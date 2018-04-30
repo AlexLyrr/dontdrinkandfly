@@ -16,7 +16,7 @@
 #include "in4073.h"
 
 /*------------------------------------------------------------------
- * process_key -- process command keys
+ * process_key -- process command keys -
  *------------------------------------------------------------------
  */
 void process_key(uint8_t c)
