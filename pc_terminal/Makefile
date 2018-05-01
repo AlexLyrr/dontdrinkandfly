@@ -8,3 +8,8 @@ all:
 
 run: all
 	$(EXEC)
+
+
+jstest:
+	$(CC) $(CFLAGS) jstest.c -o ./jstest
+	./jstest

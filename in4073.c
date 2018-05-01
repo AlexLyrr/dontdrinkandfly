@@ -15,47 +15,45 @@
 
 #include "in4073.h"
 
-/*------------------------------------------------------------------
- * process_key -- process command keys
- *------------------------------------------------------------------
+
+void writeByte(uint8_t b) {
+	uart_put(b);
+}
+
+/*
+ *
+ * @author Joseph Verburg
  */
-void process_key(uint8_t c)
-{
-	switch (c)
-	{
-		case 'q':
-			ae[0] += 10;
+void readPacket() {
+	switch(state.currentPacket[0]) {
+		case 0x01: 
+			parsePacketInit();
 			break;
-		case 'a':
-			ae[0] -= 10;
-			if (ae[0] < 0) ae[0] = 0;
+		case 0x03:
+			parsePacketSetControl();
 			break;
-		case 'w':
-			ae[1] += 10;
-			break;
-		case 's':
-			ae[1] -= 10;
-			if (ae[1] < 0) ae[1] = 0;
-			break;
-		case 'e':
-			ae[2] += 10;
-			break;
-		case 'd':
-			ae[2] -= 10;
-			if (ae[2] < 0) ae[2] = 0;
-			break;
-		case 'r':
-			ae[3] += 10;
-			break;
-		case 'f':
-			ae[3] -= 10;
-			if (ae[3] < 0) ae[3] = 0;
-			break;
-		case 27:
-			demo_done = true;
+		case 0x05:
+			parsePacketSetMode();
 			break;
 		default:
-			nrf_gpio_pin_toggle(RED);
+			writeError(1);
+			break;
+	}
+}
+
+/*
+ *
+ * @author Joseph Verburg
+ */
+void onAbort() {
+	switch(state.currentMode) {
+		case 0:
+		case 1:
+			break;
+		default:
+			state.nextMode = 1;
+			state.panicFinished = appClock + (5000 / TIMER_PERIOD);
+			break;
 	}
 }
 
@@ -75,34 +73,101 @@ int main(void)
 	spi_flash_init();
 	ble_init();
 
-	uint32_t counter = 0;
-	demo_done = false;
+	state.currentMode = 0;
+	state.nextMode = 0;
+	state.hasPacket = false;
+	state.controlChanged = false;
+	state.sendStatus = false;
+	
+	systemDone = false;
+	appClock = 0;
 
-	while (!demo_done)
-	{
-		if (rx_queue.count) process_key( dequeue(&rx_queue) );
-
-		if (check_timer_flag()) 
-		{
-			if (counter++%20 == 0) nrf_gpio_pin_toggle(BLUE);
-
-			adc_request_sample();
-			read_baro();
-
-			printf("%10ld | ", get_time_us());
-			printf("%3d %3d %3d %3d | ",ae[0],ae[1],ae[2],ae[3]);
-			printf("%6d %6d %6d | ", phi, theta, psi);
-			printf("%6d %6d %6d | ", sp, sq, sr);
-			printf("%4d | %4ld | %6ld \n", bat_volt, temperature, pressure);
-
-			clear_timer_flag();
+	while (!systemDone) {
+		if (rx_queue.count >= PACKET_LENGTH) {
+			state.hasPacket = true;
+			NVIC_DisableIRQ(UART0_IRQn);
+			for(uint8_t i = 0; i < PACKET_LENGTH; i += 1) {
+				state.currentPacket[i] = dequeue(&rx_queue);
+			}
+			NVIC_EnableIRQ(UART0_IRQn);
+		}
+		if (state.hasPacket) {
+			readPacket();
 		}
 
-		if (check_sensor_int_flag()) 
-		{
+		switch(state.currentMode) {
+			case 0:
+				motor[0] = 0;
+				motor[1] = 0;
+				motor[2] = 0;
+				motor[3] = 0;
+				break;
+			case 1: // Panic!
+				motor[0] = 100;
+				motor[1] = 100;
+				motor[2] = 100;
+				motor[3] = 100;
+				break;
+			case 2: // Manual
+				if (state.controlChanged) {
+					run_filters_and_control(); // TODO: rename function
+					state.controlChanged = false;
+				}
+				break;
+			case 3: // Manual Yaw
+
+				break;
+		}
+
+		if (check_timer_flag()) {
+			nrf_gpio_pin_toggle(YELLOW);
+			if (appClock%100 == 0) { // Every second
+				nrf_gpio_pin_toggle(BLUE);
+			}
+			if (appClock%1000 == 0) {
+				state.sendStatus = true;				
+			}
+			if (appClock%5 == 0) {
+				adc_request_sample();
+				read_baro();
+			}
+			if (state.nextMode != state.currentMode) {
+				switch(state.currentMode) {
+					case 1: 
+						break;
+					default:
+						state.currentMode = state.nextMode;
+						break;
+				}
+				state.sendStatus = true;
+			}
+			if (state.currentMode == 1 && state.panicFinished == appClock) {
+				state.currentMode = 0;
+				systemDone = true;
+				state.sendStatus = true;
+			}
+
+			// printf("%10ld | ", get_time_us());
+			// printf("%3d %3d %3d %3d | ",ae[0],ae[1],ae[2],ae[3]);
+			// printf("%6d %6d %6d | ", phi, theta, psi);
+			// printf("%6d %6d %6d | ", sp, sq, sr);
+			// printf("%4d | %4ld | %6ld \n", bat_volt, temperature, pressure);
+
+			clear_timer_flag();
+			appClock++;
+		}
+
+		if (check_sensor_int_flag()) {
 			get_dmp_data();
 			run_filters_and_control();
 		}
+
+		if (state.sendStatus) {
+			writeDroneStatus();
+			state.sendStatus = false;
+		}
+
+		state.hasPacket = false;
 	}	
 
 	printf("\n\t Goodbye \n\n");

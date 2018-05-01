@@ -1,3 +1,5 @@
 _build
 pc_terminal/pc-terminal
 pc_terminal/pc-terminal.dSYM
+node/node_modules
+*.pyc

@@ -27,14 +27,12 @@
 #define BLUE		30
 #define INT_PIN		5
 
-bool demo_done;
-
 // Control
-int16_t motor[4],ae[4];
+int16_t motor[4], ae[4];
 void run_filters_and_control();
 
 // Timers
-#define TIMER_PERIOD	50 //50ms=20Hz (MAX 23bit, 4.6h)
+#define TIMER_PERIOD	10 //50ms=20Hz (MAX 23bit, 4.6h)
 void timers_init(void);
 uint32_t get_time_us(void);
 bool check_timer_flag(void);
@@ -47,8 +45,8 @@ void gpio_init(void);
 #define QUEUE_SIZE 256
 typedef struct {
 	uint8_t Data[QUEUE_SIZE];
-	uint16_t first,last;
-  	uint16_t count; 
+	uint16_t first, last;
+	uint16_t count;
 } queue;
 void init_queue(queue *q);
 void enqueue(queue *q, char x);
@@ -106,5 +104,54 @@ queue ble_tx_queue;
 volatile bool radio_active;
 void ble_init(void);
 void ble_send(void);
+
+
+/*******
+	State
+	@author Joseph Verburg
+*******/
+#define PACKET_LENGTH 10
+typedef struct {
+	uint8_t nextMode; 
+
+
+	uint8_t currentMode;
+
+	bool hasPacket;
+	bool sendStatus;
+	
+	uint8_t currentPacket[PACKET_LENGTH];
+	uint16_t panicFinished;
+
+	uint8_t motor1Offset;
+	uint8_t motor2Offset;
+	uint8_t motor3Offset;
+	uint8_t motor4Offset;
+
+	bool controlChanged;
+	uint8_t controlRoll;
+	uint8_t controlPitch;
+	uint8_t controlYaw;
+	uint16_t controlLift;
+
+} State;
+State state;
+bool systemDone;
+uint16_t appClock;
+
+void onAbort();
+
+
+/*******
+	Protocol
+	@author Joseph Verburg
+*******/
+void writeByte(uint8_t b);
+void parsePacketInit();
+void parsePacketSetControl();
+void parsePacketSetMode();
+
+void writeDroneStatus();
+void writeError(char errorCode);
 
 #endif // IN4073_H__
