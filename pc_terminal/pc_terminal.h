@@ -19,14 +19,18 @@ struct pcState{
 
 	bool aPressed;	//lift up
 	bool zPressed;	//lift down
+	uint16_t liftValue = 0;
 
 	bool leftPressed;	//roll up
 	bool rightPressed;	//roll down
+	uint8_t rollValue = 90;
 	bool upPressed;		//pitch down
 	bool downPressed;	//pitch up
+	uint8_t pitchValue = 90;
 
 	bool qPressed;	//yaw down
 	bool wPressed;	//yaw up
+	uint8_t yawValue = 90;
 
 	bool uPressed;	//yaw control P up
 	bool jPressed;	//yaw control P down
@@ -44,7 +48,7 @@ struct pcState{
 	bool jRight;	//roll down
 	bool jForward;	//pitch down
 	bool jBackward;	//pitch up
-	bool jTwistClockwise;		//yaw up
+	bool jTwistClockwise;			//yaw up
 	bool jTwistCounterClockwise;	//yaw down
 	bool jFire;	//abort / exit
 };
