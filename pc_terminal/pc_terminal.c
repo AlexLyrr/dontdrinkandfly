@@ -12,6 +12,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <inttypes.h>
+#include <time.h>
+#include "pc_terminal.h"
 
 /*------------------------------------------------------------
  * console I/O
@@ -174,6 +176,102 @@ int 	rs232_putchar(char c)
 }
 
 
+// @Author: Alex Lyrakis
+void check_input(char c, struct *pcState)
+{
+	switch (c)
+	{
+		case 27:
+			pcState->escPressed = true;
+			c = term_getchar_nb();
+			if (c == 91){					// If we have one 'Esc' and '[' in a raw, that means it is probably an arrow command.
+				c = term_getchar_nb();
+				switch (c)
+				{
+					case 'A':
+						pcState->escPressed = false;
+						pcState->upPressed = true;
+						break;
+					case 'B':
+						pcState->escPressed = false;
+						pcState->downPressed = true;
+						break;
+					case 'C':
+						pcState->escPressed = false;
+						pcState->rightPressed = true;
+						break;
+					case 'D':
+						pcState->escPressed = false;
+						pcState->leftPressed = true;
+						break;	
+				}
+			}
+			break;
+		case '0':
+			pcState->n0Pressed = true;
+			break;
+		case '1':
+			pcState->n1Pressed = true;
+			break;
+		case '2':
+			pcState->n2Pressed = true;
+			break;
+		case '3':
+			pcState->n3Pressed = true;
+			break;
+		case '4':
+			pcState->n4Pressed = true;
+			break;
+		case '5':
+			pcState->n5Pressed = true;
+			break;
+		case '6':
+			pcState->n6Pressed = true;
+			break;
+		case '7':
+			pcState->n7Pressed = true;
+			break;
+		case '8':
+			pcState->n8Pressed = true;
+			break;
+		case '9':
+			pcState->n9Pressed = true;
+			break;
+		case 'a':
+			pcState->aPressed = true;
+			break;
+		case 'z':
+			pcState->zPressed = true;
+			break;
+		case 'q':
+			pcState->qPressed = true;
+			break;
+		case 'w':
+			pcState->wPressed = true;
+			break;
+		case 'u':
+			pcState->uPressed = true;
+			break;
+		case 'j':
+			pcState->jPressed = true;
+			break;
+		case 'i':
+			pcState->iPressed = true;
+			break;
+		case 'k':
+			pcState->kkPressed = true;
+			break;
+		case 'o':
+			pcState->oPressed = true;
+			break;
+		case 'l':
+			pcState->lPressed = true;
+			break;
+		default:
+			nrf_gpio_pin_toggle(RED);
+	}
+}
+
 /*----------------------------------------------------------------
  * main -- execute terminal
  *----------------------------------------------------------------
@@ -181,8 +279,9 @@ int 	rs232_putchar(char c)
 int main(int argc, char **argv)
 {
 	char	c;
+	clock_t timeLastPacket=0; //= clock();
 
-	term_puts("\nTerminal program - Embedded Real-Time Systems\n");
+	term_puts("\nTerminal program - Embedded Real-TFime Systems\n");
 
 	term_initio();
 	rs232_open();
@@ -198,12 +297,18 @@ int main(int argc, char **argv)
 	 */
 	for (;;)
 	{
-		if ((c = term_getchar_nb()) != -1)
-			rs232_putchar(c);
-
-		if ((c = rs232_getchar_nb()) != -1)
+		if ((c = term_getchar_nb()) != -1)	// Read from keyboard and store in fd_RS232
+		{
+			check_input(c, &pcState);	
+		}
+		if ((c = rs232_getchar_nb()) != -1)	// Read from fd_RS232 and 
 			term_putchar(c);
-
+		if ((clock()-timeLastPacket)> 50)
+		{
+			//TBD: Based on our pcState and protocol we have to put a sequence of bytes using rs232_putchar(c);
+			//		After we have to reset the pcState.
+			timeLastPacket = clock();
+		}
 	}
 
 	term_exitio();
