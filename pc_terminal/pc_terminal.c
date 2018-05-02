@@ -356,7 +356,7 @@ void sendPacket(struct *pcState){
 			if (pcState->escPressed)
 				rs232_putchar(1);	// abort byte
 			else
-				rs232_putchar(0);
+				rs232_putchar(0);  // else zero
 			
 
 
