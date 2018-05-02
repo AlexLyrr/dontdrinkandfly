@@ -1,6 +1,9 @@
 // @Author: George Giannakaras
+#include <stdbool.h>
+#include <stdint.h>
 
-#ifndef PC_TERMINAL_H_  
+
+#ifndef PC_TERMINAL_H_
 #define PC_TERMINAL_H_
 
 struct pcState{
@@ -52,6 +55,12 @@ struct pcState{
 	bool jTwistClockwise;			//yaw up
 	bool jTwistCounterClockwise;	//yaw down
 	bool jFire;	//abort / exit
+	uint16_t jThrottleValue;
+	uint8_t jRollValue;
+	uint8_t jPitchValue;
+	uint8_t jYawValue;
 };
 
-#endif 
+void getJoystick();
+
+#endif
