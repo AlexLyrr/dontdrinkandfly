@@ -20,7 +20,7 @@ void parsePacketSetControl() {
 	state.controlRoll = state.currentPacket[2];
 	state.controlPitch = state.currentPacket[3];
 	state.controlYaw = state.currentPacket[4];
-	state.controlLift = state.currentPacket[5];
+	state.controlLift = state.currentPacket[5] << 8 | state.currentPacket[6];
 	state.controlChanged = true;
 }
 
@@ -74,5 +74,23 @@ void writeError(char errorCode) {
 	writeByte(0x00);
 	writeByte(0x00);
 	writeByte(0x00);
+	writeByte(0x00);
+}
+
+void writeMotorStatus() {
+	writeByte(0x0a);
+	
+	writeByte(motor[0] >> 8);
+	writeByte(motor[0] & 0xFF);
+
+	writeByte(motor[1] >> 8);
+	writeByte(motor[1] & 0xFF);
+	
+	writeByte(motor[2] >> 8);
+	writeByte(motor[2] & 0xFF);
+	
+	writeByte(motor[3] >> 8);
+	writeByte(motor[3] & 0xFF);
+	
 	writeByte(0x00);
 }

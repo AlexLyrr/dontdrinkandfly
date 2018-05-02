@@ -335,37 +335,39 @@ void sendPacket(struct pcState *pcState){
 		frameType = 3;
 	rs232_putchar(frameType); //Send frameType Byte
 
-	switch (frameType)
-	{
+	switch (frameType) {
 		case 5:
 			//here we must send the packet
 			rs232_putchar(pcState->mode);
-			for (int i=0; i<8; i++)
+			for (int i = 0; i < 8; i++) {
 				rs232_putchar(0);
+			}
 			break;
 		case 3:
-			if (pcState->escPressed)
-				rs232_putchar(128);	// abort byte
-			else
+			if (pcState->escPressed) {
+				rs232_putchar(0x80);	// abort byte
+			} else {
 				rs232_putchar(0);  // else zero
+			}
 			rs232_putchar(pcState->rollValue); // roll byte
 			rs232_putchar(pcState->pitchValue);
 			rs232_putchar(pcState->yawValue);
-			uint16_t liftValue = pcState->liftValue;
-			uint8_t liftByte0 = 0;
-			uint8_t liftByte1 = 0;	
-			if (pcState->liftValue > 255){
-				while (pcState->liftValue > 255){
-					liftByte1 += 1;
-					liftValue -= 256;
-				}
-			}
-				liftByte0 = liftValue;
-				rs232_putchar(liftByte0);
-				rs232_putchar(liftByte1);
-			}
-			for (int i=0; i<3; i++)
+			// uint16_t liftValue = pcState->liftValue;
+			// uint8_t liftByte0 = 0;
+			// uint8_t liftByte1 = 0;	
+			// if (pcState->liftValue > 255){
+			// 	while (pcState->liftValue > 255){
+			// 		liftByte1 += 1;
+			// 		liftValue -= 256;
+			// 	}
+			// }
+			// liftByte0 = liftValue;
+			rs232_putchar(pcState->liftValue >> 8);
+			rs232_putchar(pcState->liftValue & 0xFF);
+			
+			for (int i=0; i<3; i++) {
 				rs232_putchar(0); // send 3 remaining null bytes
+			}
 			break;
 
 	}	
@@ -383,10 +385,12 @@ int main(int argc, char **argv)
 	char c;
 	clock_t timeLastPacket=0; //= clock();
 
-	term_puts("\nTerminal program - Embedded Real-TFime Systems\n");
+	term_puts("\nTerminal program - Embedded Real-Time Systems\n");
 
 	term_initio();
+	term_puts("Initialized termios...\n");
 	rs232_open();
+	term_puts("Initialized termios...\n");
 
 	term_puts("Type ^C to exit\n");
 

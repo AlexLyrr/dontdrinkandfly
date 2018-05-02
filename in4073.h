@@ -153,5 +153,6 @@ void parsePacketSetMode();
 
 void writeDroneStatus();
 void writeError(char errorCode);
+void writeMotorStatus();
 
 #endif // IN4073_H__

@@ -112,6 +112,7 @@ int main(void)
 				if (state.controlChanged) {
 					run_filters_and_control(); // TODO: rename function
 					state.controlChanged = false;
+					writeMotorStatus(); // TODO: move to the end of the control loop
 				}
 				break;
 			case 3: // Manual Yaw
@@ -120,7 +121,9 @@ int main(void)
 		}
 
 		if (check_timer_flag()) {
-			nrf_gpio_pin_toggle(YELLOW);
+			if (appClock%2 == 0) {
+				nrf_gpio_pin_toggle(YELLOW);
+			}
 			if (appClock%100 == 0) { // Every second
 				nrf_gpio_pin_toggle(BLUE);
 			}

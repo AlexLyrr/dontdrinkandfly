@@ -43,6 +43,23 @@ port.open(err => {
 				0x00
 			])
 		);
+		setTimeout(() => {
+			port.write(
+				Buffer.from([
+					0x03,
+					0x00,
+					100,
+					90,
+					90,
+
+					1000 >> 8,
+					1000 & 0xff,
+					0x00,
+					0x00,
+					0x00
+				])
+			);
+		}, 1e3);
 	}, 5e3);
 	setTimeout(() => {
 		console.log("Abort abort...");
@@ -70,7 +87,7 @@ port.on("data", function(data) {
 		switch (data[0]) {
 			case 2:
 				console.log(
-					`${new Date().toString()} Status(mode=${data[1] &
+					`${new Date().toString()} DroneStatus(mode=${data[1] &
 						0x0f}, bat=${data[2] << 8}, phi=${data.readInt8(3) *
 						(360 / 128)}, theta=${data.readInt8(4) *
 						(360 / 128)}, appClock=${data.readUInt16BE(7)})`
@@ -78,6 +95,15 @@ port.on("data", function(data) {
 				break;
 			case 7:
 				console.log("Received error packet with code:", data[1]);
+				break;
+			case 10:
+				console.log(
+					`${new Date().toString()} MotorStatus(1=${data.readUInt16BE(
+						1
+					)}, 1=${data.readUInt16BE(3)}, 1=${data.readUInt16BE(
+						5
+					)}, 1=${data.readUInt16BE(7)})`
+				);
 				break;
 			default:
 				console.log("unknown packet type:", data[0]);
