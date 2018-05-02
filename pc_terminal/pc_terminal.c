@@ -14,6 +14,7 @@
 #include <inttypes.h>
 #include <time.h>
 #include <stdbool.h> 
+#include <stdlib.h>
 #include "pc_terminal.h"
 
 /*------------------------------------------------------------
@@ -178,7 +179,7 @@ int 	rs232_putchar(char c)
 
 
 // @Author: Alex Lyrakis
-void resetPcState(struct *pcState){
+void resetPcState(struct pcState *pcState){
 	pcState->escPressed = false;
 	pcState->n0Pressed = false;
 	pcState->n1Pressed = false;
@@ -203,15 +204,15 @@ void resetPcState(struct *pcState){
 
 
 // @Author: George Giannakaras 
-void init_pcState(){ 
-  uint16_t liftValue = 0; 
-  uint8_t rollValue = 90; 
-  uint8_t pitchValue = 90; 
-  uint8_t yawValue = 90; 
+void init_pcState(struct pcState *pcState){ 
+  pcState->liftValue = 0; 
+  pcState->rollValue = 90; 
+  pcState->pitchValue = 90; 
+  pcState->yawValue = 90; 
 } 
 
 // @Author: Alex Lyrakis
-void check_input(char c, struct *pcState)
+void check_input(char c, struct pcState *pcState)
 {
 	switch (c)
 	{
@@ -255,27 +256,35 @@ void check_input(char c, struct *pcState)
 			break;
 		case '1':
 			pcState->n1Pressed = true;
+			pcState->mode = 1;
 			break;
 		case '2':
 			pcState->n2Pressed = true;
+			pcState->mode = 2;
 			break;
 		case '3':
 			pcState->n3Pressed = true;
+			pcState->mode = 3;
 			break;
 		case '4':
 			pcState->n4Pressed = true;
+			pcState->mode = 4;
 			break;
 		case '5':
 			pcState->n5Pressed = true;
+			pcState->mode = 5;
 			break;
 		case '6':
 			pcState->n6Pressed = true;
+			pcState->mode = 6;
 			break;
 		case '7':
 			pcState->n7Pressed = true;
+			pcState->mode = 7;
 			break;
 		case '8':
 			pcState->n8Pressed = true;
+			pcState->mode = 8;
 			break;
 		case 'a':
 			pcState->aPressed = true;
@@ -311,61 +320,55 @@ void check_input(char c, struct *pcState)
 		case 'l':
 			pcState->lPressed = true;
 			break;
-		default:
-			nrf_gpio_pin_toggle(RED);
 	}
 }
 
 
-void sendPacket(struct *pcState){
+void sendPacket(struct pcState *pcState){
 	//Define packet type
-	uint8_t frameType, mode;
-	if (pcState->n0Pressed || pcState->n1Pressed || pcState->n2Pressed || pcState->n3Pressed || pcState->n4Pressed || pcState->n5Pressed || pcState->n6Pressed) || pcState->n7Pressed || pcState->n8Pressed)
+	uint8_t frameType = 0;
+	if (pcState->n0Pressed || pcState->n1Pressed || pcState->n2Pressed || pcState->n3Pressed || pcState->n4Pressed || pcState->n5Pressed 
+		|| pcState->n6Pressed || pcState->n7Pressed || pcState->n8Pressed)
 		frameType = 5;
-	if (pcState->aPressed || pcState->zPressed || pcState->qPressed || pcState->wPressed || pcState->upPressed || pcState->downPressed || pcState->leftPressed || pcState->rightPressed)
+	if (pcState->aPressed || pcState->zPressed || pcState->qPressed || pcState->wPressed || pcState->upPressed || pcState->downPressed || 
+		pcState->leftPressed || pcState->rightPressed)
 		frameType = 3;
+	rs232_putchar(frameType); //Send frameType Byte
 
-	
 	switch (frameType)
 	{
 		case 5:
-			if (pcState->n0Pressed)
-				mode = 0;
-			if (pcState->n1Pressed)
-				mode = 1;
-			if (pcState->n2Pressed)
-				mode = 2;
-			if (pcState->n3Pressed)
-				mode = 3;
-			if (pcState->n4Pressed)
-				mode = 4;
-			if (pcState->n5Pressed)
-				mode = 5;
-			if (pcState->n6Pressed)
-				mode = 6;
-			if (pcState->n7Pressed)
-				mode = 7;
-			if (pcState->n8Pressed)
-				mode = 8;
 			//here we must send the packet
-			rs232_putchar(mode);
+			rs232_putchar(pcState->mode);
 			for (int i=0; i<8; i++)
-				rs232_putchar(0);	
+				rs232_putchar(0);
 			break;
 		case 3:
 			if (pcState->escPressed)
-				rs232_putchar(1);	// abort byte
+				rs232_putchar(128);	// abort byte
 			else
 				rs232_putchar(0);  // else zero
-			
+			rs232_putchar(pcState->rollValue); // roll byte
+			rs232_putchar(pcState->pitchValue);
+			rs232_putchar(pcState->yawValue);
+			uint16_t liftValue = pcState->liftValue;
+			uint8_t liftByte0 = 0;
+			uint8_t liftByte1 = 0;	
+			if (pcState->liftValue > 255){
+				while (pcState->liftValue > 255){
+					liftByte1 += 1;
+					liftValue -= 256;
+				}
+			}
+				liftByte0 = liftValue;
+				rs232_putchar(liftByte0);
+				rs232_putchar(liftByte1);
+			}
+			for (int i=0; i<3; i++)
+				rs232_putchar(0); // send 3 remaining null bytes
+			break;
 
-
-
-	
-
-
-
-
+	}	
 
 }
 
@@ -375,7 +378,9 @@ void sendPacket(struct *pcState){
  */
 int main(int argc, char **argv)
 {
-	char	c;
+	struct pcState *pcState;
+	pcState = (struct pcState*) calloc(1, sizeof(struct pcState));
+	char c;
 	clock_t timeLastPacket=0; //= clock();
 
 	term_puts("\nTerminal program - Embedded Real-TFime Systems\n");
@@ -392,13 +397,13 @@ int main(int argc, char **argv)
 
 	/* send & receive
 	 */
-	resetPcState(&pcState); // Reset values and State of PC side.
+	resetPcState(pcState); // Reset values and State of PC side.
 
 	for (;;)
 	{
 		if ((c = term_getchar_nb()) != -1)	// Read from keyboard and store in fd_RS232
 		{
-			check_input(c, &pcState);
+			check_input(c, pcState);
 		}
 		if ((c = rs232_getchar_nb()) != -1)	// Read from fd_RS232 and 
 			term_putchar(c);
@@ -406,8 +411,8 @@ int main(int argc, char **argv)
 		{
 			//TBD: Based on our pcState and protocol we have to put a sequence of bytes using rs232_putchar(c);
 			//		After we have to reset the pcState.
-			sendPacket(&pcState);
-			resetPcState(&pcState);
+			sendPacket(pcState);
+			resetPcState(pcState);
 			timeLastPacket = clock();
 		}
 	}
