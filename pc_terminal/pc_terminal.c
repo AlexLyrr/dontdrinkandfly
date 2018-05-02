@@ -12,10 +12,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <inttypes.h>
-#include <time.h>
 #include <stdbool.h> 
-#include <stdlib.h>
-#include "pc_terminal.h"
+
 
 /*------------------------------------------------------------
  * console I/O
@@ -84,6 +82,12 @@ int	term_getchar()
 #include <stdio.h>
 #include <assert.h>
 #include <time.h>
+#include <stdlib.h>
+#include "pc_terminal.h"
+#include <time.h>
+#include <time.h>
+#include <stdlib.h>
+
 
 int serial_device = 0;
 int fd_RS232;
@@ -352,19 +356,8 @@ void sendPacket(struct pcState *pcState){
 			rs232_putchar(pcState->rollValue); // roll byte
 			rs232_putchar(pcState->pitchValue);
 			rs232_putchar(pcState->yawValue);
-			// uint16_t liftValue = pcState->liftValue;
-			// uint8_t liftByte0 = 0;
-			// uint8_t liftByte1 = 0;	
-			// if (pcState->liftValue > 255){
-			// 	while (pcState->liftValue > 255){
-			// 		liftByte1 += 1;
-			// 		liftValue -= 256;
-			// 	}
-			// }
-			// liftByte0 = liftValue;
 			rs232_putchar(pcState->liftValue >> 8);
 			rs232_putchar(pcState->liftValue & 0xFF);
-			
 			for (int i=0; i<3; i++) {
 				rs232_putchar(0); // send 3 remaining null bytes
 			}
@@ -380,8 +373,6 @@ void sendPacket(struct pcState *pcState){
  */
 int main(int argc, char **argv)
 {
-	struct pcState *pcState;
-	pcState = (struct pcState*) calloc(1, sizeof(struct pcState));
 	char c;
 	clock_t timeLastPacket=0; //= clock();
 
@@ -393,7 +384,9 @@ int main(int argc, char **argv)
 	term_puts("Initialized termios...\n");
 
 	term_puts("Type ^C to exit\n");
-
+	struct pcState *pcState;
+	pcState = (struct pcState*) calloc(1, sizeof(struct pcState));
+	
 	/* discard any incoming text
 	 */
 	while ((c = rs232_getchar_nb()) != -1)
@@ -401,6 +394,7 @@ int main(int argc, char **argv)
 
 	/* send & receive
 	 */
+	init_pcState(pcState);
 	resetPcState(pcState); // Reset values and State of PC side.
 
 	for (;;)
@@ -410,13 +404,18 @@ int main(int argc, char **argv)
 			check_input(c, pcState);
 		}
 		if ((c = rs232_getchar_nb()) != -1)	// Read from fd_RS232 and 
-			term_putchar(c);
+			//term_putchar(c);
 		if ((clock()-timeLastPacket)> 50)
 		{
 			//TBD: Based on our pcState and protocol we have to put a sequence of bytes using rs232_putchar(c);
 			//		After we have to reset the pcState.
-			sendPacket(pcState);
-			resetPcState(pcState);
+			if (pcState->n0Pressed || pcState->n1Pressed || pcState->n2Pressed || pcState->n3Pressed || pcState->n4Pressed || pcState->n5Pressed 
+		|| pcState->n6Pressed || pcState->n7Pressed || pcState->n8Pressed || pcState->aPressed || pcState->zPressed || pcState->qPressed ||
+		 pcState->wPressed || pcState->uPressed || pcState->jPressed || pcState->iPressed || pcState->kkPressed || pcState->oPressed || 
+		 pcState->lPressed){
+				sendPacket(pcState);
+				resetPcState(pcState);
+			}
 			timeLastPacket = clock();
 		}
 	}
