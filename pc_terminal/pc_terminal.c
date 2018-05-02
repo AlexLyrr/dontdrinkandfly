@@ -13,6 +13,7 @@
 #include <string.h>
 #include <inttypes.h>
 #include <time.h>
+#include <stdbool.h> 
 #include "pc_terminal.h"
 
 /*------------------------------------------------------------
@@ -201,7 +202,13 @@ void resetPcState(struct *pcState){
 }
 
 
-
+// @Author: George Giannakaras 
+void init_pcState(){ 
+  uint16_t liftValue = 0; 
+  uint8_t rollValue = 90; 
+  uint8_t pitchValue = 90; 
+  uint8_t yawValue = 90; 
+} 
 
 // @Author: Alex Lyrakis
 void check_input(char c, struct *pcState)
