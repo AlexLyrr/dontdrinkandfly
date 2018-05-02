@@ -6,6 +6,7 @@
 struct pcState{
 	//KEYBOARD
 	bool escPressed; //abort / exit
+	uint8_t mode;
 	//modes
 	bool n0Pressed;
 	bool n1Pressed;
