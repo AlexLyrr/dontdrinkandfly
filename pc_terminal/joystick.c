@@ -7,7 +7,7 @@
 #include "pc_terminal.h"
 #include "joystick.h"
 
-void getJoystick()
+void getJoystick(struct pcState *pcState)
 {
 	int fd;
   struct js_event js;
