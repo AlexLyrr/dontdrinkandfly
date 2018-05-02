@@ -1,4 +1,4 @@
-//author: George
+// @Author: George Giannakaras
 
 #ifndef PC_TERMINAL_H_  
 #define PC_TERMINAL_H_
@@ -19,18 +19,18 @@ struct pcState{
 
 	bool aPressed;	//lift up
 	bool zPressed;	//lift down
-	uint16_t liftValue = 0;
+	uint16_t liftValue;
 
 	bool leftPressed;	//roll up
 	bool rightPressed;	//roll down
-	uint8_t rollValue = 90;
+	uint8_t rollValue;
 	bool upPressed;		//pitch down
 	bool downPressed;	//pitch up
-	uint8_t pitchValue = 90;
+	uint8_t pitchValue;
 
 	bool qPressed;	//yaw down
 	bool wPressed;	//yaw up
-	uint8_t yawValue = 90;
+	uint8_t yawValue;
 
 	bool uPressed;	//yaw control P up
 	bool jPressed;	//yaw control P down
