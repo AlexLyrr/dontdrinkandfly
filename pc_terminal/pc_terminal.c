@@ -13,7 +13,6 @@
 #include <string.h>
 #include <inttypes.h>
 #include <time.h>
-#include <stdbool.h>
 #include "pc_terminal.h"
 
 /*------------------------------------------------------------
@@ -176,13 +175,33 @@ int 	rs232_putchar(char c)
 	return result;
 }
 
-// @Author: George Giannakaras
-void init_pcState(){
-	uint16_t liftValue = 0;
-	uint8_t rollValue = 90;
-	uint8_t pitchValue = 90;
-	uint8_t yawValue = 90;
+
+// @Author: Alex Lyrakis
+void resetPcState(struct *pcState){
+	pcState->escPressed = false;
+	pcState->n0Pressed = false;
+	pcState->n1Pressed = false;
+	pcState->n2Pressed = false;
+	pcState->n3Pressed = false;
+	pcState->n4Pressed = false;
+	pcState->n5Pressed = false;
+	pcState->n6Pressed = false;
+	pcState->n7Pressed = false;
+	pcState->n8Pressed = false;
+	pcState->aPressed = false;
+	pcState->zPressed = false;
+	pcState->qPressed = false;
+	pcState->wPressed = false;
+	pcState->uPressed = false;
+	pcState->jPressed = false;
+	pcState->iPressed = false;
+	pcState->kkPressed = false;
+	pcState->oPressed = false;
+	pcState->lPressed = false;
 }
+
+
+
 
 // @Author: Alex Lyrakis
 void check_input(char c, struct *pcState)
@@ -192,31 +211,40 @@ void check_input(char c, struct *pcState)
 		case 27:
 			pcState->escPressed = true;
 			c = term_getchar_nb();
-			if (c == 91){					// If we have one 'Esc' and '[' in a raw, that means it is probably an arrow command.
+			if (c == 91){					// If we have one 'Esc' and '[' in a row, that means it is probably an arrow command.
 				c = term_getchar_nb();
 				switch (c)
 				{
 					case 'A':
 						pcState->escPressed = false;
 						pcState->upPressed = true;
+						if (pcState->pitchValue > 0)
+							pcState->pitchValue -= 1;
 						break;
 					case 'B':
 						pcState->escPressed = false;
 						pcState->downPressed = true;
+						if (pcState->pitchValue < 180)
+							pcState->pitchValue += 1;
 						break;
 					case 'C':
 						pcState->escPressed = false;
 						pcState->rightPressed = true;
+						if (pcState->rollValue > 0)
+							pcState->rollValue -= 1;
 						break;
 					case 'D':
 						pcState->escPressed = false;
 						pcState->leftPressed = true;
+						if (pcState->rollValue < 180)
+							pcState->rollValue += 1;
 						break;	
 				}
 			}
 			break;
 		case '0':
 			pcState->n0Pressed = true;
+			pcState->mode = 0;
 			break;
 		case '1':
 			pcState->n1Pressed = true;
@@ -242,14 +270,15 @@ void check_input(char c, struct *pcState)
 		case '8':
 			pcState->n8Pressed = true;
 			break;
-		case '9':
-			pcState->n9Pressed = true;
-			break;
 		case 'a':
 			pcState->aPressed = true;
+			if (pcState->liftValue <=1000)
+				pcState->liftValue +=10;
 			break;
 		case 'z':
 			pcState->zPressed = true;
+			if (pcState->liftValue <=1000)
+				pcState->liftValue -=10;
 			break;
 		case 'q':
 			pcState->qPressed = true;
@@ -280,6 +309,54 @@ void check_input(char c, struct *pcState)
 	}
 }
 
+
+void sendPacket(struct *pcState){
+	//Define packet type
+	uint8_t frameType, mode;
+	if (pcState->n0Pressed || pcState->n1Pressed || pcState->n2Pressed || pcState->n3Pressed || pcState->n4Pressed || pcState->n5Pressed || pcState->n6Pressed) || pcState->n7Pressed || pcState->n8Pressed)
+		frameType = 5;
+	if (pcState->aPressed || pcState->zPressed || pcState->qPressed || pcState->wPressed || pcState->upPressed || pcState->downPressed || pcState->leftPressed || pcState->rightPressed)
+		frameType = 3;
+
+	
+	switch (frameType)
+	{
+		case 5:
+			if (pcState->n0Pressed)
+				mode = 0;
+			if (pcState->n1Pressed)
+				mode = 1;
+			if (pcState->n2Pressed)
+				mode = 2;
+			if (pcState->n3Pressed)
+				mode = 3;
+			if (pcState->n4Pressed)
+				mode = 4;
+			if (pcState->n5Pressed)
+				mode = 5;
+			if (pcState->n6Pressed)
+				mode = 6;
+			if (pcState->n7Pressed)
+				mode = 7;
+			if (pcState->n8Pressed)
+				mode = 8;
+			//here we must send the packet
+			rs232_putchar(mode);
+			for (int i=0; i<8; i++)
+				rs232_putchar(0);	
+			break;
+		case 3:
+			
+
+
+	
+
+
+
+
+
+}
+
 /*----------------------------------------------------------------
  * main -- execute terminal
  *----------------------------------------------------------------
@@ -303,11 +380,13 @@ int main(int argc, char **argv)
 
 	/* send & receive
 	 */
+	resetPcState(&pcState); // Reset values and State of PC side.
+
 	for (;;)
 	{
 		if ((c = term_getchar_nb()) != -1)	// Read from keyboard and store in fd_RS232
 		{
-			check_input(c, &pcState);	
+			check_input(c, &pcState);
 		}
 		if ((c = rs232_getchar_nb()) != -1)	// Read from fd_RS232 and 
 			term_putchar(c);
@@ -315,6 +394,8 @@ int main(int argc, char **argv)
 		{
 			//TBD: Based on our pcState and protocol we have to put a sequence of bytes using rs232_putchar(c);
 			//		After we have to reset the pcState.
+			sendPacket(&pcState);
+			resetPcState(&pcState);
 			timeLastPacket = clock();
 		}
 	}
