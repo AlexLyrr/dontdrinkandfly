@@ -26,6 +26,8 @@
 #define GREEN		28
 #define BLUE		30
 #define INT_PIN		5
+#define PREAMPLE_B1 0x13
+#define PREAMPLE_B2 0x37
 
 // Control
 int16_t motor[4], ae[4];
@@ -51,6 +53,7 @@ typedef struct {
 void init_queue(queue *q);
 void enqueue(queue *q, char x);
 char dequeue(queue *q);
+char queuePeek(queue *q, uint16_t offset);
 
 // UART
 #define RX_PIN_NUMBER  16
@@ -110,7 +113,8 @@ void ble_send(void);
 	State
 	@author Joseph Verburg
 *******/
-#define PACKET_LENGTH 10
+#define PACKET_BODY_LENGTH 10
+#define PACKET_LENGTH (PACKET_BODY_LENGTH + 5)
 typedef struct {
 	uint8_t nextMode; 
 
@@ -119,9 +123,13 @@ typedef struct {
 
 	bool hasPacket;
 	bool sendStatus;
-	
+	uint8_t packetError;
+	uint16_t packetAck;
+	bool sendAck;
+
+	uint16_t packetNumber;
 	uint8_t currentPacket[PACKET_LENGTH];
-	uint16_t panicFinished;
+	uint16_t panicFinished; // In appClock;
 
 	uint8_t motor1Offset;
 	uint8_t motor2Offset;
@@ -142,17 +150,23 @@ uint16_t appClock;
 void onAbort();
 
 
+void controlComponentLoop();
+void communicationComponentLoop();
+void packetComponentLoop();
+
 /*******
 	Protocol
 	@author Joseph Verburg
 *******/
 void writeByte(uint8_t b);
+void writePacket(uint8_t b0, uint8_t b1, uint8_t b2, uint8_t b3, uint8_t b4, uint8_t b5, uint8_t b6, uint8_t b7, uint8_t b8, uint8_t b9);
 void parsePacketInit();
 void parsePacketSetControl();
 void parsePacketSetMode();
 
 void writeDroneStatus();
-void writeError(char errorCode);
+void writeError(uint8_t errorCode);
 void writeMotorStatus();
+void writeAck(uint16_t packetNumber);
 
 #endif // IN4073_H__

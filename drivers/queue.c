@@ -31,3 +31,8 @@ char dequeue(queue *q){
 	q->count -= 1;
 	return x;
 }
+
+char queuePeek(queue *q, uint16_t offset) {
+	offset = (q->first + offset) % QUEUE_SIZE;
+	return q->Data[ offset ];
+}

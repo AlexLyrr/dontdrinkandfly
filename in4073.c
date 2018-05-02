@@ -16,30 +16,6 @@
 #include "in4073.h"
 
 
-void writeByte(uint8_t b) {
-	uart_put(b);
-}
-
-/*
- *
- * @author Joseph Verburg
- */
-void readPacket() {
-	switch(state.currentPacket[0]) {
-		case 0x01: 
-			parsePacketInit();
-			break;
-		case 0x03:
-			parsePacketSetControl();
-			break;
-		case 0x05:
-			parsePacketSetMode();
-			break;
-		default:
-			writeError(1);
-			break;
-	}
-}
 
 /*
  *
@@ -56,6 +32,7 @@ void onAbort() {
 			break;
 	}
 }
+
 
 /*------------------------------------------------------------------
  * main -- everything you need is here :)
@@ -75,25 +52,20 @@ int main(void)
 
 	state.currentMode = 0;
 	state.nextMode = 0;
-	state.hasPacket = false;
+
 	state.controlChanged = false;
+	
+	state.hasPacket = false;
 	state.sendStatus = false;
+	state.sendAck = false;
+	state.packetError = 0;
 	
 	systemDone = false;
 	appClock = 0;
 
 	while (!systemDone) {
-		if (rx_queue.count >= PACKET_LENGTH) {
-			state.hasPacket = true;
-			NVIC_DisableIRQ(UART0_IRQn);
-			for(uint8_t i = 0; i < PACKET_LENGTH; i += 1) {
-				state.currentPacket[i] = dequeue(&rx_queue);
-			}
-			NVIC_EnableIRQ(UART0_IRQn);
-		}
-		if (state.hasPacket) {
-			readPacket();
-		}
+		communicationComponentLoop();
+		packetComponentLoop();
 
 		switch(state.currentMode) {
 			case 0:
@@ -103,10 +75,10 @@ int main(void)
 				motor[3] = 0;
 				break;
 			case 1: // Panic!
-				motor[0] = 100;
-				motor[1] = 100;
-				motor[2] = 100;
-				motor[3] = 100;
+				motor[0] = 500;
+				motor[1] = 500;
+				motor[2] = 500;
+				motor[3] = 500;
 				break;
 			case 2: // Manual
 				if (state.controlChanged) {
@@ -162,15 +134,20 @@ int main(void)
 
 		if (check_sensor_int_flag()) {
 			get_dmp_data();
-			run_filters_and_control();
+			controlComponentLoop();
 		}
 
-		if (state.sendStatus) {
-			writeDroneStatus();
+		if (state.packetError != 0) {
+			writeError(state.packetError);
+			state.packetError = 0;
+		} else if (state.sendAck) {
+			state.sendAck = false;
+			writeAck(state.packetAck);
+			state.packetAck = 0;
+		} else if (state.sendStatus) {
 			state.sendStatus = false;
+			writeDroneStatus();
 		}
-
-		state.hasPacket = false;
 	}	
 
 	printf("\n\t Goodbye \n\n");

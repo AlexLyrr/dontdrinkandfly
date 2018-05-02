@@ -12,6 +12,12 @@
 
 #include "in4073.h"
 
+
+
+void controlComponentLoop() {
+	// TODO: implement
+}
+
 void update_motors(void)
 {
 	motor[0] = ae[0];
