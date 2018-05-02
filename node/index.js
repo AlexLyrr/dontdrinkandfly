@@ -100,9 +100,9 @@ port.on("data", function(data) {
 				console.log(
 					`${new Date().toString()} MotorStatus(1=${data.readUInt16BE(
 						1
-					)}, 1=${data.readUInt16BE(3)}, 1=${data.readUInt16BE(
+					)}, 2=${data.readUInt16BE(3)}, 3=${data.readUInt16BE(
 						5
-					)}, 1=${data.readUInt16BE(7)})`
+					)}, 4=${data.readUInt16BE(7)})`
 				);
 				break;
 			default:
