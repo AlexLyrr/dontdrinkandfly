@@ -12,6 +12,7 @@ void getJoystick(struct pcState *pcState)
 	int fd;
   struct js_event js;
   uint16_t jValue;
+	int32_t jTemp;
   int i = 0;
 
   if ((fd = open("/dev/input/by-id/usb-Logitech_Logitech_Extreme_3D-joystick", O_RDONLY)) < 0) {
@@ -20,11 +21,15 @@ void getJoystick(struct pcState *pcState)
   }
   printf("Joystick Found!\n");
 
-  while(i<10){
-    if (read(fd, &js, sizeof(struct js_event)) != sizeof(struct js_event)) {
-      perror("\nJoystickError: error reading");
-      exit (1);
-    }
+	fcntl(fd, F_SETFL, O_NONBLOCK);
+
+  while(read(fd, &js, sizeof(struct js_event)) == sizeof(struct js_event)) {
+		jTemp = js.value;
+		if (jTemp > 32000) {
+			jTemp = 32000;
+		} else if (jTemp < -32000) {
+			jTemp = -32000;
+		}
     switch(js.type & ~JS_EVENT_INIT) {
       case JS_EVENT_BUTTON:
         if (js.number == 0){
@@ -32,7 +37,8 @@ void getJoystick(struct pcState *pcState)
         }
         break;
       case JS_EVENT_AXIS:
-        jValue = (js.value+32000)/355;
+				jTemp += 32000;
+        jValue = jTemp/355;
         switch(js.number) {
           case 0:
             pcState->jRollValue = 180 - jValue;
@@ -44,13 +50,12 @@ void getJoystick(struct pcState *pcState)
             pcState->jYawValue = jValue;
             break;
           case 3:
-            pcState->jThrottleValue = (js.value+32000)/64;
+            pcState->jThrottleValue = jTemp/64;
           default:
             perror("\nError, non defined axis as input");
             break;
         }
         break;
     }
-    i++;
   }
 }
