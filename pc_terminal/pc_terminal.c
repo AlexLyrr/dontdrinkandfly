@@ -22,6 +22,7 @@
  *------------------------------------------------------------
  */
 
+
 static uint8_t const crc8_table[] = {
     0xea, 0xd4, 0x96, 0xa8, 0x12, 0x2c, 0x6e, 0x50, 0x7f, 0x41, 0x03, 0x3d,
     0x87, 0xb9, 0xfb, 0xc5, 0xa5, 0x9b, 0xd9, 0xe7, 0x5d, 0x63, 0x21, 0x1f,
@@ -112,9 +113,6 @@ int	term_getchar()
 
 int serial_device = 0;
 int fd_RS232, fd_joystick;
-
-#include "joystick.c"
-
 
 void rs232_open(void)
 {
@@ -208,7 +206,6 @@ int 	rs232_putchar(char c)
 
 // @Author: Alex Lyrakis
 void resetPcState(struct pcState *pcState){
-	//KEYBOARD
 	pcState->escPressed = false;
 	pcState->n0Pressed = false;
 	pcState->n1Pressed = false;
@@ -230,6 +227,7 @@ void resetPcState(struct pcState *pcState){
 	pcState->oPressed = false;
 	pcState->lPressed = false;
 
+
 	//JOYSTIC
 	pcState->jChanged = false;
 	pcState->jThrottleUp = false;
@@ -246,7 +244,6 @@ void resetPcState(struct pcState *pcState){
 
 // @Author: George Giannakaras 
 void initPcState(struct pcState *pcState){ 
-  //KEYBOARD
   pcState->liftValue = 0; 
   pcState->rollValue = 90; 
   pcState->pitchValue = 90; 
@@ -448,6 +445,7 @@ void setPacket(struct pcState *pcState, SPacket *sPacket){
 		sPacketCounter++;
 }
 
+//@Author Alex Lyrakis
 void sendPacket(SPacket sPacket){
 	rs232_putchar(0x13);
 	rs232_putchar(0x37);
@@ -458,6 +456,7 @@ void sendPacket(SPacket sPacket){
 	}
 	rs232_putchar(sPacket.crc);	
 }
+
 
 void logSendPacket(SPacket sPacket){
 	if (sPacket.fcs == 0)
@@ -492,9 +491,8 @@ int main(int argc, char **argv)
 	struct pcState *pcState;
 	pcState = (struct pcState*) calloc(1, sizeof(struct pcState));
 	SPacket sPacket, sPacketBuffer[65535];
-
 	char c;
-	clock_t timeLastPacket = clock();
+	clock_t timeLastPacket = clock(); 
 
 	term_puts("\nTerminal program - Embedded Real-Time Systems\n");
 
@@ -502,39 +500,40 @@ int main(int argc, char **argv)
 	term_puts("Initialized termios...\n");
 	rs232_open();
 	term_puts("Initialized termios...\n");
-	openJoystic();
+	//openJoystic();
 	term_puts("Initialized termios...\n");
-	
+
 	term_puts("Type ^C to exit\n");
 
 	/* discard any incoming text
 	 */
-
 	term_puts("Empty usb buffer\n");	
 	while ((c = rs232_getchar_nb()) != -1)
 		fputc(c,stderr);
 
 	/* send & receive
 	 */
-	initPcState(pcState); // Initialize values
-	resetPcState(pcState); // Reset state
+	initPcState(pcState);
+	resetPcState(pcState); // Reset values and State of PC side.
 
 	for (;;)
 	{
-		// Read from keyboard and update pcState
-		if ((c = term_getchar_nb()) != -1){	
+		if ((c = term_getchar_nb()) != -1)	// Read from keyboard and store in fd_RS232
+		{
 			checkInput(c, pcState);
 		}
+
 		// Read from joystic and update pcState
-		checkJoystic(pcState);
+		//checkJoystic(pcState);
 		updatePcState(pcState);
-		if ((c = rs232_getchar_nb()) != -1){
-			// TBD: retrieve packets from drone
-		}	 
-		//	term_putchar(c);
-		if ((clock()-timeLastPacket)/CLOCKS_PER_SEC > 0.2){
-			// set, send and store the packet, reset pcState and update time
-			if (sthPressed(pcState) || pcState->jChanged){
+
+		if ((c = rs232_getchar_nb()) != -1)	// Read from fd_RS232 and 
+			term_putchar(c);
+		if ((clock()-timeLastPacket)> 50)
+		{
+			//TBD: Based on our pcState and protocol we have to put a sequence of bytes using rs232_putchar(c);
+			//		After we have to reset the pcState.
+			if (sthPressed(pcState) || pcState->jChanged){		
 					setPacket(pcState, &sPacket);
 					sendPacket(sPacket);
 					logSendPacket(sPacket);
