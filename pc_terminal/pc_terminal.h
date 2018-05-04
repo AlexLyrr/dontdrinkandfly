@@ -1,4 +1,3 @@
-// @Author: George Giannakaras
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -6,6 +5,7 @@
 #ifndef PC_TERMINAL_H_
 #define PC_TERMINAL_H_
 
+// @Author: George Giannakaras
 struct pcState{
 	//KEYBOARD
 	bool escPressed; //abort / exit
@@ -60,6 +60,14 @@ struct pcState{
 	uint8_t jPitchValue;
 	uint8_t jYawValue;
 };
+
+// @Author: Alex Lyrakis
+typedef struct{
+	uint16_t fcs;
+	uint8_t payload[10];
+	uint8_t crc;
+} SPacket;
+
 
 void getJoystick();
 
