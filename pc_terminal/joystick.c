@@ -21,7 +21,7 @@ void openJoystic()
 	fcntl(fd_joystick, F_SETFL, O_NONBLOCK);
 }
 
-void checkJoystic(struct pcState *pcState){  
+void checkJoystic(struct pcState *pcState){
   struct js_event js;
   uint16_t jValue;
   int32_t jTemp;
