@@ -111,7 +111,10 @@ int	term_getchar()
 #include <time.h>
 
 int serial_device = 0;
-int fd_RS232;
+int fd_RS232, fd_joystick;
+
+#include "joystick.c"
+
 
 void rs232_open(void)
 {
@@ -205,6 +208,7 @@ int 	rs232_putchar(char c)
 
 // @Author: Alex Lyrakis
 void resetPcState(struct pcState *pcState){
+	//KEYBOARD
 	pcState->escPressed = false;
 	pcState->n0Pressed = false;
 	pcState->n1Pressed = false;
@@ -225,15 +229,42 @@ void resetPcState(struct pcState *pcState){
 	pcState->kkPressed = false;
 	pcState->oPressed = false;
 	pcState->lPressed = false;
+
+	//JOYSTIC
+	pcState->jChanged = false;
+	pcState->jThrottleUp = false;
+	pcState->jThrottleDown = false;
+	pcState->jLeft = false;
+	pcState->jRight = false;
+	pcState->jForward = false;
+	pcState->jBackward = false;
+	pcState->jTwistClockwise = false;
+	pcState->jTwistCounterClockwise = false;
+	pcState->jFire = false;
 }
 
 
 // @Author: George Giannakaras 
-void init_pcState(struct pcState *pcState){ 
+void initPcState(struct pcState *pcState){ 
+  //KEYBOARD
   pcState->liftValue = 0; 
   pcState->rollValue = 90; 
   pcState->pitchValue = 90; 
   pcState->yawValue = 90; 
+
+  //JOYSTIC
+  pcState->jThrottleValue = 0;
+  pcState->jRollValue = 0;
+  pcState->jPitchValue = 0;
+  pcState->jYawValue = 0;
+
+  // Probably initialization of keyboard and joystic values have to be switched
+
+  //TOTAL
+  pcState->tLiftValue = 0; 
+  pcState->tRollValue = 90; 
+  pcState->tPitchValue = 90; 
+  pcState->tYawValue = 90; 
 } 
 
 // @Author: Alex Lyrakis
@@ -376,7 +407,7 @@ void setPacket(struct pcState *pcState, SPacket *sPacket){
 	sPacket->payload[0] = 0; //Default type
 	if (setModeAttempt(pcState))
 		sPacket->payload[0] = 5;
-	if (setControlAttempt(pcState))
+	if (setControlAttempt(pcState) || pcState->jChanged)
 		sPacket->payload[0] = 3;
 	// Set payload
 	switch (sPacket->payload[0]) {
@@ -393,11 +424,11 @@ void setPacket(struct pcState *pcState, SPacket *sPacket){
 			} else {
 				sPacket->payload[1] = 0;  // else zero
 			}
-			sPacket->payload[2] = pcState->rollValue;
-			sPacket->payload[3] = pcState->pitchValue;
-			sPacket->payload[4] = pcState->yawValue;
-			sPacket->payload[5] =(uint8_t) (pcState->liftValue >> 8);
-			sPacket->payload[6] =(uint8_t) (pcState->liftValue & 0xFF);
+			sPacket->payload[2] = pcState->tRollValue;
+			sPacket->payload[3] = pcState->tPitchValue;
+			sPacket->payload[4] = pcState->tYawValue;
+			sPacket->payload[5] =(uint8_t) (pcState->tLiftValue >> 8);
+			sPacket->payload[6] =(uint8_t) (pcState->tLiftValue & 0xFF);
 			for (int i=7; i<10; i++) {
 				sPacket->payload[1] = 0; // null bytes
 			}
@@ -445,6 +476,13 @@ void logSendPacket(SPacket sPacket){
 	fclose(file);
 }
 
+void updatePcState(struct pcState *pcState){
+	pcState->tLiftValue = pcState->liftValue + pcState->jThrottleValue;
+	pcState->tRollValue = pcState->rollValue + pcState->jRollValue;
+	pcState->tPitchValue = pcState->pitchValue + pcState->jPitchValue;
+	pcState->tYawValue = pcState->yawValue + pcState->jYawValue;
+}
+
 /*----------------------------------------------------------------
  * main -- execute terminal
  *----------------------------------------------------------------
@@ -464,7 +502,9 @@ int main(int argc, char **argv)
 	term_puts("Initialized termios...\n");
 	rs232_open();
 	term_puts("Initialized termios...\n");
-
+	openJoystic();
+	term_puts("Initialized termios...\n");
+	
 	term_puts("Type ^C to exit\n");
 
 	/* discard any incoming text
@@ -476,22 +516,25 @@ int main(int argc, char **argv)
 
 	/* send & receive
 	 */
-	init_pcState(pcState); // Initialize values
+	initPcState(pcState); // Initialize values
 	resetPcState(pcState); // Reset state
 
 	for (;;)
 	{
-		if ((c = term_getchar_nb()) != -1){	// Read from keyboard and update pcState
+		// Read from keyboard and update pcState
+		if ((c = term_getchar_nb()) != -1){	
 			checkInput(c, pcState);
-			// TBD: retrieve joystic info
 		}
+		// Read from joystic and update pcState
+		checkJoystic(pcState);
+		updatePcState(pcState);
 		if ((c = rs232_getchar_nb()) != -1){
 			// TBD: retrieve packets from drone
 		}	 
 		//	term_putchar(c);
 		if ((clock()-timeLastPacket)/CLOCKS_PER_SEC > 0.2){
 			// set, send and store the packet, reset pcState and update time
-			if (sthPressed(pcState)){
+			if (sthPressed(pcState) || pcState->jChanged){
 					setPacket(pcState, &sPacket);
 					sendPacket(sPacket);
 					logSendPacket(sPacket);

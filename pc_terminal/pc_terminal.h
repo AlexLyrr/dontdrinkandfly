@@ -9,8 +9,8 @@
 struct pcState{
 	//KEYBOARD
 	bool escPressed; //abort / exit
+
 	uint8_t mode;
-	//modes
 	bool n0Pressed;
 	bool n1Pressed;
 	bool n2Pressed;
@@ -46,6 +46,7 @@ struct pcState{
 	bool lPressed;	//roll/pitch control P2 down
 
 	//JOYSTICK
+	bool jChanged;
 	bool jThrottleUp;	//lift up
 	bool jThrottleDown;	//lift down
 	bool jLeft;		//roll up
@@ -59,6 +60,12 @@ struct pcState{
 	uint8_t jRollValue;
 	uint8_t jPitchValue;
 	uint8_t jYawValue;
+
+	//TOTAL
+	uint16_t tLiftValue;
+	uint8_t tRollValue;
+	uint8_t tPitchValue;
+	uint8_t tYawValue;
 };
 
 // @Author: Alex Lyrakis

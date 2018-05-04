@@ -3,27 +3,31 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
-
 #include "pc_terminal.h"
 #include "joystick.h"
 
-void getJoystick(struct pcState *pcState)
+//void getJoystick(struct pcState *pcState)
+void openJoystic()
 {
+  /* Initializations moves to pc_terminal.c
 	int fd;
-  struct js_event js;
-  uint16_t jValue;
-	int32_t jTemp;
   int i = 0;
-
-  if ((fd = open("/dev/input/by-id/usb-Logitech_Logitech_Extreme_3D-joystick", O_RDONLY)) < 0) {
+  */
+  if ((fd_joystick = open("/dev/input/by-id/usb-Logitech_Logitech_Extreme_3D-joystick", O_RDONLY)) < 0) {
     perror("JoystickError");
     exit(1);
   }
   printf("Joystick Found!\n");
+	fcntl(fd_joystick, F_SETFL, O_NONBLOCK);
+}
 
-	fcntl(fd, F_SETFL, O_NONBLOCK);
-
-  while(read(fd, &js, sizeof(struct js_event)) == sizeof(struct js_event)) {
+void checkJoystic(struct pcState *pcState){  
+  struct js_event js;
+  uint16_t jValue;
+  int32_t jTemp;
+  //while(read(fd, &js, sizeof(struct js_event)) == sizeof(struct js_event)) {
+  if (read(fd_joystick, &js, sizeof(struct js_event)) == sizeof(struct js_event)){
+    pcState->jChanged = true;
 		jTemp = js.value;
 		if (jTemp > 32000) {
 			jTemp = 32000;
@@ -59,3 +63,5 @@ void getJoystick(struct pcState *pcState)
     }
   }
 }
+  
+  
