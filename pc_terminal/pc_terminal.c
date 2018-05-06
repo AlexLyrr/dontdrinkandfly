@@ -116,11 +116,11 @@ int fd_RS232, fd_joystick;
 
 void rs232_open(void)
 {
-  	char 		*name;
-  	int 		result;
+  	char *name;
+  	int result;
   	struct termios	tty;
 
-       	fd_RS232 = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY);  // Hardcode your serial port here, or request it as an argument at runtime
+    fd_RS232 = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY);  // Hardcode your serial port here, or request it as an argument at runtime
 
 	assert(fd_RS232>=0);
 
@@ -459,9 +459,10 @@ void sendPacket(SPacket sPacket){
 
 
 void logSendPacket(SPacket sPacket){
-	if (sPacket.fcs == 0)
+	if (sPacket.fcs == 0){
 		system("cat /dev/null > logSendPackets.txt");
-	FILE *file = fopen("logSendPackets.txt", "a");
+		FILE *file = fopen("logSendPackets.txt", "a");
+		}
 	if (file == NULL)
 	{
 	    printf("Error opening logSendPackets.txt file!\n");
