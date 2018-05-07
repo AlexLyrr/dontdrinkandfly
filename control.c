@@ -11,7 +11,11 @@
  */
 
 #include "in4073.h"
-uint32_t prevTime = 0
+uint32_t prevTime = 0;
+
+void restoreDisp(){
+	// TODO
+}
 
 void yawControl() {
 		uint16_t displacement;
@@ -19,14 +23,13 @@ void yawControl() {
 			displacement = 0;
 		}
 		else{
-			if (sr > 10 or sr < -10){
+			if (sr > 10 || sr < -10){
 				displacement += (get_time_us() - prevTime) * sr;
 			}
 		}
 		restoreDisp();
 		prevTime = get_time_us();
 }
-
 
 void controlComponentLoop() {
 	// TODO: implement
