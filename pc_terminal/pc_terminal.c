@@ -481,6 +481,14 @@ void updatePcState(struct pcState *pcState){
 	pcState->tRollValue = pcState->rollValue + pcState->jRollValue;
 	pcState->tPitchValue = pcState->pitchValue + pcState->jPitchValue;
 	pcState->tYawValue = pcState->yawValue + pcState->jYawValue;
+	if (pcState->tLiftValue > 1000)
+		pcState->tLiftValue = 1000;
+	if (pcState->tRollValue > 180)
+		pcState->tRollValue = 180;
+	if (pcState->tPitchValue > 180)
+		pcState->tPitchValue = 180;
+	if (pcState->tYawValue > 180)
+		pcState->tYawValue = 180;
 }
 
 /*----------------------------------------------------------------

@@ -12,8 +12,6 @@
 
 #include "in4073.h"
 
-
-
 void controlComponentLoop() {
 	// TODO: implement
 }
