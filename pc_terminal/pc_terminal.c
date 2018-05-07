@@ -462,10 +462,6 @@ void sendPacket(SRPacket sPacket){
 void receivePacket(queue *pcReQueue, SRPacket *rPacket){
 	uint8_t crc = 0x00;
 
-<<<<<<< Updated upstream
-void logSendPacket(SPacket sPacket){
-	if (sPacket.fcs == 0){
-=======
 	if(queuePeek(pcReQueue, 0) == PREAMPLE_B1 && queuePeek(pcReQueue, 1) == PREAMPLE_B2){
 		for(int j = 2; j < PACKET_LENGTH - 1; j++){
 			crc = crc8_table[crc ^ queuePeek(pcReQueue, j)];
@@ -546,11 +542,10 @@ void logReceivePacket(SRPacket *rPacket){
 
 //@Author Alex Lyrakis
 void logSendPacket(SRPacket sPacket){
-	if (sPacket.fcs == 0)
->>>>>>> Stashed changes
+	if (sPacket.fcs == 0){
 		system("cat /dev/null > logSendPackets.txt");
-		FILE *file = fopen("logSendPackets.txt", "a");
-		}
+	}
+	FILE *file = fopen("logSendPackets.txt", "a");
 	if (file == NULL)
 	{
 	    printf("Error opening logSendPackets.txt file!\n");
@@ -618,7 +613,7 @@ int main(int argc, char **argv)
 
 	/* send & receive
 	 */
-	//initReceivedACK();
+	initReceivedACK();
 	initPcState(pcState);
 	resetPcState(pcState); // Reset values and State of PC side.
 	init_queue(&pcReQueue);
