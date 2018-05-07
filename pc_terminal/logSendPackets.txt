@@ -1,0 +1,4 @@
+Packet number: 0 Type: 3 Byte1: 0 Byte2: 89 Byte3: 90 Byte4: 90 Byte5: 0 Byte6: 0 Byte7: 0 Byte8: 0 Byte9: 0 crc: 174 
+Packet number: 1 Type: 3 Byte1: 0 Byte2: 89 Byte3: 90 Byte4: 90 Byte5: 0 Byte6: 0 Byte7: 0 Byte8: 0 Byte9: 0 crc: 191 
+Packet number: 2 Type: 3 Byte1: 0 Byte2: 88 Byte3: 90 Byte4: 90 Byte5: 0 Byte6: 0 Byte7: 0 Byte8: 0 Byte9: 0 crc: 176 
+Packet number: 3 Type: 3 Byte1: 0 Byte2: 85 Byte3: 90 Byte4: 90 Byte5: 0 Byte6: 0 Byte7: 0 Byte8: 0 Byte9: 0 crc: 232 
