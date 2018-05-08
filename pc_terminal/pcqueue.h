@@ -3,17 +3,17 @@
 #ifndef PCQUEUE_H_
 #define PCQUEUE_H_
 // Queue
-#define QUEUE_SIZE 256
+#define PCQUEUE_SIZE 1000
 typedef struct {
-	uint8_t Data[QUEUE_SIZE];
+	uint8_t Data[PCQUEUE_SIZE];
 	uint16_t first, last;
 	uint16_t count;
-} queue;
-void init_queue(queue *q);
-void enqueue(queue *q, char x);
-char dequeue(queue *q);
-char queuePeek(queue *q, uint16_t offset);
+} pcqueue;
+void init_queuepc(pcqueue *q);
+void enqueuepc(pcqueue *q, char x);
+char dequeuepc(pcqueue *q);
+char queuePeekpc(pcqueue *q, uint16_t offset);
 
-queue pcReQueue;
+pcqueue pcReQueue;
 
 #endif

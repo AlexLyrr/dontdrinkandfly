@@ -459,49 +459,54 @@ void sendPacket(SRPacket sPacket){
 }
 
 //@Author George Giannakaras
-void receivePacket(queue *pcReQueue, SRPacket *rPacket){
-	uint8_t crc = 0x00;
+void receivePacket(SRPacket *rPacket){
+	uint8_t crc = 0x00, crcTemp;
+	bool foundPacket = false;
 
-	if(queuePeek(pcReQueue, 0) == PREAMPLE_B1 && queuePeek(pcReQueue, 1) == PREAMPLE_B2){
-		for(int j = 2; j < PACKET_LENGTH - 1; j++){
-			crc = crc8_table[crc ^ queuePeek(pcReQueue, j)];
-		}
-		if(crc == queuePeek(pcReQueue, PACKET_LENGTH - 1)){
-			//discard preamble bytes
-			dequeue(pcReQueue);
-			dequeue(pcReQueue);
-
-			rPacket->fcs = dequeue(pcReQueue) << 8;
-			rPacket->fcs = rPacket->fcs | dequeue(pcReQueue);
-			for(int j = 0; j < PACKET_BODY_LENGTH; j++){
-				rPacket->payload[j] = dequeue(pcReQueue);
+	while(pcReQueue.count >= PACKET_LENGTH && foundPacket == false){
+		if(queuePeekpc(&pcReQueue, 0) == PREAMPLE_B1 && queuePeekpc(&pcReQueue, 1) == PREAMPLE_B2){
+			for(uint16_t j = 2; j < PACKET_LENGTH - 1; j++){
+				crc = crc8_table[crc ^ ((uint8_t) queuePeekpc(&pcReQueue, j))];
 			}
-			//discard crc
-			dequeue(pcReQueue);
-			switch(rPacket->payload[0]) {
+			crcTemp = queuePeekpc(&pcReQueue, PACKET_LENGTH - 1);
+			if(crc == crcTemp){
+				foundPacket = true;
+				//discard preamble bytes
+				dequeuepc(&pcReQueue);
+				dequeuepc(&pcReQueue);
 
-				case 2:
-					logReceivePacket(rPacket);
-					break;
-				case 7:
-					logReceivePacket(rPacket);
-					break;
-				case 10:
-					logReceivePacket(rPacket);
-					break;
-				case 11:
-					//Ack
-					receivedACK[rPacket->fcs] = true;
-					break;
+				rPacket->fcs = dequeuepc(&pcReQueue) << 8;
+				rPacket->fcs = rPacket->fcs | dequeuepc(&pcReQueue);
+				for(int j = 0; j < PACKET_BODY_LENGTH; j++){
+					rPacket->payload[j] = dequeuepc(&pcReQueue);
+				}
+				//discard crc
+				dequeuepc(&pcReQueue);
+				switch(rPacket->payload[0]) {
 
+					case 2:
+						logReceivePacket(rPacket);
+						break;
+					case 7:
+						logReceivePacket(rPacket);
+						break;
+					case 10:
+						logReceivePacket(rPacket);
+						break;
+					case 11:
+						//Ack
+						receivedACK[rPacket->fcs] = true;
+						break;
+
+				}
+			}
+			else{
+				dequeuepc(&pcReQueue);
 			}
 		}
 		else{
-			dequeue(pcReQueue);
+			dequeuepc(&pcReQueue);
 		}
-	}
-	else{
-		dequeue(pcReQueue);
 	}
 }
 
@@ -523,15 +528,18 @@ void initLogFiles(){
 	}
 }
 
+	//Printing to terminal
 //@Author George Giannakaras
 void logReceivePacket(SRPacket *rPacket){
 	uint16_t motor[4];
 	switch(rPacket->payload[0]){
 		case 2:
+			printf("System time: %hhu | Packet number: %hu | Type: %hhu | Mode: %hhu | Battery: %hhu | Roll: %hhu | Pitch: %hhu | Height: %hhu\n", 
 			fprintf(Rfile, "System time: %hu | Packet number: %hu | Type: %hhu | Mode: %hu | Battery: %hu | Roll: %hu | Pitch: %hu | Height: %hu\n", 
 				rPacket->payload[6], rPacket->fcs, rPacket->payload[0], rPacket->payload[1], rPacket->payload[2], rPacket->payload[3], rPacket->payload[4], rPacket->payload[5]);
 			break;
 		case 7:
+			printf("Type: %hhu | ERROR: %hhu\n", rPacket->payload[0], rPacket->payload[1]);
 			fprintf(Rfile, "Type: %hhu | ERROR: %hu\n", rPacket->payload[0], rPacket->payload[1]);
 			break;
 		case 10:
@@ -539,10 +547,29 @@ void logReceivePacket(SRPacket *rPacket){
 			motor[1] = rPacket->payload[3] << 8 | rPacket->payload[4];
 			motor[2] = rPacket->payload[5] << 8 | rPacket->payload[6];
 			motor[3] = rPacket->payload[7] << 8 | rPacket->payload[8];
+			printf("Packet number: %hu | Type: %hhu | Motor1: %hu | Motor2: %hu | Motor3: %hu | Motor4: %hu\n",
+				rPacket->fcs, rPacket->payload[0], motor[0], motor[1], motor[2], motor[3]);
+			break;
+	}
+
+	//Printing to file
+	switch(rPacket->payload[0]){
+		case 2:
+			fprintf(file, "System time: %hhu | Packet number: %hu | Type: %hhu | Mode: %hhu | Battery: %hhu | Roll: %hhu | Pitch: %hhu | Height: %hhu\n", 
+				rPacket->payload[6], rPacket->fcs, rPacket->payload[0], rPacket->payload[1], rPacket->payload[2], rPacket->payload[3], rPacket->payload[4], rPacket->payload[5]);
+			break;
+		case 7:
+			fprintf(file, "Type: %hhu | ERROR: %hhu\n", rPacket->payload[0], rPacket->payload[1]);
+			break;
+		case 10:
+			fprintf(file, "Packet number: %hu | Type: %hhu | Motor1: %hu | Motor2: %hu | Motor3: %hu | Motor4: %hu\n",
 			fprintf(Rfile, "Packet number: %hu | Type: %hhu | Motor1: %hu | Motor2: %hu | Motor3: %hu | Motor4: %hu\n",
 				rPacket->fcs, rPacket->payload[0], motor[0], motor[1], motor[2], motor[3]);
 			break;
 	}
+
+	
+	fclose(file);
 }
 
 //@Author Alex Lyrakis
@@ -587,9 +614,10 @@ int main(int argc, char **argv)
 	pcState = (struct pcState*) calloc(1, sizeof(struct pcState));
 	SRPacket sPacket;
 	SRPacket rPacket;
-	queue pcReQueue;
+	bool bufferCleared = false;
 	char c;
 	clock_t timeLastPacket = clock(); 
+	int k = 0;
 
 	term_puts("\nTerminal program - Embedded Real-Time Systems\n");
 
@@ -613,7 +641,7 @@ int main(int argc, char **argv)
 	initReceivedACK();
 	initPcState(pcState);
 	resetPcState(pcState); // Reset values and State of PC side.
-	init_queue(&pcReQueue);
+	init_queuepc(&pcReQueue);
 
 	for (;;)
 	{
@@ -628,9 +656,13 @@ int main(int argc, char **argv)
 
 		// Read from fd_RS232
 		if ((c = rs232_getchar_nb()) != -1){	 
-			enqueue(&pcReQueue, c);
+			if(c == 0x13){
+					bufferCleared = true;
+			}
+			if(bufferCleared)
+				enqueuepc(&pcReQueue, c);
 			if(pcReQueue.count >= PACKET_LENGTH){
-				receivePacket(&pcReQueue, &rPacket);
+				receivePacket(&rPacket);
 			}
 			term_putchar(c);
 		}
