@@ -80,7 +80,13 @@ typedef struct{
 	uint8_t crc;
 } SRPacket;
 
+FILE *Rfile;
+FILE *Sfile;
+
+SRPacket sPacketBuffer[65535];
 bool receivedACK[65535];
+
 void getJoystick();
 void logReceivePacket(SRPacket *rPacket);
+
 #endif

@@ -505,58 +505,53 @@ void receivePacket(queue *pcReQueue, SRPacket *rPacket){
 	}
 }
 
-//@Author George Giannakaras
-void logReceivePacket(SRPacket *rPacket){
-	uint16_t motor[4];
-
-	if (rPacket->fcs == 0){
-		system("cat /dev/null > logReceivePacket.txt");
-	}
-	FILE *file = fopen("logReceivePacket.txt", "a");
-	if (file == NULL)
+//@Author Alex Lyrakis
+void initLogFiles(){
+	Rfile = fopen("logReceivePacket.txt", "a");
+	Sfile = fopen("logSendPackets.txt", "a");
+	system("cat /dev/null > logSendPackets.txt");
+	system("cat /dev/null > logReceivePacket.txt");
+	if (Rfile == NULL)
 	{
 	    printf("Error opening logReceivePacket.txt file!\n");
 	    exit(1);
 	}
+	if (Sfile == NULL)
+	{
+	    printf("Error opening logSendPackets.txt file!\n");
+	    exit(1);
+	}
+}
 
+//@Author George Giannakaras
+void logReceivePacket(SRPacket *rPacket){
+	uint16_t motor[4];
 	switch(rPacket->payload[0]){
 		case 2:
-			fprintf(file, "System time: %hu | Packet number: %hu | Type: %hhu | Mode: %hu | Battery: %hu | Roll: %hu | Pitch: %hu | Height: %hu\n", 
+			fprintf(Rfile, "System time: %hu | Packet number: %hu | Type: %hhu | Mode: %hu | Battery: %hu | Roll: %hu | Pitch: %hu | Height: %hu\n", 
 				rPacket->payload[6], rPacket->fcs, rPacket->payload[0], rPacket->payload[1], rPacket->payload[2], rPacket->payload[3], rPacket->payload[4], rPacket->payload[5]);
 			break;
 		case 7:
-			fprintf(file, "Type: %hhu | ERROR: %hu\n", rPacket->payload[0], rPacket->payload[1]);
+			fprintf(Rfile, "Type: %hhu | ERROR: %hu\n", rPacket->payload[0], rPacket->payload[1]);
 			break;
 		case 10:
 			motor[0] = rPacket->payload[1] << 8 | rPacket->payload[2];
 			motor[1] = rPacket->payload[3] << 8 | rPacket->payload[4];
 			motor[2] = rPacket->payload[5] << 8 | rPacket->payload[6];
 			motor[3] = rPacket->payload[7] << 8 | rPacket->payload[8];
-			fprintf(file, "Packet number: %hu | Type: %hhu | Motor1: %hu | Motor2: %hu | Motor3: %hu | Motor4: %hu\n",
+			fprintf(Rfile, "Packet number: %hu | Type: %hhu | Motor1: %hu | Motor2: %hu | Motor3: %hu | Motor4: %hu\n",
 				rPacket->fcs, rPacket->payload[0], motor[0], motor[1], motor[2], motor[3]);
 			break;
 	}
-	
-	fclose(file);
 }
 
 //@Author Alex Lyrakis
 void logSendPacket(SRPacket sPacket){
-	if (sPacket.fcs == 0){
-		system("cat /dev/null > logSendPackets.txt");
-	}
-	FILE *file = fopen("logSendPackets.txt", "a");
-	if (file == NULL)
-	{
-	    printf("Error opening logSendPackets.txt file!\n");
-	    exit(1);
-	}
-	fprintf(file, "Packet number: %hu ", sPacket.fcs);
-	fprintf(file, "Type: %hhu ", sPacket.payload[0]);
+	fprintf(Sfile, "Packet number: %hu ", sPacket.fcs);
+	fprintf(Sfile, "Type: %hhu ", sPacket.payload[0]);
 	for (int i=1; i<10; i++)
-		fprintf(file, "Byte%d: %hhu ", i, sPacket.payload[i]);
-	fprintf(file, "crc: %hhu \n", sPacket.crc);
-	fclose(file);
+		fprintf(Sfile, "Byte%d: %hhu ", i, sPacket.payload[i]);
+	fprintf(Sfile, "crc: %hhu \n", sPacket.crc);
 }
 
 void updatePcState(struct pcState *pcState){
@@ -586,9 +581,11 @@ void initReceivedACK(){
  */
 int main(int argc, char **argv)
 {
+	//Initialize parameters
+
 	struct pcState *pcState;
 	pcState = (struct pcState*) calloc(1, sizeof(struct pcState));
-	SRPacket sPacket, sPacketBuffer[65535];
+	SRPacket sPacket;
 	SRPacket rPacket;
 	queue pcReQueue;
 	char c;
@@ -655,6 +652,8 @@ int main(int argc, char **argv)
 
 	term_exitio();
 	rs232_close();
+	fclose(Rfile);
+	fclose(Sfile);
 	term_puts("\n<exit>\n");
 
 	return 0;
