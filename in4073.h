@@ -13,6 +13,7 @@
 
 #include <inttypes.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "nrf_gpio.h"
 #include "nrf_delay.h"
 #include "inv_mpu.h"
@@ -116,7 +117,7 @@ void ble_send(void);
 #define PACKET_BODY_LENGTH 10
 #define PACKET_LENGTH (PACKET_BODY_LENGTH + 5)
 typedef struct {
-	uint8_t nextMode; 
+	uint8_t nextMode;
 
 
 	uint8_t currentMode;
@@ -172,5 +173,8 @@ void writeDroneStatus();
 void writeError(uint8_t errorCode);
 void writeMotorStatus();
 void writeAck(uint16_t packetNumber);
+
+int root(int a, int n);
+int iPow(int a, int e);
 
 #endif // IN4073_H__
