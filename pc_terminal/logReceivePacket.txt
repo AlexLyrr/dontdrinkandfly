@@ -1,0 +1,48 @@
+System time: 0 | Packet number: 1 | Type: 2 | Mode: 0 | Battery: 2 | Roll: 5 | Pitch: 243 | Height: 0
+System time: 0 | Packet number: 2 | Type: 2 | Mode: 0 | Battery: 2 | Roll: 7 | Pitch: 244 | Height: 0
+System time: 0 | Packet number: 4 | Type: 2 | Mode: 2 | Battery: 2 | Roll: 7 | Pitch: 244 | Height: 0
+Packet number: 5 | Type: 10 | Motor1: 10 | Motor2: 10 | Motor3: 10 | Motor4: 10
+System time: 0 | Packet number: 7 | Type: 2 | Mode: 2 | Battery: 2 | Roll: 7 | Pitch: 244 | Height: 0
+Packet number: 8 | Type: 10 | Motor1: 20 | Motor2: 20 | Motor3: 20 | Motor4: 20
+Packet number: 10 | Type: 10 | Motor1: 30 | Motor2: 30 | Motor3: 30 | Motor4: 30
+Packet number: 12 | Type: 10 | Motor1: 40 | Motor2: 40 | Motor3: 40 | Motor4: 40
+Packet number: 14 | Type: 10 | Motor1: 70 | Motor2: 70 | Motor3: 70 | Motor4: 70
+Packet number: 16 | Type: 10 | Motor1: 170 | Motor2: 170 | Motor3: 170 | Motor4: 170
+Packet number: 18 | Type: 10 | Motor1: 250 | Motor2: 250 | Motor3: 250 | Motor4: 250
+Packet number: 20 | Type: 10 | Motor1: 340 | Motor2: 340 | Motor3: 340 | Motor4: 340
+Packet number: 22 | Type: 10 | Motor1: 400 | Motor2: 400 | Motor3: 400 | Motor4: 400
+System time: 0 | Packet number: 24 | Type: 2 | Mode: 2 | Battery: 2 | Roll: 7 | Pitch: 244 | Height: 0
+Packet number: 25 | Type: 10 | Motor1: 400 | Motor2: 400 | Motor3: 400 | Motor4: 400
+Packet number: 27 | Type: 10 | Motor1: 400 | Motor2: 400 | Motor3: 400 | Motor4: 400
+Packet number: 29 | Type: 10 | Motor1: 400 | Motor2: 400 | Motor3: 400 | Motor4: 400
+Packet number: 31 | Type: 10 | Motor1: 400 | Motor2: 400 | Motor3: 400 | Motor4: 400
+Packet number: 33 | Type: 10 | Motor1: 400 | Motor2: 400 | Motor3: 400 | Motor4: 400
+System time: 0 | Packet number: 35 | Type: 2 | Mode: 2 | Battery: 2 | Roll: 7 | Pitch: 244 | Height: 0
+Packet number: 36 | Type: 10 | Motor1: 400 | Motor2: 400 | Motor3: 400 | Motor4: 400
+Packet number: 38 | Type: 10 | Motor1: 400 | Motor2: 400 | Motor3: 400 | Motor4: 400
+Packet number: 40 | Type: 10 | Motor1: 400 | Motor2: 400 | Motor3: 400 | Motor4: 400
+Packet number: 42 | Type: 10 | Motor1: 400 | Motor2: 400 | Motor3: 400 | Motor4: 400
+Packet number: 44 | Type: 10 | Motor1: 400 | Motor2: 400 | Motor3: 400 | Motor4: 400
+Packet number: 46 | Type: 10 | Motor1: 400 | Motor2: 400 | Motor3: 400 | Motor4: 400
+Packet number: 48 | Type: 10 | Motor1: 400 | Motor2: 400 | Motor3: 400 | Motor4: 400
+Packet number: 50 | Type: 10 | Motor1: 400 | Motor2: 400 | Motor3: 400 | Motor4: 400
+Packet number: 52 | Type: 10 | Motor1: 400 | Motor2: 400 | Motor3: 400 | Motor4: 400
+Packet number: 54 | Type: 10 | Motor1: 400 | Motor2: 400 | Motor3: 400 | Motor4: 400
+Packet number: 56 | Type: 10 | Motor1: 400 | Motor2: 400 | Motor3: 400 | Motor4: 400
+Packet number: 58 | Type: 10 | Motor1: 400 | Motor2: 400 | Motor3: 400 | Motor4: 400
+Packet number: 60 | Type: 10 | Motor1: 400 | Motor2: 400 | Motor3: 400 | Motor4: 400
+Packet number: 62 | Type: 10 | Motor1: 400 | Motor2: 400 | Motor3: 400 | Motor4: 400
+Packet number: 64 | Type: 10 | Motor1: 400 | Motor2: 400 | Motor3: 400 | Motor4: 400
+Packet number: 66 | Type: 10 | Motor1: 400 | Motor2: 400 | Motor3: 400 | Motor4: 400
+Packet number: 68 | Type: 10 | Motor1: 400 | Motor2: 400 | Motor3: 400 | Motor4: 400
+Packet number: 70 | Type: 10 | Motor1: 400 | Motor2: 400 | Motor3: 400 | Motor4: 400
+Packet number: 72 | Type: 10 | Motor1: 400 | Motor2: 400 | Motor3: 400 | Motor4: 400
+Packet number: 74 | Type: 10 | Motor1: 400 | Motor2: 400 | Motor3: 400 | Motor4: 400
+Packet number: 76 | Type: 10 | Motor1: 400 | Motor2: 400 | Motor3: 400 | Motor4: 400
+Packet number: 78 | Type: 10 | Motor1: 400 | Motor2: 400 | Motor3: 400 | Motor4: 400
+Packet number: 80 | Type: 10 | Motor1: 400 | Motor2: 400 | Motor3: 400 | Motor4: 400
+Packet number: 82 | Type: 10 | Motor1: 400 | Motor2: 400 | Motor3: 400 | Motor4: 293
+Packet number: 84 | Type: 10 | Motor1: 360 | Motor2: 400 | Motor3: 360 | Motor4: 245
+Packet number: 86 | Type: 10 | Motor1: 360 | Motor2: 400 | Motor3: 360 | Motor4: 245
+Packet number: 88 | Type: 10 | Motor1: 360 | Motor2: 400 | Motor3: 360 | Motor4: 245
+Packet number: 90 |

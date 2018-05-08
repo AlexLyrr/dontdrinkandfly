@@ -528,13 +528,14 @@ void initLogFiles(){
 	}
 }
 
-	//Printing to terminal
 //@Author George Giannakaras
 void logReceivePacket(SRPacket *rPacket){
 	uint16_t motor[4];
+
 	switch(rPacket->payload[0]){
 		case 2:
 			printf("System time: %hhu | Packet number: %hu | Type: %hhu | Mode: %hhu | Battery: %hhu | Roll: %hhu | Pitch: %hhu | Height: %hhu\n", 
+				rPacket->payload[6], rPacket->fcs, rPacket->payload[0], rPacket->payload[1], rPacket->payload[2], rPacket->payload[3], rPacket->payload[4], rPacket->payload[5]);
 			fprintf(Rfile, "System time: %hu | Packet number: %hu | Type: %hhu | Mode: %hu | Battery: %hu | Roll: %hu | Pitch: %hu | Height: %hu\n", 
 				rPacket->payload[6], rPacket->fcs, rPacket->payload[0], rPacket->payload[1], rPacket->payload[2], rPacket->payload[3], rPacket->payload[4], rPacket->payload[5]);
 			break;
@@ -549,27 +550,10 @@ void logReceivePacket(SRPacket *rPacket){
 			motor[3] = rPacket->payload[7] << 8 | rPacket->payload[8];
 			printf("Packet number: %hu | Type: %hhu | Motor1: %hu | Motor2: %hu | Motor3: %hu | Motor4: %hu\n",
 				rPacket->fcs, rPacket->payload[0], motor[0], motor[1], motor[2], motor[3]);
-			break;
-	}
-
-	//Printing to file
-	switch(rPacket->payload[0]){
-		case 2:
-			fprintf(file, "System time: %hhu | Packet number: %hu | Type: %hhu | Mode: %hhu | Battery: %hhu | Roll: %hhu | Pitch: %hhu | Height: %hhu\n", 
-				rPacket->payload[6], rPacket->fcs, rPacket->payload[0], rPacket->payload[1], rPacket->payload[2], rPacket->payload[3], rPacket->payload[4], rPacket->payload[5]);
-			break;
-		case 7:
-			fprintf(file, "Type: %hhu | ERROR: %hhu\n", rPacket->payload[0], rPacket->payload[1]);
-			break;
-		case 10:
-			fprintf(file, "Packet number: %hu | Type: %hhu | Motor1: %hu | Motor2: %hu | Motor3: %hu | Motor4: %hu\n",
 			fprintf(Rfile, "Packet number: %hu | Type: %hhu | Motor1: %hu | Motor2: %hu | Motor3: %hu | Motor4: %hu\n",
 				rPacket->fcs, rPacket->payload[0], motor[0], motor[1], motor[2], motor[3]);
 			break;
 	}
-
-	
-	fclose(file);
 }
 
 //@Author Alex Lyrakis
@@ -617,7 +601,6 @@ int main(int argc, char **argv)
 	bool bufferCleared = false;
 	char c;
 	clock_t timeLastPacket = clock(); 
-	int k = 0;
 
 	term_puts("\nTerminal program - Embedded Real-Time Systems\n");
 
@@ -638,6 +621,7 @@ int main(int argc, char **argv)
 
 	/* send & receive
 	 */
+	initLogFiles();
 	initReceivedACK();
 	initPcState(pcState);
 	resetPcState(pcState); // Reset values and State of PC side.
