@@ -82,3 +82,26 @@ void run_filters_and_control()
 
 	update_motors();
 }
+
+void manualControlBackup()
+{
+	int32_t adjust = 500, b = 1, d = 1;
+	int32_t aeSQ[4];
+	int32_t Z = state.controlLift;
+	int32_t L = state.controlPitch - 90;
+	int32_t M = state.controlRoll - 90;
+	int32_t N = state.controlYaw - 90;
+
+	Z *= adjust; L *= adjust/2; M *= adjust/2; N *= adjust/2;
+	aeSQ[0] = Z/(4*b) + M/(2*b) - N/(4*d);
+	aeSQ[1] = Z/(4*b) - L/(2*b) + N/(4*d);
+	aeSQ[2] = Z/(4*b) - M/(2*b) - N/(4*d);
+	aeSQ[3] = Z/(4*b) + L/(2*b) + N/(4*d);
+	for (int i=0; i<4; i++)
+		ae[i] = root(aeSQ[i], 2);
+
+	update_motors();
+}
+
+
+

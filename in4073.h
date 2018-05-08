@@ -170,4 +170,7 @@ void writeError(uint8_t errorCode);
 void writeMotorStatus();
 void writeAck(uint16_t packetNumber);
 
+int root(int a, int n);
+int iPow(int a, int e);
+
 #endif // IN4073_H__

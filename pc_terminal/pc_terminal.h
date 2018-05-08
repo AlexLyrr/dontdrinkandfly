@@ -4,6 +4,11 @@
 #ifndef PC_TERMINAL_H_
 #define PC_TERMINAL_H_
 
+#define PREAMPLE_B1 0x13
+#define PREAMPLE_B2 0x37
+#define PACKET_BODY_LENGTH 10
+#define PACKET_LENGTH (PACKET_BODY_LENGTH + 5)
+
 // @Author: George Giannakaras
 struct pcState{
 	//KEYBOARD
@@ -67,14 +72,15 @@ struct pcState{
 	uint8_t tYawValue;
 };
 
+
 // @Author: Alex Lyrakis
 typedef struct{
 	uint16_t fcs;
 	uint8_t payload[10];
 	uint8_t crc;
-} SPacket;
+} SRPacket;
 
-
+bool receivedACK[65535];
 void getJoystick();
-
+void logReceivePacket(SRPacket *rPacket);
 #endif

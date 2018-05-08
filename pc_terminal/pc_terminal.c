@@ -16,6 +16,7 @@
 #include <stdbool.h> 
 #include <stdlib.h>
 #include "pc_terminal.h"
+#include "pcqueue.h"
 
 /*------------------------------------------------------------
  * console I/O
@@ -397,7 +398,7 @@ bool sthPressed(struct pcState *pcState){
 }
 
 // @Author Alex Lyrakis
-void setPacket(struct pcState *pcState, SPacket *sPacket){
+void setPacket(struct pcState *pcState, SRPacket *sPacket){
 	// Set packet type
 	static uint16_t sPacketCounter = 0;
 	sPacket->fcs = sPacketCounter;
@@ -446,7 +447,7 @@ void setPacket(struct pcState *pcState, SPacket *sPacket){
 }
 
 //@Author Alex Lyrakis
-void sendPacket(SPacket sPacket){
+void sendPacket(SRPacket sPacket){
 	rs232_putchar(0x13);
 	rs232_putchar(0x37);
 	rs232_putchar(sPacket.fcs >> 8);
@@ -457,12 +458,94 @@ void sendPacket(SPacket sPacket){
 	rs232_putchar(sPacket.crc);	
 }
 
+//@Author George Giannakaras
+void receivePacket(queue *pcReQueue, SRPacket *rPacket){
+	uint8_t crc = 0x00;
 
-void logSendPacket(SPacket sPacket){
+	if(queuePeek(pcReQueue, 0) == PREAMPLE_B1 && queuePeek(pcReQueue, 1) == PREAMPLE_B2){
+		for(int j = 2; j < PACKET_LENGTH - 1; j++){
+			crc = crc8_table[crc ^ queuePeek(pcReQueue, j)];
+		}
+		if(crc == queuePeek(pcReQueue, PACKET_LENGTH - 1)){
+			//discard preamble bytes
+			dequeue(pcReQueue);
+			dequeue(pcReQueue);
+
+			rPacket->fcs = dequeue(pcReQueue) << 8;
+			rPacket->fcs = rPacket->fcs | dequeue(pcReQueue);
+			for(int j = 0; j < PACKET_BODY_LENGTH; j++){
+				rPacket->payload[j] = dequeue(pcReQueue);
+			}
+			//discard crc
+			dequeue(pcReQueue);
+			switch(rPacket->payload[0]) {
+
+				case 2:
+					logReceivePacket(rPacket);
+					break;
+				case 7:
+					logReceivePacket(rPacket);
+					break;
+				case 10:
+					logReceivePacket(rPacket);
+					break;
+				case 11:
+					//Ack
+					receivedACK[rPacket->fcs] = true;
+					break;
+
+			}
+		}
+		else{
+			dequeue(pcReQueue);
+		}
+	}
+	else{
+		dequeue(pcReQueue);
+	}
+}
+
+//@Author George Giannakaras
+void logReceivePacket(SRPacket *rPacket){
+	uint16_t motor[4];
+
+	if (rPacket->fcs == 0){
+		system("cat /dev/null > logReceivePacket.txt");
+	}
+	FILE *file = fopen("logReceivePacket.txt", "a");
+	if (file == NULL)
+	{
+	    printf("Error opening logReceivePacket.txt file!\n");
+	    exit(1);
+	}
+
+	switch(rPacket->payload[0]){
+		case 2:
+			fprintf(file, "System time: %hu | Packet number: %hu | Type: %hhu | Mode: %hu | Battery: %hu | Roll: %hu | Pitch: %hu | Height: %hu\n", 
+				rPacket->payload[6], rPacket->fcs, rPacket->payload[0], rPacket->payload[1], rPacket->payload[2], rPacket->payload[3], rPacket->payload[4], rPacket->payload[5]);
+			break;
+		case 7:
+			fprintf(file, "Type: %hhu | ERROR: %hu\n", rPacket->payload[0], rPacket->payload[1]);
+			break;
+		case 10:
+			motor[0] = rPacket->payload[1] << 8 | rPacket->payload[2];
+			motor[1] = rPacket->payload[3] << 8 | rPacket->payload[4];
+			motor[2] = rPacket->payload[5] << 8 | rPacket->payload[6];
+			motor[3] = rPacket->payload[7] << 8 | rPacket->payload[8];
+			fprintf(file, "Packet number: %hu | Type: %hhu | Motor1: %hu | Motor2: %hu | Motor3: %hu | Motor4: %hu\n",
+				rPacket->fcs, rPacket->payload[0], motor[0], motor[1], motor[2], motor[3]);
+			break;
+	}
+	
+	fclose(file);
+}
+
+//@Author Alex Lyrakis
+void logSendPacket(SRPacket sPacket){
 	if (sPacket.fcs == 0){
 		system("cat /dev/null > logSendPackets.txt");
-		FILE *file = fopen("logSendPackets.txt", "a");
-		}
+	}
+	FILE *file = fopen("logSendPackets.txt", "a");
 	if (file == NULL)
 	{
 	    printf("Error opening logSendPackets.txt file!\n");
@@ -491,6 +574,12 @@ void updatePcState(struct pcState *pcState){
 		pcState->tYawValue = 180;
 }
 
+void initReceivedACK(){
+	for(int i = 0; i < 65535; i++){
+		receivedACK[i] = false;
+	}
+}
+
 /*----------------------------------------------------------------
  * main -- execute terminal
  *----------------------------------------------------------------
@@ -499,7 +588,9 @@ int main(int argc, char **argv)
 {
 	struct pcState *pcState;
 	pcState = (struct pcState*) calloc(1, sizeof(struct pcState));
-	SPacket sPacket, sPacketBuffer[65535];
+	SRPacket sPacket, sPacketBuffer[65535];
+	SRPacket rPacket;
+	queue pcReQueue;
 	char c;
 	clock_t timeLastPacket = clock(); 
 
@@ -522,8 +613,10 @@ int main(int argc, char **argv)
 
 	/* send & receive
 	 */
+	initReceivedACK();
 	initPcState(pcState);
 	resetPcState(pcState); // Reset values and State of PC side.
+	init_queue(&pcReQueue);
 
 	for (;;)
 	{
@@ -536,9 +629,16 @@ int main(int argc, char **argv)
 		//checkJoystic(pcState);
 		updatePcState(pcState);
 
-		if ((c = rs232_getchar_nb()) != -1)	// Read from fd_RS232 and 
+		// Read from fd_RS232
+		if ((c = rs232_getchar_nb()) != -1){	 
+			enqueue(&pcReQueue, c);
+			if(pcReQueue.count >= PACKET_LENGTH){
+				receivePacket(&pcReQueue, &rPacket);
+			}
 			term_putchar(c);
-		if ((clock()-timeLastPacket)> 50)
+		}
+
+		if ((clock()-timeLastPacket)> 500)
 		{
 			//TBD: Based on our pcState and protocol we have to put a sequence of bytes using rs232_putchar(c);
 			//		After we have to reset the pcState.
