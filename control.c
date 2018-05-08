@@ -12,32 +12,41 @@
 
 #include "in4073.h"
 uint32_t prevTime = 0;
-uint16_t prevDisp = 0;
+int16_t prevDisp = 0;
+int16_t displacement;
 
-void restoreDisp(){
-	if (displacement - prevDisp > 0 && sr > 0){
-		state.controlYaw = 45;
-	} else if (displacement - prevDisp > 0 && sr < 0) {
-		state.controlYaw = 135;
-	}
-
-	prevDisp = displacement;
-}
+// void restoreDisp(){
+// 	if (abs(displacement - prevDisp) > 0 && sr > 0){
+// 		state.controlYaw = 45;
+// 	} else if (abs(displacement - prevDisp) > 0 && sr < 0){
+// 		state.controlYaw = 135;
+// 	} else if (abs(displacement - prevDisp) < 0 && sr > 0){
+// 		// TODO
+// 	} else if (abs(displacement - prevDisp) < 0 && sr < 0){
+// 		// TODO
+// 	}
+// 	prevDisp = displacement;
+// }
+//
+// void yawControl() {
+// 		if (prevTime == 0){
+// 			displacement = 0;
+// 		}
+// 		else{
+// 			if (abs(sr)>10){
+// 				displacement += (get_time_us() - prevTime) * sr;
+// 				restoreDisp();
+// 			} else{
+// 				prevDisp = 0;
+// 				state.controlYaw = 90;
+// 			}
+// 		}
+// 		prevTime = get_time_us();
+// }
 
 void yawControl() {
-		uint16_t displacement;
-		if (prevTime == 0){
-			displacement = 0;
-		}
-		else{
-			if (abs(sr)>10){
-				displacement += (get_time_us() - prevTime) * abs(sr);
-				restoreDisp();
-			} else{
-				state.controlYaw = 90;
-			}
-		}
-		prevTime = get_time_us();
+	uint16_t yaw = state.controlYaw * 100;
+	state.controlYaw = state.pYaw * (yaw - sr);
 }
 
 void controlComponentLoop() {
@@ -102,6 +111,3 @@ void manualControlBackup()
 
 	update_motors();
 }
-
-
-
