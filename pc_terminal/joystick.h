@@ -125,4 +125,7 @@ struct JS_DATA_SAVE_TYPE {
 	struct JS_DATA_TYPE JS_CORR;
 };
 
+void openJoystic();
+void checkJoystic(struct pcState *pcState);
+
 #endif /* _LINUX_JOYSTICK_H */

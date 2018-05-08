@@ -1,2 +1,0 @@
-System time: 0 | Packet number: 0 | Type: 2 | Mode: 0 | Battery: 2 | Roll: 0 | Pitch: 0 | Height: 0
-System time: 0 | Packet number: 2 | Type: 2 | Mode: 0 | Battery: 2 | Roll: 6 | Pitch: 242 | Height: 0

@@ -94,6 +94,7 @@ void run_filters_and_control()
 
 void manualControlBackup()
 {
+	uint8_t setMotors = 0;
 	int32_t adjust = 500, b = 1, d = 1;
 	int32_t aeSQ[4];
 	int32_t Z = state.controlLift;
@@ -106,8 +107,13 @@ void manualControlBackup()
 	aeSQ[1] = Z/(4*b) - L/(2*b) + N/(4*d);
 	aeSQ[2] = Z/(4*b) - M/(2*b) - N/(4*d);
 	aeSQ[3] = Z/(4*b) + L/(2*b) + N/(4*d);
-	for (int i=0; i<4; i++)
-		ae[i] = root(aeSQ[i], 2);
 
-	update_motors();
+
+	for (int i = 0; i < 4; i++){
+		if (aeSQ[i] < 0)
+			setMotors = 1;
+		ae[i] = root(aeSQ[i], 2);
+	}
+	if (setMotors == 0)
+		update_motors();
 }
