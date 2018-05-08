@@ -16,6 +16,9 @@ void packetComponentLoop() {
 			case 0x05:
 				parsePacketSetMode();
 				break;
+			case 0x09:
+				parsePacketSetP();
+				break;
 			default:
 				state.packetError = 1;
 				break;
@@ -53,8 +56,16 @@ void parsePacketSetControl() {
  */
 void parsePacketSetMode() {
 	uint8_t mode = state.currentPacket[5];
-	// TODO: processing here ?
 	state.nextMode = mode;
+}
+/*
+ *
+ * @author Joseph Verburg
+ */
+void parsePacketSetP() {
+	state.pRoll = state.currentPacket[5] << 8 | state.currentPacket[6];
+	state.pPitch = state.currentPacket[7] << 8 | state.currentPacket[8];
+	state.pYaw = state.currentPacket[9] << 8 | state.currentPacket[10];
 }
 
 /*

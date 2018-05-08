@@ -60,6 +60,10 @@ int main(void)
 	state.sendAck = false;
 	state.packetError = 0;
 	
+	state.pRoll = 1;
+	state.pPitch = 1;
+	state.pYaw = 1;
+
 	systemDone = false;
 	appClock = 0;
 

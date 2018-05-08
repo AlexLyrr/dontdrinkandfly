@@ -168,6 +168,7 @@ void writePacket(uint8_t b0, uint8_t b1, uint8_t b2, uint8_t b3, uint8_t b4, uin
 void parsePacketInit();
 void parsePacketSetControl();
 void parsePacketSetMode();
+void parsePacketSetP();
 
 void writeDroneStatus();
 void writeError(uint8_t errorCode);
