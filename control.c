@@ -78,7 +78,7 @@ void manualControlBackup()
 {
 	int32_t adjust = 500, b = 1, d = 1;
 	int32_t aeSQ[4];
-	int32_t Z = state.controlLift*adjust;
+	int32_t Z = state.controlLift;
 	int32_t L = state.controlPitch - 90;
 	int32_t M = state.controlRoll - 90;
 	int32_t N = state.controlYaw - 90;
