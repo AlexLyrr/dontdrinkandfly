@@ -64,6 +64,12 @@ int main(void)
 	state.pPitch = 1;
 	state.pYaw = 1;
 
+	state.calibrated = false;
+	state.calibratePhiOffset = 0;
+	state.calibrateThetaOffset = 0;
+	state.calibratePsiOffset = 0;
+
+
 	systemDone = false;
 	appClock = 0;
 
@@ -91,7 +97,12 @@ int main(void)
 					writeMotorStatus(); // TODO: move to the end of the control loop
 				}
 				break;
-			case 3: // Manual Yaw
+			case 3: // Calibration
+				if (state.calibrated) {
+					state.nextMode = 0;
+				}
+				break;
+			case 4: // Manual Yaw
 
 				break;
 		}
@@ -114,6 +125,10 @@ int main(void)
 				switch(state.currentMode) {
 					case 1: 
 						break;
+					case 3:
+						state.calibrated = false; // reset flag
+						state.currentMode = state.nextMode;
+						break;
 					default:
 						state.currentMode = state.nextMode;
 						break;
@@ -126,18 +141,18 @@ int main(void)
 				state.sendStatus = true;
 			}
 
-			// printf("%10ld | ", get_time_us());
-			// printf("%3d %3d %3d %3d | ",ae[0],ae[1],ae[2],ae[3]);
-			// printf("%6d %6d %6d | ", phi, theta, psi);
-			// printf("%6d %6d %6d | ", sp, sq, sr);
-			// printf("%4d | %4ld | %6ld \n", bat_volt, temperature, pressure);
-
 			clear_timer_flag();
 			appClock++;
 		}
 
 		if (check_sensor_int_flag()) {
 			get_dmp_data();
+			if (state.currentMode == 3 && !state.calibrated) { // Calibrate mode
+				state.calibratePhiOffset = phi;
+				state.calibrateThetaOffset = theta;
+				state.calibratePsiOffset = psi;
+				state.calibrated = true;
+			}
 			controlComponentLoop();
 		}
 

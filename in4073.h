@@ -141,6 +141,11 @@ typedef struct {
 	uint16_t pPitch;
 	uint16_t pYaw;
 
+	bool calibrated;
+	int16_t calibratePhiOffset;
+	int16_t calibrateThetaOffset;
+	int16_t calibratePsiOffset;
+
 	bool controlChanged;
 	uint8_t controlRoll;
 	uint8_t controlPitch;
