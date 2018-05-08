@@ -12,9 +12,16 @@
 
 #include "in4073.h"
 uint32_t prevTime = 0;
+uint16_t prevDisp = 0;
 
 void restoreDisp(){
-	// TODO
+	if (displacement - prevDisp > 0 && sr > 0){
+		state.controlYaw = 45;
+	} else if (displacement - prevDisp > 0 && sr < 0) {
+		state.controlYaw = 135;
+	}
+
+	prevDisp = displacement;
 }
 
 void yawControl() {
@@ -23,11 +30,13 @@ void yawControl() {
 			displacement = 0;
 		}
 		else{
-			if (sr > 10 || sr < -10){
-				displacement += (get_time_us() - prevTime) * sr;
+			if (abs(sr)>10){
+				displacement += (get_time_us() - prevTime) * abs(sr);
+				restoreDisp();
+			} else{
+				state.controlYaw = 90;
 			}
 		}
-		restoreDisp();
 		prevTime = get_time_us();
 }
 
