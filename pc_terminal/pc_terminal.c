@@ -13,7 +13,7 @@
 #include <string.h>
 #include <inttypes.h>
 #include <time.h>
-#include <stdbool.h> 
+#include <stdbool.h>
 #include <stdlib.h>
 #include "pc_terminal.h"
 #include "pcqueue.h"
@@ -121,7 +121,7 @@ void rs232_open(void)
   	int result;
   	struct termios	tty;
 
-    fd_RS232 = open("/dev/cu.usbserial-DN00P2UG", O_RDWR | O_NOCTTY);  // Hardcode your serial port here, or request it as an argument at runtime
+    fd_RS232 = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY);  // Hardcode your serial port here, or request it as an argument at runtime
 
 	assert(fd_RS232>=0);
 
@@ -243,16 +243,16 @@ void resetPcState(struct pcState *pcState){
 }
 
 
-// @Author: George Giannakaras 
-void initPcState(struct pcState *pcState){ 
-  pcState->liftValue = 0; 
-  pcState->rollValue = 90; 
-  pcState->pitchValue = 90; 
-  pcState->yawValue = 90; 
+// @Author: George Giannakaras
+void initPcState(struct pcState *pcState){
+  pcState->liftValue = 0;
+  pcState->rollValue = 90;
+  pcState->pitchValue = 90;
+  pcState->yawValue = 90;
   pcState->PValue = 0;
   pcState->P1Value = 0;
   pcState->P2Value = 0;
-	
+
   //JOYSTIC
   pcState->jThrottleValue = 0;
   pcState->jRollValue = 0;
@@ -262,11 +262,11 @@ void initPcState(struct pcState *pcState){
   // Probably initialization of keyboard and joystic values have to be switched
 
   //TOTAL
-  pcState->tLiftValue = 0; 
-  pcState->tRollValue = 90; 
-  pcState->tPitchValue = 90; 
-  pcState->tYawValue = 90; 
-} 
+  pcState->tLiftValue = 0;
+  pcState->tRollValue = 90;
+  pcState->tPitchValue = 90;
+  pcState->tYawValue = 90;
+}
 
 // @Author: Alex Lyrakis
 void checkInput(char c, struct pcState *pcState)
@@ -286,7 +286,7 @@ void checkInput(char c, struct pcState *pcState)
 							pcState->upPressed = true;
 							pcState->pitchValue -= 1;
 						}
-							
+
 						break;
 					case 'B':
 						pcState->escPressed = false;
@@ -294,7 +294,7 @@ void checkInput(char c, struct pcState *pcState)
 							pcState->downPressed = true;
 							pcState->pitchValue += 1;
 						}
-							
+
 						break;
 					case 'C':
 						pcState->escPressed = false;
@@ -302,7 +302,7 @@ void checkInput(char c, struct pcState *pcState)
 							pcState->rightPressed = true;
 							pcState->rollValue -= 1;
 						}
-							
+
 						break;
 					case 'D':
 						pcState->escPressed = false;
@@ -310,7 +310,7 @@ void checkInput(char c, struct pcState *pcState)
 							pcState->leftPressed = true;
 							pcState->rollValue += 1;
 						}
-						break;	
+						break;
 				}
 			}
 			break;
@@ -378,7 +378,7 @@ void checkInput(char c, struct pcState *pcState)
 				pcState->uPressed = true;
 				pcState->PValue += 10;
 			}
-				
+
 			break;
 		case 'j':
 			if (pcState->PValue > 10){
@@ -415,12 +415,12 @@ void checkInput(char c, struct pcState *pcState)
 
 // @Author Alex Lyrakis
 bool setModeAttempt(struct pcState *pcState){
-	return (pcState->n0Pressed || pcState->n1Pressed || pcState->n2Pressed || pcState->n3Pressed || pcState->n4Pressed || pcState->n5Pressed 
+	return (pcState->n0Pressed || pcState->n1Pressed || pcState->n2Pressed || pcState->n3Pressed || pcState->n4Pressed || pcState->n5Pressed
 		|| pcState->n6Pressed || pcState->n7Pressed || pcState->n8Pressed);
 }
 
 bool setControlAttempt(struct pcState *pcState){
-	return (pcState->escPressed || pcState->aPressed || pcState->zPressed || pcState->qPressed || pcState->wPressed || pcState->upPressed || pcState->downPressed || 
+	return (pcState->escPressed || pcState->aPressed || pcState->zPressed || pcState->qPressed || pcState->wPressed || pcState->upPressed || pcState->downPressed ||
 		pcState->leftPressed || pcState->rightPressed || pcState->qPressed || pcState->wPressed);
 }
 
@@ -429,11 +429,11 @@ bool setPAttempt(struct pcState *pcState){
 }
 
 bool sthPressed(struct pcState *pcState){
-	return (pcState->n0Pressed || pcState->n1Pressed || pcState->n2Pressed || pcState->n3Pressed || pcState->n4Pressed || pcState->n5Pressed 
+	return (pcState->n0Pressed || pcState->n1Pressed || pcState->n2Pressed || pcState->n3Pressed || pcState->n4Pressed || pcState->n5Pressed
 				|| pcState->n6Pressed || pcState->n7Pressed || pcState->n8Pressed || pcState->aPressed || pcState->zPressed || pcState->qPressed ||
-				 pcState->wPressed || pcState->uPressed || pcState->jPressed || pcState->iPressed || pcState->kkPressed || pcState->oPressed || 
+				 pcState->wPressed || pcState->uPressed || pcState->jPressed || pcState->iPressed || pcState->kkPressed || pcState->oPressed ||
 				 pcState->lPressed || pcState->leftPressed || pcState->rightPressed || pcState->upPressed || pcState->downPressed || pcState->escPressed ||
-				 pcState->jThrottleUp || pcState->jThrottleDown || pcState->jLeft || pcState->jRight || pcState->jForward || pcState->jBackward || 
+				 pcState->jThrottleUp || pcState->jThrottleDown || pcState->jLeft || pcState->jRight || pcState->jForward || pcState->jBackward ||
 				 pcState->jTwistClockwise || pcState->jTwistCounterClockwise || pcState->jFire);
 }
 
@@ -475,9 +475,9 @@ void setPacket(struct pcState *pcState, SRPacket *sPacket){
 	// Set crc
 	sPacket->crc = 0x00;
 	sPacket->crc = crc8_table[sPacket->crc ^ ((uint8_t) (sPacket->fcs >> 8))];
-	sPacket->crc = crc8_table[sPacket->crc ^ ((uint8_t) (sPacket->fcs & 0xFF))];	
+	sPacket->crc = crc8_table[sPacket->crc ^ ((uint8_t) (sPacket->fcs & 0xFF))];
 	for (int i=0; i<10; i++) {
-		sPacket->crc = crc8_table[sPacket->crc ^ sPacket->payload[i]];		
+		sPacket->crc = crc8_table[sPacket->crc ^ sPacket->payload[i]];
 	}
 	// Increase packet counter
 	if (sPacketCounter == 0xFFFF)
@@ -495,7 +495,7 @@ void sendPacket(SRPacket sPacket){
 	for (int i=0; i<10; i++){
 		rs232_putchar(sPacket.payload[i]);
 	}
-	rs232_putchar(sPacket.crc);	
+	rs232_putchar(sPacket.crc);
 }
 
 //@Author George Giannakaras
@@ -574,9 +574,9 @@ void logReceivePacket(SRPacket *rPacket){
 
 	switch(rPacket->payload[0]){
 		case 2:
-			printf("System time: %hhu | Packet number: %hu | Type: %hhu | Mode: %hhu | Battery: %hhu | Roll: %hhu | Pitch: %hhu | Height: %hhu\n", 
+			printf("System time: %hhu | Packet number: %hu | Type: %hhu | Mode: %hhu | Battery: %hhu | Roll: %hhu | Pitch: %hhu | Height: %hhu\n",
 				rPacket->payload[6], rPacket->fcs, rPacket->payload[0], rPacket->payload[1], rPacket->payload[2], rPacket->payload[3], rPacket->payload[4], rPacket->payload[5]);
-			fprintf(Rfile, "System time: %hu | Packet number: %hu | Type: %hhu | Mode: %hu | Battery: %hu | Roll: %hu | Pitch: %hu | Height: %hu\n", 
+			fprintf(Rfile, "System time: %hu | Packet number: %hu | Type: %hhu | Mode: %hu | Battery: %hu | Roll: %hu | Pitch: %hu | Height: %hu\n",
 				rPacket->payload[6], rPacket->fcs, rPacket->payload[0], rPacket->payload[1], rPacket->payload[2], rPacket->payload[3], rPacket->payload[4], rPacket->payload[5]);
 			break;
 		case 7:
@@ -640,7 +640,7 @@ int main(int argc, char **argv)
 	SRPacket rPacket;
 	bool bufferCleared = false;
 	char c;
-	clock_t timeLastPacket = clock(); 
+	clock_t timeLastPacket = clock();
 
 	term_puts("\nTerminal program - Embedded Real-Time Systems\n");
 
@@ -655,7 +655,7 @@ int main(int argc, char **argv)
 
 	/* discard any incoming text
 	 */
-	term_puts("Empty usb buffer\n");	
+	term_puts("Empty usb buffer\n");
 	while ((c = rs232_getchar_nb()) != -1)
 		fputc(c,stderr);
 
@@ -679,7 +679,7 @@ int main(int argc, char **argv)
 		updatePcState(pcState);
 
 		// Read from fd_RS232
-		if ((c = rs232_getchar_nb()) != -1){	 
+		if ((c = rs232_getchar_nb()) != -1){
 			if(c == 0x13){
 				bufferCleared = true;
 			}
@@ -696,7 +696,7 @@ int main(int argc, char **argv)
 		{
 			//TBD: Based on our pcState and protocol we have to put a sequence of bytes using rs232_putchar(c);
 			//		After we have to reset the pcState.
-			if (sthPressed(pcState) || pcState->jChanged){		
+			if (sthPressed(pcState) || pcState->jChanged){
 					setPacket(pcState, &sPacket);
 					sendPacket(sPacket);
 					logSendPacket(sPacket);
@@ -715,4 +715,3 @@ int main(int argc, char **argv)
 
 	return 0;
 }
-

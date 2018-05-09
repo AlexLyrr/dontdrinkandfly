@@ -45,7 +45,7 @@ int main(void)
 	timers_init();
 	adc_init();
 	twi_init();
-	imu_init(true, 100);	
+	imu_init(true, 100);
 	baro_init();
 	spi_flash_init();
 	ble_init();
@@ -54,12 +54,12 @@ int main(void)
 	state.nextMode = 0;
 
 	state.controlChanged = false;
-	
+
 	state.hasPacket = false;
 	state.sendStatus = false;
 	state.sendAck = false;
 	state.packetError = 0;
-	
+
 	state.pRoll = 1;
 	state.pPitch = 1;
 	state.pYaw = 1;
@@ -115,7 +115,7 @@ int main(void)
 				nrf_gpio_pin_toggle(BLUE);
 			}
 			if (appClock%1000 == 0) {
-				state.sendStatus = true;				
+				state.sendStatus = true;
 			}
 			if (appClock%5 == 0) {
 				adc_request_sample();
@@ -123,7 +123,9 @@ int main(void)
 			}
 			if (state.nextMode != state.currentMode) {
 				switch(state.currentMode) {
-					case 1: 
+					case 1:
+						state.panicFinished = appClock + (5000 / TIMER_PERIOD);
+						state.currentMode = state.nextMode;
 						break;
 					case 3:
 						state.calibrated = false; // reset flag
@@ -167,7 +169,7 @@ int main(void)
 			state.sendStatus = false;
 			writeDroneStatus();
 		}
-	}	
+	}
 
 	printf("\n\t Goodbye \n\n");
 	nrf_delay_ms(100);
