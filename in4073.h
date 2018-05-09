@@ -33,6 +33,7 @@
 // Control
 int16_t motor[4], ae[4];
 void run_filters_and_control();
+void yawControl();
 
 // Timers
 #define TIMER_PERIOD	10 //50ms=20Hz (MAX 23bit, 4.6h)

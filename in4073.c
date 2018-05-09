@@ -103,7 +103,12 @@ int main(void)
 				}
 				break;
 			case 4: // Manual Yaw
-
+				if (state.controlChanged) {
+					yawControl();
+					run_filters_and_control();
+					state.controlChanged = false;
+					writeMotorStatus();
+				}
 				break;
 		}
 
