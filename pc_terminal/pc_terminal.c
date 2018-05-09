@@ -217,6 +217,12 @@ void resetPcState(struct pcState *pcState){
 	pcState->n6Pressed = false;
 	pcState->n7Pressed = false;
 	pcState->n8Pressed = false;
+	
+	pcState->upPressed = false;
+	pcState->downPressed = false;
+	pcState->leftPressed = false;
+	pcState->rightPressed = false;
+	
 	pcState->aPressed = false;
 	pcState->zPressed = false;
 	pcState->qPressed = false;
@@ -447,17 +453,20 @@ void setPacket(struct pcState *pcState, SRPacket *sPacket){
 		sPacket->payload[0] = 5;
 	if (setControlAttempt(pcState) || pcState->jChanged)
 		sPacket->payload[0] = 3;
+	if (setPAttempt(pcState) || pcState->jChanged)
+		sPacket->payload[0] = 9;
+	
 	// Set payload
 	switch (sPacket->payload[0]) {
 		case 5:
 			//here we must send the packet
 			sPacket->payload[1] = pcState->mode;
-			for (int i = 2; i < 10; i++) {
+			for (int i = 2; i < PACKET_BODY_LENGTH; i++){
 				sPacket->payload[i] = 0;
 			}
 			break;
 		case 3:
-			if (pcState->escPressed) {
+			if (pcState->escPressed){
 				sPacket->payload[1] = 0x80;	// abort byte
 			} else {
 				sPacket->payload[1] = 0;  // else zero
@@ -467,10 +476,20 @@ void setPacket(struct pcState *pcState, SRPacket *sPacket){
 			sPacket->payload[4] = pcState->tYawValue;
 			sPacket->payload[5] =(uint8_t) (pcState->tLiftValue >> 8);
 			sPacket->payload[6] =(uint8_t) (pcState->tLiftValue & 0xFF);
-			for (int i=7; i<10; i++) {
+			for (int i = 7; i < PACKET_BODY_LENGTH; i++){
 				sPacket->payload[1] = 0; // null bytes
 			}
 			break;
+		case 9:
+			sPacket->payload[2] = (pcState->P1Value >> 8);
+			sPacket->payload[3] = (pcState->P1Value & 0xFF);
+			sPacket->payload[4] = (pcState->P2Value >> 8);
+			sPacket->payload[5] = (pcState->P2Value & 0xFF);
+			sPacket->payload[6] = (pcState->PValue >> 8);
+			sPacket->payload[7] = (pcState->PValue & 0xFF);
+			for (int i = 8; i < PACKET_BODY_LENGTH; i++){
+				sPacket->payload[1] = 0; // null bytes
+			}
 	}
 	// Set crc
 	sPacket->crc = 0x00;
