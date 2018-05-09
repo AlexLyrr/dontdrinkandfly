@@ -42,7 +42,7 @@ void checkJoystick(struct pcState *pcState){
         break;
       case JS_EVENT_AXIS:
 				jTemp += 32000;
-        jValue = jTemp/356;
+        jValue = jTemp/355;
         switch(js.number) {
           case 0:
             pcState->jRollValue = 180 - jValue;
