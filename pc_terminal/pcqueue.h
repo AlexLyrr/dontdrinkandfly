@@ -10,9 +10,9 @@ typedef struct {
 	uint16_t count;
 } pcqueue;
 void init_queuepc(pcqueue *q);
-void enqueuepc(pcqueue *q, char x);
-char dequeuepc(pcqueue *q);
-char queuePeekpc(pcqueue *q, uint16_t offset);
+void enqueuepc(pcqueue *q, uint8_t x);
+uint8_t dequeuepc(pcqueue *q);
+uint8_t queuePeekpc(pcqueue *q, uint16_t offset);
 
 pcqueue pcReQueue;
 

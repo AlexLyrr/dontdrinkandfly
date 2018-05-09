@@ -121,7 +121,7 @@ void rs232_open(void)
   	int result;
   	struct termios	tty;
 
-    fd_RS232 = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY);  // Hardcode your serial port here, or request it as an argument at runtime
+    fd_RS232 = open("/dev/cu.usbserial-DN00P2UG", O_RDWR | O_NOCTTY);  // Hardcode your serial port here, or request it as an argument at runtime
 
 	assert(fd_RS232>=0);
 
@@ -506,7 +506,7 @@ void receivePacket(SRPacket *rPacket){
 	while(pcReQueue.count >= PACKET_LENGTH && foundPacket == false){
 		if(queuePeekpc(&pcReQueue, 0) == PREAMPLE_B1 && queuePeekpc(&pcReQueue, 1) == PREAMPLE_B2){
 			for(uint16_t j = 2; j < PACKET_LENGTH - 1; j++){
-				crc = crc8_table[crc ^ ((uint8_t) queuePeekpc(&pcReQueue, j))];
+				crc = crc8_table[crc ^ queuePeekpc(&pcReQueue, j)];
 			}
 			crcTemp = queuePeekpc(&pcReQueue, PACKET_LENGTH - 1);
 			if(crc == crcTemp){
@@ -681,11 +681,12 @@ int main(int argc, char **argv)
 		// Read from fd_RS232
 		if ((c = rs232_getchar_nb()) != -1){	 
 			if(c == 0x13){
-					bufferCleared = true;
+				bufferCleared = true;
 			}
-			if(bufferCleared)
-				enqueuepc(&pcReQueue, c);
-			if(pcReQueue.count >= PACKET_LENGTH){
+			if(bufferCleared) {
+				enqueuepc(&pcReQueue, (uint8_t) c);
+			}
+			if(pcReQueue.count >= PACKET_LENGTH) {
 				receivePacket(&rPacket);
 			}
 			term_putchar(c);
