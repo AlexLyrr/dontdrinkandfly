@@ -224,7 +224,7 @@ cleanobj:
 
 
 doupload:
-	dfu_serial/./serial_dfu.py -p /dev/tty.usbserial-DN00P2UG  _build/in4073.bin
+	dfu_serial/./serial_dfu.py  _build/in4073.bin
 
 upload: default doupload
 
