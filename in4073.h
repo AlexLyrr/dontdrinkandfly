@@ -182,5 +182,5 @@ void writeAck(uint16_t packetNumber);
 
 int root(int a, int n);
 int iPow(int a, int e);
-
+void manualControlBackup();
 #endif // IN4073_H__

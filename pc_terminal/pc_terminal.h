@@ -42,12 +42,15 @@ struct pcState{
 
 	bool uPressed;	//yaw control P up
 	bool jPressed;	//yaw control P down
+	uint16_t PValue;
 
 	bool iPressed;	//roll/pitch control P1 up
 	bool kkPressed;	//roll/pitch control P1 down
+	uint16_t P1Value;
 
 	bool oPressed;	//roll/pitch control P2 up
 	bool lPressed;	//roll/pitch control P2 down
+	uint16_t P2Value;
 
 	//JOYSTICK
 	bool jChanged;
