@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdbool.h>
 
 
 #ifndef PC_TERMINAL_H_
@@ -9,6 +10,7 @@
 #define PACKET_BODY_LENGTH 10
 #define PACKET_LENGTH (PACKET_BODY_LENGTH + 5)
 
+int fd_joystick;
 // @Author: George Giannakaras
 struct pcState{
 	//KEYBOARD
@@ -89,7 +91,6 @@ FILE *Sfile;
 SRPacket sPacketBuffer[65535];
 bool receivedACK[65535];
 
-void getJoystick();
 void logReceivePacket(SRPacket *rPacket);
 
 #endif
