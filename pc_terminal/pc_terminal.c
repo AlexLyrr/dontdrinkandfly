@@ -250,8 +250,8 @@ void initPcState(struct pcState *pcState){
   pcState->pitchValue = 90; 
   pcState->yawValue = 90; 
   pcState->PValue = 0;
-  pcState->controlRollValue = 0;
-  pcState->controlPitchValue = 0;
+  pcState->P1Value = 0;
+  pcState->P2Value = 0;
 	
   //JOYSTIC
   pcState->jThrottleValue = 0;
@@ -376,38 +376,38 @@ void checkInput(char c, struct pcState *pcState)
 		case 'u':
 			if (pcState->PValue < 1000){
 				pcState->uPressed = true;
-				PValue += 10;
+				pcState->PValue += 10;
 			}
 				
 			break;
 		case 'j':
 			if (pcState->PValue > 10){
 				pcState->jPressed = true;
-				PValue -= 10;
+				pcState->PValue -= 10;
 			}
 			break;
 		case 'i':
 			if (pcState->P1Value < 1000){
 				pcState->iPressed = true;
-				PValue += 10;
+				pcState->P1Value += 10;
 			}
 			break;
 		case 'k':
 			if (pcState->P1Value > 10){
 				pcState->kkPressed = true;
-				PValue -= 10;
+				pcState->P1Value -= 10;
 			}
 			break;
 		case 'o':
 			if (pcState->P2Value < 1000){
 				pcState->oPressed = true;
-				PValue += 10;
+				pcState->P2Value += 10;
 			}
 			break;
 		case 'l':
 			if (pcState->P2Value > 10){
 				pcState->lPressed = true;
-				PValue -= 10;
+				pcState->P2Value -= 10;
 			}
 			break;
 	}
