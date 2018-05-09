@@ -138,6 +138,7 @@ typedef struct {
 	uint8_t motor3Offset;
 	uint8_t motor4Offset;
 
+	bool pChanged;
 	uint16_t pRoll;
 	uint16_t pPitch;
 	uint16_t pYaw;

@@ -60,6 +60,7 @@ int main(void)
 	state.sendAck = false;
 	state.packetError = 0;
 
+	state.pChanged = false;
 	state.pRoll = 1;
 	state.pPitch = 1;
 	state.pYaw = 1;
@@ -102,12 +103,17 @@ int main(void)
 					state.nextMode = 0;
 				}
 				break;
-			case 4: // Manual Yaw
-				if (state.controlChanged) {
+			case 4: // Manual Yaw	
+				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
 					yawControl();
 					run_filters_and_control();
-					state.controlChanged = false;
 					writeMotorStatus();
+				}
+				if (state.controlChanged) { // We don't need to do anything extra yet when this happens
+					state.controlChanged = false;
+				}
+				if (state.pChanged) { // We don't need to do anything extra yet when this happens
+					state.pChanged = false;
 				}
 				break;
 		}

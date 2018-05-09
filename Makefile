@@ -222,8 +222,11 @@ clean:
 cleanobj:
 	$(RM) $(BUILD_DIRECTORIES)/*.o
 
-upload: default
-	dfu_serial/./serial_dfu.py  _build/in4073.bin
+
+doupload:
+	dfu_serial/./serial_dfu.py -p /dev/tty.usbserial-DN00P2UG  _build/in4073.bin
+
+upload: default doupload
 
 pc: 
 	cd pc_terminal/; make
@@ -231,6 +234,5 @@ pc:
 pc-run: 
 	cd pc_terminal/; make run
 	
-upload-run: default pc
-	dfu_serial/./serial_dfu.py  _build/in4073.bin
+upload-run: default pc doupload
 	cd pc_terminal/; make run
