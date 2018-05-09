@@ -61,6 +61,7 @@ int main(void)
 	state.hasPacket = false;
 	state.sendStatus = false;
 	state.sendAck = false;
+	state.sendMotorStatus = false;
 	state.packetError = 0;
 
 	state.pChanged = false;
@@ -73,7 +74,7 @@ int main(void)
 	state.calibrateThetaOffset = 0;
 	state.calibratePsiOffset = 0;
 
-
+	int32_t panicStep = 0;
 	systemDone = false;
 	appClock = 0;
 
@@ -89,10 +90,14 @@ int main(void)
 				motor[3] = 0;
 				break;
 			case 1: // Panic!
-				motor[0] = 500;
-				motor[1] = 500;
-				motor[2] = 500;
-				motor[3] = 500;
+				panicStep = state.panicFinished - appClock;
+				if (panicStep < 0) {
+						panicStep = 0;
+				}
+				motor[0] = (uint16_t)(state.panicMotor[0] * panicStep / PANIC_STEPS);
+				motor[1] = (uint16_t)(state.panicMotor[1] * panicStep / PANIC_STEPS);
+				motor[2] = (uint16_t)(state.panicMotor[2] * panicStep / PANIC_STEPS);
+				motor[3] = (uint16_t)(state.panicMotor[3] * panicStep / PANIC_STEPS);
 				break;
 			case 2: // Manual
 				if (state.controlChanged) {
@@ -152,7 +157,10 @@ int main(void)
 					default:
 						switch(state.nextMode) {
 							case 1:
-								state.panicFinished = appClock + (5000 / TIMER_PERIOD);
+								state.panicFinished = appClock + PANIC_STEPS;
+								for(uint8_t i = 0; i < 4; i += 1) {
+										state.panicMotor[i] = motor[i];
+								}
 								break;
 						}
 						state.currentMode = state.nextMode;
@@ -160,10 +168,16 @@ int main(void)
 				}
 				state.sendStatus = true;
 			}
-			if (state.currentMode == 1 && state.panicFinished == appClock) {
-				state.currentMode = 0;
-				systemDone = true;
-				state.sendStatus = true;
+			if (state.currentMode == 1) {
+				if (appClock%5 == 0) {
+					state.sendStatus = true;
+					state.sendMotorStatus = true;
+				}
+				if (state.panicFinished == appClock) {
+					state.currentMode = 0;
+					systemDone = true;
+					state.sendStatus = true;
+				}
 			}
 
 			clear_timer_flag();
@@ -191,6 +205,9 @@ int main(void)
 		} else if (state.sendStatus) {
 			state.sendStatus = false;
 			writeDroneStatus();
+		} else if (state.sendMotorStatus) {
+			state.sendMotorStatus = false;
+			writeMotorStatus();
 		}
 	}
 

@@ -19,6 +19,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <assert.h>
+#include <float.h>
 
 #include "pc_terminal.h"
 #include "pcqueue.h"
@@ -472,9 +473,9 @@ void setPacket(struct pcState *pcState, SRPacket *sPacket){
 			} else {
 				sPacket->payload[1] = 0;  // else zero
 			}
-			sPacket->payload[2] = pcState->tRollValue;
-			sPacket->payload[3] = pcState->tPitchValue;
-			sPacket->payload[4] = pcState->tYawValue;
+			sPacket->payload[2] = (uint8_t) pcState->tRollValue;
+			sPacket->payload[3] = (uint8_t) pcState->tPitchValue;
+			sPacket->payload[4] = (uint8_t) pcState->tYawValue;
 			sPacket->payload[5] =(uint8_t) (pcState->tLiftValue >> 8);
 			sPacket->payload[6] =(uint8_t) (pcState->tLiftValue & 0xFF);
 			for (int i = 7; i < PACKET_BODY_LENGTH; i++){
@@ -591,11 +592,12 @@ void initLogFiles(){
 //@Author George Giannakaras
 void logReceivePacket(SRPacket *rPacket){
 	uint16_t motor[4];
-
+  float battery;
 	switch(rPacket->payload[0]){
 		case 2:
-			printf("System time: %hhu | Packet number: %hu | Type: %hhu | Mode: %hhu | Battery: %hhu | Roll: %hhu | Pitch: %hhu | Height: %hhu\n",
-				rPacket->payload[6], rPacket->fcs, rPacket->payload[0], rPacket->payload[1], rPacket->payload[2], rPacket->payload[3], rPacket->payload[4], rPacket->payload[5]);
+      battery = (((float) rPacket->payload[2]) * 7 / 100) + 1.2;
+			printf("System time: %hhu | Packet number: %hu | Type: %hhu | Mode: %hhu | Battery: %f | Roll: %hhu | Pitch: %hhu | Height: %hhu\n",
+				rPacket->payload[6], rPacket->fcs, rPacket->payload[0], rPacket->payload[1], battery, rPacket->payload[3], rPacket->payload[4], rPacket->payload[5]);
 			fprintf(Rfile, "System time: %hu | Packet number: %hu | Type: %hhu | Mode: %hu | Battery: %hu | Roll: %hu | Pitch: %hu | Height: %hu\n",
 				rPacket->payload[6], rPacket->fcs, rPacket->payload[0], rPacket->payload[1], rPacket->payload[2], rPacket->payload[3], rPacket->payload[4], rPacket->payload[5]);
 			break;
@@ -626,10 +628,26 @@ void logSendPacket(SRPacket sPacket){
 }
 
 void updatePcState(struct pcState *pcState){
+
 	pcState->tLiftValue = pcState->liftValue + pcState->jThrottleValue;
 	pcState->tRollValue = pcState->rollValue + pcState->jRollValue - 90;
 	pcState->tPitchValue = pcState->pitchValue + pcState->jPitchValue - 90;
 	pcState->tYawValue = pcState->yawValue + pcState->jYawValue - 90;
+  if (pcState->tRollValue < 0) {
+    pcState->tRollValue = 0;
+  } else if (pcState->tRollValue > 180) {
+    pcState->tRollValue = 180;
+  }
+  if (pcState->tPitchValue < 0) {
+    pcState->tPitchValue = 0;
+  } else if (pcState->tPitchValue > 180) {
+    pcState->tPitchValue = 180;
+  }
+  if (pcState->tYawValue < 0) {
+    pcState->tYawValue = 0;
+  } else if (pcState->tYawValue > 180) {
+    pcState->tYawValue = 180;
+  }
 	if (pcState->tLiftValue > 1000)
 		pcState->tLiftValue = 1000;
 	if (pcState->tRollValue > 180)

@@ -115,6 +115,7 @@ void ble_send(void);
 	State
 	@author Joseph Verburg
 *******/
+#define PANIC_STEPS (5000 / TIMER_PERIOD)
 #define PACKET_BODY_LENGTH 10
 #define PACKET_LENGTH (PACKET_BODY_LENGTH + 5)
 typedef struct {
@@ -125,13 +126,16 @@ typedef struct {
 
 	bool hasPacket;
 	bool sendStatus;
+	bool sendMotorStatus;
 	uint8_t packetError;
 	uint16_t packetAck;
 	bool sendAck;
 
 	uint16_t packetNumber;
 	uint8_t currentPacket[PACKET_LENGTH];
+
 	uint16_t panicFinished; // In appClock;
+	uint32_t panicMotor[4];
 
 	uint8_t motor1Offset;
 	uint8_t motor2Offset;

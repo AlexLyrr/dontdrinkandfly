@@ -72,9 +72,9 @@ struct pcState{
 
 	//TOTAL
 	uint16_t tLiftValue;
-	uint8_t tRollValue;
-	uint8_t tPitchValue;
-	uint8_t tYawValue;
+	int16_t tRollValue;
+	int16_t tPitchValue;
+	int16_t tYawValue;
 };
 
 

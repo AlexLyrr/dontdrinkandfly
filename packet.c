@@ -79,7 +79,7 @@ void writeDroneStatus() {
 		0x0F & state.currentMode,
 
 		// Battery
-		(uint8_t) (bat_volt >> 8),
+		(uint8_t) (bat_volt),
 		// Roll / phi
 		(phi >> 8),
 		// Pitch / theta
