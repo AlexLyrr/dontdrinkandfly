@@ -52,9 +52,9 @@ typedef struct {
 	uint16_t count;
 } queue;
 void init_queue(queue *q);
-void enqueue(queue *q, char x);
-char dequeue(queue *q);
-char queuePeek(queue *q, uint16_t offset);
+void enqueue(queue *q, uint8_t x);
+uint8_t dequeue(queue *q);
+uint8_t queuePeek(queue *q, uint16_t offset);
 
 // UART
 #define RX_PIN_NUMBER  16
