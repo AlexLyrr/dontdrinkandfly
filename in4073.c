@@ -24,13 +24,16 @@
 void onAbort() {
 	switch(state.currentMode) {
 		case 0:
+			systemDone = true;
+			break;
 		case 1:
 			break;
 		default:
 			state.nextMode = 1;
-			state.panicFinished = appClock + (5000 / TIMER_PERIOD);
+			// state.panicFinished = appClock + (5000 / TIMER_PERIOD);
 			break;
 	}
+	state.sendStatus = true;
 }
 
 
@@ -103,7 +106,7 @@ int main(void)
 					state.nextMode = 0;
 				}
 				break;
-			case 4: // Manual Yaw	
+			case 4: // Manual Yaw
 				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
 					yawControl();
 					run_filters_and_control();
@@ -135,14 +138,23 @@ int main(void)
 			if (state.nextMode != state.currentMode) {
 				switch(state.currentMode) {
 					case 1:
-						state.panicFinished = appClock + (5000 / TIMER_PERIOD);
-						state.currentMode = state.nextMode;
+						state.nextMode = 1;
 						break;
 					case 3:
 						state.calibrated = false; // reset flag
 						state.currentMode = state.nextMode;
 						break;
+					case 0:
+						if (state.nextMode == 1) {
+							systemDone = true;
+							break;
+						}
 					default:
+						switch(state.nextMode) {
+							case 1:
+								state.panicFinished = appClock + (5000 / TIMER_PERIOD);
+								break;
+						}
 						state.currentMode = state.nextMode;
 						break;
 				}

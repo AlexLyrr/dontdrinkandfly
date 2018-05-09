@@ -261,9 +261,9 @@ void initPcState(struct pcState *pcState){
 
   //JOYSTIC
   pcState->jThrottleValue = 0;
-  pcState->jRollValue = 0;
-  pcState->jPitchValue = 0;
-  pcState->jYawValue = 0;
+  pcState->jRollValue = 90;
+  pcState->jPitchValue = 90;
+  pcState->jYawValue = 90;
 
   // Probably initialization of keyboard and joystic values have to be switched
 
@@ -467,7 +467,7 @@ void setPacket(struct pcState *pcState, SRPacket *sPacket){
 			}
 			break;
 		case 3:
-			if (pcState->escPressed){
+			if (pcState->escPressed || pcState->jFire){
 				sPacket->payload[1] = 0x80;	// abort byte
 			} else {
 				sPacket->payload[1] = 0;  // else zero
@@ -478,7 +478,7 @@ void setPacket(struct pcState *pcState, SRPacket *sPacket){
 			sPacket->payload[5] =(uint8_t) (pcState->tLiftValue >> 8);
 			sPacket->payload[6] =(uint8_t) (pcState->tLiftValue & 0xFF);
 			for (int i = 7; i < PACKET_BODY_LENGTH; i++){
-				sPacket->payload[1] = 0; // null bytes
+				sPacket->payload[i] = 0; // null bytes
 			}
 			break;
 		case 9:
@@ -489,7 +489,7 @@ void setPacket(struct pcState *pcState, SRPacket *sPacket){
 			sPacket->payload[6] = (pcState->PValue >> 8);
 			sPacket->payload[7] = (pcState->PValue & 0xFF);
 			for (int i = 8; i < PACKET_BODY_LENGTH; i++){
-				sPacket->payload[1] = 0; // null bytes
+				sPacket->payload[i] = 0; // null bytes
 			}
 	}
 	// Set crc
@@ -627,9 +627,9 @@ void logSendPacket(SRPacket sPacket){
 
 void updatePcState(struct pcState *pcState){
 	pcState->tLiftValue = pcState->liftValue + pcState->jThrottleValue;
-	pcState->tRollValue = pcState->rollValue + pcState->jRollValue;
-	pcState->tPitchValue = pcState->pitchValue + pcState->jPitchValue;
-	pcState->tYawValue = pcState->yawValue + pcState->jYawValue;
+	pcState->tRollValue = pcState->rollValue + pcState->jRollValue - 90;
+	pcState->tPitchValue = pcState->pitchValue + pcState->jPitchValue - 90;
+	pcState->tYawValue = pcState->yawValue + pcState->jYawValue - 90;
 	if (pcState->tLiftValue > 1000)
 		pcState->tLiftValue = 1000;
 	if (pcState->tRollValue > 180)
@@ -692,6 +692,7 @@ int main(int argc, char **argv)
 		if ((c = term_getchar_nb()) != -1)	// Read from keyboard and store in fd_RS232
 		{
 			checkInput(c, pcState);
+      term_putchar(c);
 		}
 
 		// Read from joystic and update pcState
@@ -709,7 +710,7 @@ int main(int argc, char **argv)
 			if(pcReQueue.count >= PACKET_LENGTH) {
 				receivePacket(&rPacket);
 			}
-			term_putchar(c);
+		//	term_putchar(c);
 		}
 
 		if ((clock()-timeLastPacket)> 10)

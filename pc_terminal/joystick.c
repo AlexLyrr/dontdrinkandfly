@@ -37,12 +37,12 @@ void checkJoystick(struct pcState *pcState){
     switch(js.type & ~JS_EVENT_INIT) {
       case JS_EVENT_BUTTON:
         if (js.number == 0){
-          pcState->jFire = js.value;
+          pcState->jFire = js.value == 1;
         }
         break;
       case JS_EVENT_AXIS:
 				jTemp += 32000;
-        jValue = jTemp/355;
+        jValue = jTemp/356;
         switch(js.number) {
           case 0:
             pcState->jRollValue = 180 - jValue;
@@ -54,7 +54,8 @@ void checkJoystick(struct pcState *pcState){
             pcState->jYawValue = jValue;
             break;
           case 3:
-            pcState->jThrottleValue = jTemp/64;
+            pcState->jThrottleValue = (64000-jTemp)/64;
+            break;
           default:
             perror("\nError, non defined axis as input");
             break;

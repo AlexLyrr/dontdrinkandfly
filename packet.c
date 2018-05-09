@@ -7,7 +7,7 @@ void packetComponentLoop() {
 	if (state.hasPacket) {
 		state.hasPacket = false;
 		switch(state.currentPacket[4]) {
-			case 0x01: 
+			case 0x01:
 				parsePacketInit();
 				break;
 			case 0x03:
@@ -39,7 +39,7 @@ void parsePacketInit() {
  * @author Joseph Verburg
  */
 void parsePacketSetControl() {
-	if ((state.currentPacket[5] & 0x80) == 0x80) {
+	if (state.currentPacket[5] > 0) {
 		onAbort();
 		return;
 	}
@@ -125,10 +125,10 @@ void writeMotorStatus() {
 
 		motor[1] >> 8,
 		motor[1] & 0xFF,
-		
+
 		motor[2] >> 8,
 		motor[2] & 0xFF,
-		
+
 		motor[3] >> 8,
 		motor[3] & 0xFF,
 
