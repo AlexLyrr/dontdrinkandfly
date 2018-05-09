@@ -4,7 +4,7 @@ CFLAGS = -g -Wall -lm
 EXEC = ./pc-terminal
 
 all:
-	$(CC) $(CFLAGS) pc_terminal.c pcqueue.c -o $(EXEC)
+	$(CC) $(CFLAGS) pc_terminal.c pcqueue.c joystick.c -o $(EXEC)
 
 run: all
 	$(EXEC)

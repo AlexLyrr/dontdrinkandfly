@@ -7,7 +7,7 @@
 #include "joystick.h"
 
 //void getJoystick(struct pcState *pcState)
-void openJoystic()
+void openJoystick()
 {
   /* Initializations moves to pc_terminal.c
 	int fd;
@@ -21,7 +21,7 @@ void openJoystic()
 	fcntl(fd_joystick, F_SETFL, O_NONBLOCK);
 }
 
-void checkJoystic(struct pcState *pcState){
+void checkJoystick(struct pcState *pcState){
   struct js_event js;
   uint16_t jValue;
   int32_t jTemp;
@@ -63,5 +63,3 @@ void checkJoystic(struct pcState *pcState){
     }
   }
 }
-  
-  

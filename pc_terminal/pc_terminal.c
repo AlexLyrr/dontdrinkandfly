@@ -15,8 +15,16 @@
 #include <time.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <ctype.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <assert.h>
+
 #include "pc_terminal.h"
 #include "pcqueue.h"
+#include "joystick.h"
+
+
 
 /*------------------------------------------------------------
  * console I/O
@@ -104,16 +112,8 @@ int	term_getchar()
  * 115,200 baud
  *------------------------------------------------------------
  */
-#include <termios.h>
-#include <ctype.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <assert.h>
-#include <time.h>
-
 int serial_device = 0;
-int fd_RS232, fd_joystick;
+int fd_RS232;
 
 void rs232_open(void)
 {
@@ -357,9 +357,10 @@ void checkInput(char c, struct pcState *pcState)
 			pcState->mode = 8;
 			break;
 		case 'a':
-			if (pcState->liftValue <=1000)
+			if (pcState->liftValue <=1000){
 				pcState->liftValue +=10;
 				pcState->aPressed = true;
+      }
 			break;
 		case 'z':
 			if (pcState->liftValue >10){
@@ -667,7 +668,7 @@ int main(int argc, char **argv)
 	term_puts("Initialized termios...\n");
 	rs232_open();
 	term_puts("Initialized termios...\n");
-	//openJoystic();
+	openJoystick();
 	term_puts("Initialized termios...\n");
 
 	term_puts("Type ^C to exit\n");
@@ -694,7 +695,7 @@ int main(int argc, char **argv)
 		}
 
 		// Read from joystic and update pcState
-		//checkJoystic(pcState);
+		checkJoystick(pcState);
 		updatePcState(pcState);
 
 		// Read from fd_RS232
