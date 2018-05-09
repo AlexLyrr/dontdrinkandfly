@@ -56,8 +56,8 @@ void controlComponentLoop() {
 void update_motors(void)
 {
 	for (int i = 0; i<4 ; i++){
-		if (ae[i] > 400){
-			ae[i] = 400;
+		if (ae[i] > 550){
+			ae[i] = 550;
 		}
 	}
 	motor[0] = ae[0];
@@ -79,15 +79,10 @@ void run_filters_and_control()
 	uint32_t controlRoll = adjust * state.controlRoll;
 	uint32_t controlYaw = adjust * state.controlYaw;
 	uint32_t controlLift = state.controlLift;
-	ae[0] = (((controlPitch+controlYaw)/180) * controlLift)/adjust;
-	ae[1] = (((controlRoll + (180*adjust-controlYaw))/180) * controlLift)/adjust;
-	ae[2] = ((((180*adjust - controlPitch)+controlYaw)/180) * controlLift)/adjust;
-	ae[3] = ((((180*adjust - controlRoll) + (180*adjust - controlYaw))/180) * controlLift)/adjust;
-	for (int i = 0; i<4 ; i++){
-		if (ae[i] > 1000){
-			ae[i] = 1000;
-		}
-	}
+	ae[0] = (((controlPitch + (180*adjust - controlYaw))/180) * controlLift)/adjust;
+	ae[1] = (((controlRoll + controlYaw)/180) * controlLift)/adjust;
+	ae[2] = ((((180*adjust - controlPitch) + (180*adjust - controlYaw))/180) * controlLift)/adjust;
+	ae[3] = ((((180*adjust - controlRoll) + controlYaw)/180) * controlLift)/adjust;
 
 	update_motors();
 }

@@ -103,7 +103,8 @@ int main(void)
 				if (state.controlChanged) {
 					run_filters_and_control(); // TODO: rename function
 					state.controlChanged = false;
-					writeMotorStatus(); // TODO: move to the end of the control loop
+					state.sendMotorStatus = true;
+					// writeMotorStatus(); // TODO: move to the end of the control loop
 				}
 				break;
 			case 3: // Calibration
