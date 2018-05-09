@@ -217,12 +217,12 @@ void resetPcState(struct pcState *pcState){
 	pcState->n6Pressed = false;
 	pcState->n7Pressed = false;
 	pcState->n8Pressed = false;
-	
+
 	pcState->upPressed = false;
 	pcState->downPressed = false;
 	pcState->leftPressed = false;
 	pcState->rightPressed = false;
-	
+
 	pcState->aPressed = false;
 	pcState->zPressed = false;
 	pcState->qPressed = false;
@@ -455,7 +455,7 @@ void setPacket(struct pcState *pcState, SRPacket *sPacket){
 		sPacket->payload[0] = 3;
 	if (setPAttempt(pcState) || pcState->jChanged)
 		sPacket->payload[0] = 9;
-	
+
 	// Set payload
 	switch (sPacket->payload[0]) {
 		case 5:
@@ -711,7 +711,7 @@ int main(int argc, char **argv)
 			term_putchar(c);
 		}
 
-		if ((clock()-timeLastPacket)> 500)
+		if ((clock()-timeLastPacket)> 10)
 		{
 			//TBD: Based on our pcState and protocol we have to put a sequence of bytes using rs232_putchar(c);
 			//		After we have to reset the pcState.
