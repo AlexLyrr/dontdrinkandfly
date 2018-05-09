@@ -1,8 +1,8 @@
-var SerialPort = require("serialport");
+var SerialPort = require('serialport');
 // DN00P2SZ
 
 // var port = new SerialPort("/dev/tty.usbserial-DN00P2UG", {
-var port = new SerialPort("/dev/tty.usbserial-DN00P2UG", {
+var port = new SerialPort('/dev/tty.usbserial-DN00P2UG', {
 	baudRate: 115200,
 	autoOpen: false
 });
@@ -278,84 +278,28 @@ function sendPacket(buf) {
 	}
 	packet[packet.length - 1] = crc;
 	packetNumber++;
-	console.log("write", packet);
+	console.log('write', packet);
 	port.write(packet);
 }
 
 port.open(err => {
 	if (err) {
-		console.log("Open error:", err);
+		console.log('Open error:', err);
 	}
 	setTimeout(() => {
-		console.log("Starting...");
-		sendPacket(
-			Buffer.from([
-				0x01,
-				0x00,
-				0x00,
-				0x00,
-				0x00,
-
-				0x00,
-				0x00,
-				0x00,
-				0x00,
-				0x00
-			])
-		);
+		console.log('Starting...');
+		sendPacket(Buffer.from([ 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ]));
 	}, 1e3);
 	setTimeout(() => {
-		console.log("Switching manual...");
-		sendPacket(
-			Buffer.from([
-				0x05,
-				0x02,
-				0x00,
-				0x00,
-				0x00,
-
-				0x00,
-				0x00,
-				0x00,
-				0x00,
-				0x00
-			])
-		);
+		console.log('Switching manual...');
+		sendPacket(Buffer.from([ 0x05, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ]));
 		setTimeout(() => {
-			sendPacket(
-				Buffer.from([
-					0x03,
-					0x00,
-					100,
-					90,
-					90,
-
-					1000 >> 8,
-					1000 & 0xff,
-					0x00,
-					0x00,
-					0x00
-				])
-			);
+			sendPacket(Buffer.from([ 0x03, 0x00, 100, 90, 90, 1000 >> 8, 1000 & 0xff, 0x00, 0x00, 0x00 ]));
 		}, 1e3);
 	}, 5e3);
 	setTimeout(() => {
-		console.log("Abort abort...");
-		sendPacket(
-			Buffer.from([
-				0x03,
-				0x80,
-				0x00,
-				0x00,
-				0x00,
-
-				0x00,
-				0x00,
-				0x00,
-				0x00,
-				0x00
-			])
-		);
+		console.log('Abort abort...');
+		sendPacket(Buffer.from([ 0x03, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ]));
 	}, 30e3);
 });
 
@@ -364,41 +308,33 @@ function onData(data) {
 	switch (data[4]) {
 		case 2:
 			console.log(
-				`${new Date().toString()} DroneStatus(mode=${data[5] &
-					0x0f}, bat=${data[6] << 8}, phi=${data.readInt8(7) *
-					(360 / 128)}, theta=${data.readInt8(8) *
-					(360 / 128)}, appClock=${data.readUInt16BE(11)})`
+				`${new Date().toString()} DroneStatus(mode=${data[5] & 0x0f}, bat=${data[6] << 8}, phi=${data.readInt8(
+					7
+				) *
+					(360 / 128)}, theta=${data.readInt8(8) * (360 / 128)}, appClock=${data.readUInt16BE(11)})`
 			);
 			break;
 		case 7:
-			console.log("Received error packet with code:", data[5]);
+			console.log('Received error packet with code:', data[5]);
 			break;
 		case 10:
 			console.log(
-				`${new Date().toString()} MotorStatus(1=${data.readUInt16BE(
-					5
-				)}, 2=${data.readUInt16BE(7)}, 3=${data.readUInt16BE(
-					9
-				)}, 4=${data.readUInt16BE(11)})`
+				`${new Date().toString()} MotorStatus(1=${data.readUInt16BE(5)}, 2=${data.readUInt16BE(
+					7
+				)}, 3=${data.readUInt16BE(9)}, 4=${data.readUInt16BE(11)})`
 			);
 			break;
-		// case 11:
-		// 	break;
 		case 11:
-			console.log(
-				`${new Date().toString()} Ack(packetNumber=${data.readUInt16BE(
-					5
-				)})`
-			);
+			console.log(`${new Date().toString()} Ack(packetNumber=${data.readUInt16BE(5)})`);
 			break;
 		default:
-			console.log("unknown packet type:", data[4]);
+			console.log('unknown packet type:', data[4]);
 	}
 }
 // Switches the port into "flowing mode"
-port.on("data", function(data) {
-	console.log("Received data", data.length, data.toString("ascii"));
-	appBuffer = Buffer.concat([appBuffer, data]);
+port.on('data', function(data) {
+	console.log('Received data', data.length, data.toString('ascii'));
+	appBuffer = Buffer.concat([ appBuffer, data ]);
 	if (appBuffer.length < 15) {
 		return;
 	}

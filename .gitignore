@@ -3,3 +3,5 @@ pc_terminal/pc-terminal
 pc_terminal/pc-terminal.dSYM
 node/node_modules
 *.pyc
+pc_terminal/logReceivePacket.txt
+pc_terminal/logSendPackets.txt
