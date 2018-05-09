@@ -249,7 +249,10 @@ void initPcState(struct pcState *pcState){
   pcState->rollValue = 90; 
   pcState->pitchValue = 90; 
   pcState->yawValue = 90; 
-
+  pcState->PValue = 0;
+  pcState->P1Value = 0;
+  pcState->P2Value = 0;
+	
   //JOYSTIC
   pcState->jThrottleValue = 0;
   pcState->jRollValue = 0;
@@ -279,27 +282,34 @@ void checkInput(char c, struct pcState *pcState)
 				{
 					case 'A':
 						pcState->escPressed = false;
-						pcState->upPressed = true;
-						if (pcState->pitchValue > 0)
+						if (pcState->pitchValue > 0){
+							pcState->upPressed = true;
 							pcState->pitchValue -= 1;
+						}
+							
 						break;
 					case 'B':
 						pcState->escPressed = false;
-						pcState->downPressed = true;
-						if (pcState->pitchValue < 180)
+						if (pcState->pitchValue < 180){
+							pcState->downPressed = true;
 							pcState->pitchValue += 1;
+						}
+							
 						break;
 					case 'C':
 						pcState->escPressed = false;
-						pcState->rightPressed = true;
-						if (pcState->rollValue > 0)
+						if (pcState->rollValue > 0){
+							pcState->rightPressed = true;
 							pcState->rollValue -= 1;
+						}
+							
 						break;
 					case 'D':
 						pcState->escPressed = false;
-						pcState->leftPressed = true;
-						if (pcState->rollValue < 180)
+						if (pcState->rollValue < 180){
+							pcState->leftPressed = true;
 							pcState->rollValue += 1;
+						}
 						break;	
 				}
 			}
@@ -341,38 +351,64 @@ void checkInput(char c, struct pcState *pcState)
 			pcState->mode = 8;
 			break;
 		case 'a':
-			pcState->aPressed = true;
 			if (pcState->liftValue <=1000)
 				pcState->liftValue +=10;
+				pcState->aPressed = true;
 			break;
 		case 'z':
-			pcState->zPressed = true;
-			if (pcState->liftValue <=1000)
+			if (pcState->liftValue >10){
+				pcState->zPressed = true;
 				pcState->liftValue -=10;
+			}
 			break;
 		case 'q':
-			pcState->qPressed = true;
+			if (pcState->yawValue > 10){
+				pcState->qPressed = true;
+				pcState->yawValue -= 10;
+			}
 			break;
 		case 'w':
-			pcState->wPressed = true;
+			if (pcState->yawValue < 180){
+				pcState->wPressed = true;
+				pcState->yawValue += 10;
+			}
 			break;
 		case 'u':
-			pcState->uPressed = true;
+			if (pcState->PValue < 1000){
+				pcState->uPressed = true;
+				pcState->PValue += 10;
+			}
+				
 			break;
 		case 'j':
-			pcState->jPressed = true;
+			if (pcState->PValue > 10){
+				pcState->jPressed = true;
+				pcState->PValue -= 10;
+			}
 			break;
 		case 'i':
-			pcState->iPressed = true;
+			if (pcState->P1Value < 1000){
+				pcState->iPressed = true;
+				pcState->P1Value += 10;
+			}
 			break;
 		case 'k':
-			pcState->kkPressed = true;
+			if (pcState->P1Value > 10){
+				pcState->kkPressed = true;
+				pcState->P1Value -= 10;
+			}
 			break;
 		case 'o':
-			pcState->oPressed = true;
+			if (pcState->P2Value < 1000){
+				pcState->oPressed = true;
+				pcState->P2Value += 10;
+			}
 			break;
 		case 'l':
-			pcState->lPressed = true;
+			if (pcState->P2Value > 10){
+				pcState->lPressed = true;
+				pcState->P2Value -= 10;
+			}
 			break;
 	}
 }
@@ -385,7 +421,11 @@ bool setModeAttempt(struct pcState *pcState){
 
 bool setControlAttempt(struct pcState *pcState){
 	return (pcState->escPressed || pcState->aPressed || pcState->zPressed || pcState->qPressed || pcState->wPressed || pcState->upPressed || pcState->downPressed || 
-		pcState->leftPressed || pcState->rightPressed);
+		pcState->leftPressed || pcState->rightPressed || pcState->qPressed || pcState->wPressed);
+}
+
+bool setPAttempt(struct pcState *pcState){
+	return (pcState->uPressed || pcState->jPressed || pcState->iPressed || pcState->kkPressed || pcState->oPressed || pcState->lPressed);
 }
 
 bool sthPressed(struct pcState *pcState){

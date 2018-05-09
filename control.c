@@ -95,20 +95,18 @@ void run_filters_and_control()
 void manualControlBackup()
 {
 	uint8_t setMotors = 0;
-	int32_t adjust = 500, b = 1, d = 1;
+	int32_t adjust1 = 640, adjust2 = 1700, adjust3 = 3500, b = 1, d = 1;
 	int32_t aeSQ[4];
 	int32_t Z = state.controlLift;
 	int32_t L = state.controlPitch - 90;
 	int32_t M = state.controlRoll - 90;
 	int32_t N = state.controlYaw - 90;
 
-	Z *= adjust; L *= adjust/2; M *= adjust/2; N *= adjust/2;
+	Z *= adjust1; L *= adjust2; M *= adjust2; N *= adjust3;
 	aeSQ[0] = Z/(4*b) + M/(2*b) - N/(4*d);
 	aeSQ[1] = Z/(4*b) - L/(2*b) + N/(4*d);
 	aeSQ[2] = Z/(4*b) - M/(2*b) - N/(4*d);
 	aeSQ[3] = Z/(4*b) + L/(2*b) + N/(4*d);
-
-
 	for (int i = 0; i < 4; i++){
 		if (aeSQ[i] < 0)
 			setMotors = 1;
