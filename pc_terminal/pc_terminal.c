@@ -454,7 +454,7 @@ void setPacket(struct pcState *pcState, SRPacket *sPacket){
 		sPacket->payload[0] = 5;
 	if (setControlAttempt(pcState) || pcState->jChanged)
 		sPacket->payload[0] = 3;
-	if (setPAttempt(pcState) || pcState->jChanged)
+	if (setPAttempt(pcState))
 		sPacket->payload[0] = 9;
 
 	// Set payload
