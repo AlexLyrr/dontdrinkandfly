@@ -25,7 +25,7 @@
 #include "pcqueue.h"
 #include "joystick.h"
 
-
+//#include <sys/time.h>
 
 /*------------------------------------------------------------
  * console I/O
@@ -289,7 +289,7 @@ void checkInput(char c, struct pcState *pcState)
 				{
 					case 'A':
 						pcState->escPressed = false;
-						if (pcState->pitchValue > 0){
+						if (pcState->pitchValue > 0 && pcState->mode == 2){
 							pcState->upPressed = true;
 							pcState->pitchValue -= 1;
 						}
@@ -297,7 +297,7 @@ void checkInput(char c, struct pcState *pcState)
 						break;
 					case 'B':
 						pcState->escPressed = false;
-						if (pcState->pitchValue < 180){
+						if (pcState->pitchValue < 180 && pcState->mode == 2){
 							pcState->downPressed = true;
 							pcState->pitchValue += 1;
 						}
@@ -305,7 +305,7 @@ void checkInput(char c, struct pcState *pcState)
 						break;
 					case 'C':
 						pcState->escPressed = false;
-						if (pcState->rollValue > 0){
+						if (pcState->rollValue > 0 && pcState->mode == 2){
 							pcState->rightPressed = true;
 							pcState->rollValue -= 1;
 						}
@@ -313,7 +313,7 @@ void checkInput(char c, struct pcState *pcState)
 						break;
 					case 'D':
 						pcState->escPressed = false;
-						if (pcState->rollValue < 180){
+						if (pcState->rollValue < 180 && pcState->mode == 2){
 							pcState->leftPressed = true;
 							pcState->rollValue += 1;
 						}
@@ -358,64 +358,64 @@ void checkInput(char c, struct pcState *pcState)
 			pcState->mode = 8;
 			break;
 		case 'a':
-			if (pcState->liftValue <=1000){
+			if (pcState->liftValue <=1000 && pcState->mode == 2){
 				pcState->liftValue +=10;
 				pcState->aPressed = true;
       }
 			break;
 		case 'z':
-			if (pcState->liftValue >10){
+			if (pcState->liftValue >10 && pcState->mode == 2){
 				pcState->zPressed = true;
 				pcState->liftValue -=10;
 			}
 			break;
 		case 'q':
-			if (pcState->yawValue > 10){
+			if (pcState->yawValue > 10 && pcState->mode == 2){
 				pcState->qPressed = true;
 				pcState->yawValue -= 10;
 			}
 			break;
 		case 'w':
-			if (pcState->yawValue < 180){
+			if (pcState->yawValue < 180 && pcState->mode == 2){
 				pcState->wPressed = true;
 				pcState->yawValue += 10;
 			}
 			break;
 		case 'u':
-			if (pcState->PValue < 1000){
+			if (pcState->PValue < 100 && pcState->mode == 4){
 				pcState->uPressed = true;
-				pcState->PValue += 10;
+				pcState->PValue += 1;
 			}
 
 			break;
 		case 'j':
-			if (pcState->PValue > 10){
+			if (pcState->PValue > 1 && pcState->mode == 4){
 				pcState->jPressed = true;
-				pcState->PValue -= 10;
+				pcState->PValue -= 1;
 			}
 			break;
 		case 'i':
-			if (pcState->P1Value < 1000){
+			if (pcState->P1Value < 100 && pcState->mode == 5){
 				pcState->iPressed = true;
-				pcState->P1Value += 10;
+				pcState->P1Value += 1;
 			}
 			break;
 		case 'k':
-			if (pcState->P1Value > 10){
+			if (pcState->P1Value > 1 && pcState->mode == 5){
 				pcState->kkPressed = true;
-				pcState->P1Value -= 10;
+				pcState->P1Value -= 1;
 			}
 			break;
 		case 'o':
-			if (pcState->P2Value < 1000){
+			if (pcState->P2Value < 100 && pcState->mode == 6){
 				pcState->oPressed = true;
-				pcState->P2Value += 10;
+				pcState->P2Value += 1;
 			}
 			break;
 		case 'l':
-			if (pcState->P2Value > 10){
+			if (pcState->P2Value > 1 && pcState->mode == 6){
 				pcState->lPressed = true;
-				pcState->P2Value -= 10;
+				pcState->P2Value -= 1;
 			}
 			break;
 	}
@@ -483,13 +483,13 @@ void setPacket(struct pcState *pcState, SRPacket *sPacket){
 			}
 			break;
 		case 9:
-			sPacket->payload[2] = (pcState->P1Value >> 8);
-			sPacket->payload[3] = (pcState->P1Value & 0xFF);
-			sPacket->payload[4] = (pcState->P2Value >> 8);
-			sPacket->payload[5] = (pcState->P2Value & 0xFF);
-			sPacket->payload[6] = (pcState->PValue >> 8);
-			sPacket->payload[7] = (pcState->PValue & 0xFF);
-			for (int i = 8; i < PACKET_BODY_LENGTH; i++){
+			sPacket->payload[1] = (pcState->P1Value >> 8);
+			sPacket->payload[2] = (pcState->P1Value & 0xFF);
+			sPacket->payload[3] = (pcState->P2Value >> 8);
+			sPacket->payload[4] = (pcState->P2Value & 0xFF);
+			sPacket->payload[5] = (pcState->PValue >> 8);
+			sPacket->payload[6] = (pcState->PValue & 0xFF);
+			for (int i = 7; i < PACKET_BODY_LENGTH; i++){
 				sPacket->payload[i] = 0; // null bytes
 			}
 	}
@@ -620,11 +620,23 @@ void logReceivePacket(SRPacket *rPacket){
 
 //@Author Alex Lyrakis
 void logSendPacket(SRPacket sPacket){
-	fprintf(Sfile, "Packet number: %hu ", sPacket.fcs);
-	fprintf(Sfile, "Type: %hhu ", sPacket.payload[0]);
-	for (int i=1; i<10; i++)
-		fprintf(Sfile, "Byte%d: %hhu ", i, sPacket.payload[i]);
-	fprintf(Sfile, "crc: %hhu \n", sPacket.crc);
+	switch(sPacket.payload[0]){
+		case 3:
+			fprintf(Sfile, "Packet number: %hu | Type: %hhu | Abort: %hhu | Mode: %hhu | Roll: %hhu | Pitch: %hhu | HeightByte1: %hhu | HeightByte0: %hhu",
+						sPacket.fcs, sPacket.payload[0], sPacket.payload[1], sPacket.payload[2], sPacket.payload[3], sPacket.payload[4], sPacket.payload[5], sPacket.payload[6]);
+			fprintf(Sfile, " | crc: %hhu \n", sPacket.crc);
+			break;
+		case 5:
+			fprintf(Sfile, "Packet number: %hu | Type: %hhu | Mode: %hhu",
+						sPacket.fcs, sPacket.payload[0], sPacket.payload[1]);
+			fprintf(Sfile, " | crc: %hhu \n", sPacket.crc);
+			break;
+		case 9:
+			fprintf(Sfile, "Packet number: %hu | Type: %hhu | P_rollByte1: %hhu | P_rollByte0: %hhu | P_pitchByte1: %hhu | P_pitchByte0: %hhu | P_yawByte1: %hhu | P_yawByte0: %hhu",
+						sPacket.fcs, sPacket.payload[0], sPacket.payload[1], sPacket.payload[2], sPacket.payload[3], sPacket.payload[4], sPacket.payload[5], sPacket.payload[6]);
+			fprintf(Sfile, " | crc: %hhu \n", sPacket.crc);
+			break;
+	}
 }
 
 void updatePcState(struct pcState *pcState){
@@ -633,21 +645,24 @@ void updatePcState(struct pcState *pcState){
 	pcState->tRollValue = pcState->rollValue + pcState->jRollValue - 90;
 	pcState->tPitchValue = pcState->pitchValue + pcState->jPitchValue - 90;
 	pcState->tYawValue = pcState->yawValue + pcState->jYawValue - 90;
-  if (pcState->tRollValue < 0) {
-    pcState->tRollValue = 0;
-  } else if (pcState->tRollValue > 180) {
+	if (pcState->tRollValue < 0) {
+		pcState->tRollValue = 0;
+	} 
+	else if (pcState->tRollValue > 180) {
     pcState->tRollValue = 180;
-  }
-  if (pcState->tPitchValue < 0) {
+	}
+    if (pcState->tPitchValue < 0) {
     pcState->tPitchValue = 0;
-  } else if (pcState->tPitchValue > 180) {
+    }
+    else if (pcState->tPitchValue > 180) {
     pcState->tPitchValue = 180;
-  }
-  if (pcState->tYawValue < 0) {
-    pcState->tYawValue = 0;
-  } else if (pcState->tYawValue > 180) {
-    pcState->tYawValue = 180;
-  }
+    }
+    if (pcState->tYawValue < 0) {
+      pcState->tYawValue = 0;
+    } 
+    else if (pcState->tYawValue > 180) {
+      pcState->tYawValue = 180;
+    }
 	if (pcState->tLiftValue > 1000)
 		pcState->tLiftValue = 1000;
 	if (pcState->tRollValue > 180)
@@ -671,7 +686,6 @@ void initReceivedACK(){
 int main(int argc, char **argv)
 {
 	//Initialize parameters
-
 	struct pcState *pcState;
 	pcState = (struct pcState*) calloc(1, sizeof(struct pcState));
 	SRPacket sPacket;
@@ -679,14 +693,17 @@ int main(int argc, char **argv)
 	bool bufferCleared = false;
 	char c;
 	clock_t timeLastPacket = clock();
-
+	//long double loopTime = 0;
+	//clock_t beginLoop = 0, endLoop = 0;
+	//struct timespec start, end;
+	
 	term_puts("\nTerminal program - Embedded Real-Time Systems\n");
 
 	term_initio();
 	term_puts("Initialized termios...\n");
 	rs232_open();
 	term_puts("Initialized termios...\n");
-	openJoystick();
+	//openJoystick();
 	term_puts("Initialized termios...\n");
 
 	term_puts("Type ^C to exit\n");
@@ -707,14 +724,17 @@ int main(int argc, char **argv)
 
 	for (;;)
 	{
+		//beginLoop = clock();
+		//clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+		
 		if ((c = term_getchar_nb()) != -1)	// Read from keyboard and store in fd_RS232
 		{
 			checkInput(c, pcState);
-      term_putchar(c);
+     	 term_putchar(c);
 		}
 
 		// Read from joystic and update pcState
-		checkJoystick(pcState);
+		//checkJoystick(pcState);
 		updatePcState(pcState);
 
 		// Read from fd_RS232
@@ -731,19 +751,29 @@ int main(int argc, char **argv)
 		//	term_putchar(c);
 		}
 
-		if ((clock()-timeLastPacket)> 10)
-		{
+		if ((clock()-timeLastPacket)> 50){
 			//TBD: Based on our pcState and protocol we have to put a sequence of bytes using rs232_putchar(c);
 			//		After we have to reset the pcState.
 			if (sthPressed(pcState) || pcState->jChanged){
 					setPacket(pcState, &sPacket);
 					sendPacket(sPacket);
 					logSendPacket(sPacket);
+					if (pcState->escPressed)
+						break;
 					resetPcState(pcState);
 					sPacketBuffer[sPacket.fcs] = sPacket;
 			}
 			timeLastPacket = clock();
 		}
+
+		/*
+		endLoop = clock();
+		clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+		uint64_t delta_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
+		loopTime = (endLoop - beginLoop))/CLOCKS_PER_SEC;
+		printf("%" PRIu64 "\n", delta_us);
+		printf("Time of loop is : %Lf \n", loopTime);
+		*/
 	}
 
 	term_exitio();

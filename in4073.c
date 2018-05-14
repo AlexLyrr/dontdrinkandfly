@@ -125,6 +125,32 @@ int main(void)
 					state.pChanged = false;
 				}
 				break;
+			case 5:
+				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
+					rollControl();
+					run_filters_and_control();
+					writeMotorStatus();
+				}
+				if (state.controlChanged) { // We don't need to do anything extra yet when this happens
+					state.controlChanged = false;
+				}
+				if (state.pChanged) { // We don't need to do anything extra yet when this happens
+					state.pChanged = false;
+				}
+				break;	
+			case 6:
+				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
+					pitchControl();
+					run_filters_and_control();
+					writeMotorStatus();
+				}
+				if (state.controlChanged) { // We don't need to do anything extra yet when this happens
+					state.controlChanged = false;
+				}
+				if (state.pChanged) { // We don't need to do anything extra yet when this happens
+					state.pChanged = false;
+				}
+				break;
 		}
 
 		if (check_timer_flag()) {

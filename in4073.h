@@ -34,6 +34,9 @@
 int16_t motor[4], ae[4];
 void run_filters_and_control();
 void yawControl();
+void pitchControl();
+void rollControl();
+
 
 // Timers
 #define TIMER_PERIOD	10 //50ms=20Hz (MAX 23bit, 4.6h)
@@ -157,6 +160,9 @@ typedef struct {
 	uint8_t controlPitch;
 	uint8_t controlYaw;
 	uint16_t controlLift;
+	uint8_t controlPitchUser;
+	uint8_t controlRollUser;
+	
 
 } State;
 State state;

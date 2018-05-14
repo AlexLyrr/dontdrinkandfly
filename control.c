@@ -49,6 +49,49 @@ void yawControl() {
 	state.controlYaw = state.pYaw * (yaw - sr);
 }
 
+void pitchControl() {
+	int32_t eps = ((int32_t) state.controlPitchUser - 90) - (sq / 100);
+	int32_t pitchValue = (state.pPitch * eps) + 90;
+	if (pitchValue > 180)
+		pitchValue = 180;
+	if (pitchValue < 0)
+		pitchValue = 0;
+	state.controlPitch = (uint8_t) pitchValue;
+}
+
+void rollControl() {
+	int32_t eps = ((int32_t) state.controlRollUser - 90) - (sp / 100);
+	int32_t rollValue = (state.pRoll * eps) + 90; 
+	if (rollValue > 180)
+		rollValue = 180;
+	if (rollValue < 0)
+		rollValue = 0;
+	state.controlRoll = (uint8_t) rollValue;
+}
+
+/*
+void pitchControl() {
+	int32_t eps = ((int32_t) state.controlPitch - 90) * 100 - sp;
+	state.controlPitch = (100 * eps)/100 + 90;
+}
+
+void pitchControl() {
+
+	int32_t error = 0;
+	int32_t spNew = sp + 10000;
+	if (spNew < 0)
+		spNew = 0;
+	int32_t spFinal = 0;
+	while ((spNew - 111) > 0) {
+		spFinal += 1;
+		spNew -= 111;
+	}
+	int32_t error = ((int32_t) state.controlPitch - spFinal;
+	state.controlPitch = (100 * eps)/100 + 90;
+
+}
+*/
+
 void controlComponentLoop() {
 	// TODO: implement
 }
@@ -138,14 +181,14 @@ void manualControlBackup()
 	int32_t N = state.controlYaw - 90;
 
 	Z *= adjust1; L *= adjust2; M *= adjust2; N *= adjust3;
-	aeSQ[0] = Z/(4*b) + M/(2*b) - N/(4*d);
-	aeSQ[1] = Z/(4*b) - L/(2*b) + N/(4*d);
-	aeSQ[2] = Z/(4*b) - M/(2*b) - N/(4*d);
-	aeSQ[3] = Z/(4*b) + L/(2*b) + N/(4*d);
+	aeSQ[0] = Z/(4*b) + L/(2*b) - N/(4*d);
+	aeSQ[1] = Z/(4*b) - M/(2*b) + N/(4*d);
+	aeSQ[2] = Z/(4*b) - L/(2*b) - N/(4*d);
+	aeSQ[3] = Z/(4*b) + M/(2*b) + N/(4*d);
 	for (int i = 0; i < 4; i++){
 		if (aeSQ[i] < 0)
 			setMotors = 1;
-		ae[i] = root(aeSQ[i], 2);
+		ae[i] = root(aeSQ[i], 2) + 120;
 	}
 	if (setMotors == 0)
 		update_motors();

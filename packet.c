@@ -44,7 +44,9 @@ void parsePacketSetControl() {
 		return;
 	}
 	state.controlRoll = state.currentPacket[6];
+	state.controlRollUser = state.currentPacket[6];
 	state.controlPitch = state.currentPacket[7];
+	state.controlPitchUser = state.currentPacket[7];
 	state.controlYaw = state.currentPacket[8];
 	state.controlLift = state.currentPacket[9] << 8 | state.currentPacket[10];
 	state.controlChanged = true;
