@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include <stdbool.h>
-
+#include <gtk/gtk.h>
 
 #ifndef PC_TERMINAL_H_
 #define PC_TERMINAL_H_
@@ -9,6 +9,8 @@
 #define PREAMPLE_B2 0x37
 #define PACKET_BODY_LENGTH 10
 #define PACKET_LENGTH (PACKET_BODY_LENGTH + 5)
+#define BATTERY_MAX 12.6
+#define BATTERY_MIN 10.5
 
 int fd_joystick;
 // @Author: George Giannakaras
@@ -77,6 +79,20 @@ struct pcState{
 	int16_t tYawValue;
 };
 
+struct pcState *pcStateGui;
+
+//@Author Georgios Giannakaras
+typedef struct _Widgets Widgets;
+struct _Widgets
+{
+	GtkLabel *l[13];
+	GtkLevelBar *lb[4];
+	GtkProgressBar *pb[1];
+};
+
+GtkBuilder *builder;
+GtkWidget  *window;
+Widgets widg;
 
 // @Author: Alex Lyrakis
 typedef struct{
@@ -91,6 +107,38 @@ FILE *Sfile;
 SRPacket sPacketBuffer[65535];
 bool receivedACK[65535];
 
+void initializations(struct pcState *pcState);
 void logReceivePacket(SRPacket *rPacket);
+void logSendPacket(SRPacket sPacket);
+void initReceivedACK();
+void initLogFiles();
+void receivePacket(SRPacket *rPacket);
+void sendPacket(SRPacket sPacket);
+void setPacket(struct pcState *pcState, SRPacket *sPacket);
+bool sthPressed(struct pcState *pcState);
+bool setPAttempt(struct pcState *pcState);
+bool setControlAttempt(struct pcState *pcState);
+bool setModeAttempt(struct pcState *pcState);
+void checkInput(char c, struct pcState *pcState);
+void initPcState(struct pcState *pcState);
+void resetPcState(struct pcState *pcState);
+void updatePcState(struct pcState *pcState);
+void calculateBatteryStatus(float battery);
+void *guiThread(void *vargp);
+void on_button_safe_clicked(GtkButton *button, Widgets *widg);
+void on_button_panic_clicked(GtkButton *button, Widgets *widg);
+void on_button_manual_clicked(GtkButton *button, Widgets *widg);
+void on_button_calibration_clicked(GtkButton *button, Widgets *widg);
+void on_button_yaw_clicked(GtkButton *button, Widgets *widg);
+void on_button_fullControl_clicked(GtkButton *button, Widgets *widg);
+void on_button_raw_clicked(GtkButton *button, Widgets *widg);
+void on_button_height_clicked(GtkButton *button, Widgets *widg);
+void on_button_wireless_clicked(GtkButton *button, Widgets *widg);
+void on_button_abort_clicked(GtkButton *button, Widgets *widg);
+void on_button_up_clicked(GtkButton *button, Widgets *widg);
+void on_button_down_clicked(GtkButton *button, Widgets *widg);
+
+
+bool emptiedBuffer;
 
 #endif

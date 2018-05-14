@@ -20,6 +20,8 @@
 #include <stdio.h>
 #include <assert.h>
 #include <float.h>
+#include <gtk/gtk.h>
+#include <pthread.h>
 
 #include "pc_terminal.h"
 #include "pcqueue.h"
@@ -361,7 +363,7 @@ void checkInput(char c, struct pcState *pcState)
 			if (pcState->liftValue <=1000 && pcState->mode == 2){
 				pcState->liftValue +=10;
 				pcState->aPressed = true;
-      }
+     		 }
 			break;
 		case 'z':
 			if (pcState->liftValue >10 && pcState->mode == 2){
@@ -592,14 +594,57 @@ void initLogFiles(){
 //@Author George Giannakaras
 void logReceivePacket(SRPacket *rPacket){
 	uint16_t motor[4];
-  float battery;
+	float battery;
+	char guiText[30];
+
 	switch(rPacket->payload[0]){
 		case 2:
-      battery = (((float) rPacket->payload[2]) * 7 / 100) + 1.2;
+			emptiedBuffer = true;
+      		battery = (((float) rPacket->payload[2]) * 7 / 100) + 1.2;
 			printf("System time: %hhu | Packet number: %hu | Type: %hhu | Mode: %hhu | Battery: %f | Roll: %hhu | Pitch: %hhu | Height: %hhu\n",
 				rPacket->payload[6], rPacket->fcs, rPacket->payload[0], rPacket->payload[1], battery, rPacket->payload[3], rPacket->payload[4], rPacket->payload[5]);
 			fprintf(Rfile, "System time: %hu | Packet number: %hu | Type: %hhu | Mode: %hu | Battery: %hu | Roll: %hu | Pitch: %hu | Height: %hu\n",
-				rPacket->payload[6], rPacket->fcs, rPacket->payload[0], rPacket->payload[1], rPacket->payload[2], rPacket->payload[3], rPacket->payload[4], rPacket->payload[5]);
+				rPacket->payload[6], rPacket->fcs, rPacket->payload[0], rPacket->payload[1], rPacket->payload[2], rPacket->payload[3], 
+				rPacket->payload[4], rPacket->payload[5]);
+				sprintf(guiText, "%f V", battery);
+				gtk_label_set_label(widg.l[5], guiText);
+				calculateBatteryStatus(battery);	
+				switch(rPacket->payload[1]){	
+					case 0:
+						sprintf(guiText, "Safe");
+						break;
+					case 1:
+						sprintf(guiText, "Panic");
+						break;					
+					case 2:
+						sprintf(guiText, "Manual");
+						break;					
+					case 3:
+						sprintf(guiText, "Calibration");
+						break;					
+					case 4:
+						sprintf(guiText, "Yaw");
+						break;					
+					case 5:
+						sprintf(guiText, "Full Control");
+						break;
+					case 6:
+						sprintf(guiText, "Raw");
+						break;					
+					case 7:
+						sprintf(guiText, "Height");
+						break;					
+					case 8:
+						sprintf(guiText, "Wireless");
+						break;					
+				}				
+				gtk_label_set_label(widg.l[4], guiText);	
+				
+				for (int i = 3; i < 6; ++i)
+				{
+					sprintf(guiText, "%hhu", rPacket->payload[i]);
+					gtk_label_set_label(widg.l[i+3], guiText);
+				}
 			break;
 		case 7:
 			printf("Type: %hhu | ERROR: %hhu\n", rPacket->payload[0], rPacket->payload[1]);
@@ -610,6 +655,15 @@ void logReceivePacket(SRPacket *rPacket){
 			motor[1] = rPacket->payload[3] << 8 | rPacket->payload[4];
 			motor[2] = rPacket->payload[5] << 8 | rPacket->payload[6];
 			motor[3] = rPacket->payload[7] << 8 | rPacket->payload[8];
+
+			for (int i = 0; i < 4; ++i)
+			{
+				sprintf(guiText, "%hu RPM", motor[i]);
+				gtk_label_set_label(widg.l[i], guiText);
+				gtk_level_bar_set_value (widg.lb[i], motor[i]);
+			}
+			
+
 			printf("Packet number: %hu | Type: %hhu | Motor1: %hu | Motor2: %hu | Motor3: %hu | Motor4: %hu\n",
 				rPacket->fcs, rPacket->payload[0], motor[0], motor[1], motor[2], motor[3]);
 			fprintf(Rfile, "Packet number: %hu | Type: %hhu | Motor1: %hu | Motor2: %hu | Motor3: %hu | Motor4: %hu\n",
@@ -620,11 +674,22 @@ void logReceivePacket(SRPacket *rPacket){
 
 //@Author Alex Lyrakis
 void logSendPacket(SRPacket sPacket){
+	char guiText[20];
+	uint8_t lift;
+
 	switch(sPacket.payload[0]){
 		case 3:
-			fprintf(Sfile, "Packet number: %hu | Type: %hhu | Abort: %hhu | Mode: %hhu | Roll: %hhu | Pitch: %hhu | HeightByte1: %hhu | HeightByte0: %hhu",
+			fprintf(Sfile, "Packet number: %hu | Type: %hhu | Abort: %hhu | Roll: %hhu | Pitch: %hhu | Yaw: %hhu | HeightByte1: %hhu | HeightByte0: %hhu",
 						sPacket.fcs, sPacket.payload[0], sPacket.payload[1], sPacket.payload[2], sPacket.payload[3], sPacket.payload[4], sPacket.payload[5], sPacket.payload[6]);
 			fprintf(Sfile, " | crc: %hhu \n", sPacket.crc);
+			for (int i = 2; i < 5; ++i)
+			{
+				sprintf(guiText, "%hhu", sPacket.payload[i]);
+				gtk_label_set_label(widg.l[i+7], guiText);
+			}
+			lift = sPacket.payload[5] << 8 | sPacket.payload[6];
+			sprintf(guiText, "%hu", lift);
+			gtk_label_set_label(widg.l[12], guiText);
 			break;
 		case 5:
 			fprintf(Sfile, "Packet number: %hu | Type: %hhu | Mode: %hhu",
@@ -639,6 +704,7 @@ void logSendPacket(SRPacket sPacket){
 	}
 }
 
+//@Author Alex Lyrakis
 void updatePcState(struct pcState *pcState){
 
 	pcState->tLiftValue = pcState->liftValue + pcState->jThrottleValue;
@@ -663,14 +729,18 @@ void updatePcState(struct pcState *pcState){
     else if (pcState->tYawValue > 180) {
       pcState->tYawValue = 180;
     }
-	if (pcState->tLiftValue > 1000)
+	if (pcState->tLiftValue > 1000){
 		pcState->tLiftValue = 1000;
-	if (pcState->tRollValue > 180)
+	}
+	if (pcState->tRollValue > 180){
 		pcState->tRollValue = 180;
-	if (pcState->tPitchValue > 180)
+	}
+	if (pcState->tPitchValue > 180){
 		pcState->tPitchValue = 180;
-	if (pcState->tYawValue > 180)
+	}
+	if (pcState->tYawValue > 180){
 		pcState->tYawValue = 180;
+	}
 }
 
 void initReceivedACK(){
@@ -679,13 +749,41 @@ void initReceivedACK(){
 	}
 }
 
+//@Author Georgios Giannakaras
+void initializations(struct pcState *pcState){
+	char c;
+
+	term_puts("\nTerminal program - Embedded Real-Time Systems\n");
+	emptiedBuffer = false;
+	term_initio();
+	term_puts("Initialized termios...\n");
+	rs232_open();
+	term_puts("Initialized rs232...\n");
+	//openJoystick();
+	term_puts("Initialized joystick...\n");
+
+	term_puts("Type ^C to exit\n");
+
+	/* discard any incoming text
+	 */
+	term_puts("Empty usb buffer\n");
+	while ((c = rs232_getchar_nb()) != -1){
+		fputc(c,stderr);
+	}
+	printf("\n");
+	initLogFiles();
+	initReceivedACK();
+	initPcState(pcState);
+	resetPcState(pcState); // Reset values and State of PC side.
+	init_queuepc(&pcReQueue);
+}
+
 /*----------------------------------------------------------------
  * main -- execute terminal
  *----------------------------------------------------------------
  */
 int main(int argc, char **argv)
 {
-	//Initialize parameters
 	struct pcState *pcState;
 	pcState = (struct pcState*) calloc(1, sizeof(struct pcState));
 	SRPacket sPacket;
@@ -693,35 +791,13 @@ int main(int argc, char **argv)
 	bool bufferCleared = false;
 	char c;
 	clock_t timeLastPacket = clock();
-	//long double loopTime = 0;
-	//clock_t beginLoop = 0, endLoop = 0;
-	//struct timespec start, end;
-	
-	term_puts("\nTerminal program - Embedded Real-Time Systems\n");
+	pthread_t guithread;
 
-	term_initio();
-	term_puts("Initialized termios...\n");
-	rs232_open();
-	term_puts("Initialized termios...\n");
-	//openJoystick();
-	term_puts("Initialized termios...\n");
+	initializations(pcState);
+	pcStateGui = pcState;
+	pthread_create(&guithread, NULL, guiThread, NULL);
 
-	term_puts("Type ^C to exit\n");
-
-	/* discard any incoming text
-	 */
-	term_puts("Empty usb buffer\n");
-	while ((c = rs232_getchar_nb()) != -1)
-		fputc(c,stderr);
-
-	/* send & receive
-	 */
-	initLogFiles();
-	initReceivedACK();
-	initPcState(pcState);
-	resetPcState(pcState); // Reset values and State of PC side.
-	init_queuepc(&pcReQueue);
-
+	//send & receive
 	for (;;)
 	{
 		//beginLoop = clock();
@@ -730,12 +806,10 @@ int main(int argc, char **argv)
 		if ((c = term_getchar_nb()) != -1)	// Read from keyboard and store in fd_RS232
 		{
 			checkInput(c, pcState);
-     	 term_putchar(c);
 		}
 
 		// Read from joystic and update pcState
 		//checkJoystick(pcState);
-		updatePcState(pcState);
 
 		// Read from fd_RS232
 		if ((c = rs232_getchar_nb()) != -1){
@@ -748,13 +822,14 @@ int main(int argc, char **argv)
 			if(pcReQueue.count >= PACKET_LENGTH) {
 				receivePacket(&rPacket);
 			}
-		//	term_putchar(c);
+			//term_putchar(c);
 		}
 
 		if ((clock()-timeLastPacket)> 50){
 			//TBD: Based on our pcState and protocol we have to put a sequence of bytes using rs232_putchar(c);
 			//		After we have to reset the pcState.
 			if (sthPressed(pcState) || pcState->jChanged){
+					updatePcState(pcState);
 					setPacket(pcState, &sPacket);
 					sendPacket(sPacket);
 					logSendPacket(sPacket);
