@@ -58,7 +58,7 @@ void checkJoystick(struct pcState *pcState){
             if (jTemp > 60800) {
               pcState->jThrottleValue = 0;
             } else{
-              pcState->jThrottleValue = log(60801-jTemp)/log(1.0111)
+              pcState->jThrottleValue = log(60801-jTemp)/log(1.0111);
             }
             break;
           default:
