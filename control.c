@@ -59,6 +59,9 @@ void update_motors(void)
 		if (ae[i] > 550){
 			ae[i] = 550;
 		}
+		if (ae[i] < 200 && state.controlLift != 0){
+			ae[i] = 200;
+		}
 	}
 	motor[0] = ae[0];
 	motor[1] = ae[1];
@@ -74,15 +77,52 @@ void run_filters_and_control()
 	// ae[0] = xxx, ae[1] = yyy etc etc
 	//controlLift: 0-1000
 	//controlPitch, controlRoll, controlYaw: 0-180
-	uint16_t adjust = 10000;
-	uint32_t controlPitch = adjust * state.controlPitch;
-	uint32_t controlRoll = adjust * state.controlRoll;
-	uint32_t controlYaw = adjust * state.controlYaw;
+	// uint16_t adjust = 10000;
+	// uint32_t controlPitch = adjust * state.controlPitch;
+	// uint32_t controlRoll = adjust * state.controlRoll;
+	// uint32_t controlYaw = adjust * state.controlYaw;
+	// uint32_t controlLift = state.controlLift;
+	// ae[0] = (((controlPitch + (180*adjust - controlYaw))/180) * controlLift)/adjust;
+	// ae[1] = (((controlRoll + controlYaw)/180) * controlLift)/adjust;
+	// ae[2] = ((((180*adjust - controlPitch) + (180*adjust - controlYaw))/180) * controlLift)/adjust;
+	// ae[3] = ((((180*adjust - controlRoll) + controlYaw)/180) * controlLift)/adjust;
+
+
+	uint32_t controlPitch = state.controlPitch;
+	uint32_t controlRoll = state.controlRoll;
+	uint32_t controlYaw = state.controlYaw;
 	uint32_t controlLift = state.controlLift;
-	ae[0] = (((controlPitch + (180*adjust - controlYaw))/180) * controlLift)/adjust;
-	ae[1] = (((controlRoll + controlYaw)/180) * controlLift)/adjust;
-	ae[2] = ((((180*adjust - controlPitch) + (180*adjust - controlYaw))/180) * controlLift)/adjust;
-	ae[3] = ((((180*adjust - controlRoll) + controlYaw)/180) * controlLift)/adjust;
+	ae[0] = controlLift;
+	ae[1] = controlLift;
+	ae[2] = controlLift;
+	ae[3] = controlLift;
+	if (controlLift > 180) {
+		if (controlPitch > 90) {
+			ae[0] += controlPitch - 90;
+			ae[2] -= controlPitch - 90;
+		}else {
+			ae[0] -= 90 - controlPitch;
+			ae[2] += 90 - controlPitch;
+		}
+		if (controlRoll > 90) {
+			ae[1] += controlRoll - 90;
+			ae[3] -= controlRoll - 90;
+		}else{
+			ae[1] -= 90 - controlRoll;
+			ae[3] += 90 - controlRoll;
+		}
+		if (controlYaw > 90){
+			ae[0] -= controlYaw - 90;
+			ae[1] += controlYaw - 90;
+			ae[2] -= controlYaw - 90;
+			ae[3] += controlYaw - 90;
+		} else{
+			ae[0] += 90 - controlYaw;
+			ae[1] -= 90 - controlYaw;
+			ae[2] += 90 - controlYaw;
+			ae[3] -= 90 - controlYaw;
+		}
+	}
 
 	update_motors();
 }
