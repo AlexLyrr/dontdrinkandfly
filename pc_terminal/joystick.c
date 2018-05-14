@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <math.h>
 #include "pc_terminal.h"
 #include "joystick.h"
 
@@ -54,7 +55,11 @@ void checkJoystick(struct pcState *pcState){
             pcState->jYawValue = jValue;
             break;
           case 3:
-            pcState->jThrottleValue = (64000-jTemp)/64;
+            if (jTemp > 60800) {
+              pcState->jThrottleValue = 0;
+            } else{
+              pcState->jThrottleValue = log(60801-jTemp)/log(1.0111)
+            }
             break;
           default:
             perror("\nError, non defined axis as input");

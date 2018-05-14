@@ -46,7 +46,7 @@ int16_t displacement;
 
 void yawControl() {
 	uint16_t yaw = state.controlYaw * 100;
-	state.controlYaw = state.pYaw * (yaw - sr);
+	state.controlYaw = (uint8_t) state.pYaw * (yaw - sr);
 }
 
 void pitchControl() {
@@ -61,7 +61,7 @@ void pitchControl() {
 
 void rollControl() {
 	int32_t eps = ((int32_t) state.controlRollUser - 90) - (sp / 100);
-	int32_t rollValue = (state.pRoll * eps) + 90; 
+	int32_t rollValue = (state.pRoll * eps) + 90;
 	if (rollValue > 180)
 		rollValue = 180;
 	if (rollValue < 0)
