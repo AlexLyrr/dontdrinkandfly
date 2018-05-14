@@ -833,8 +833,8 @@ int main(int argc, char **argv)
 					setPacket(pcState, &sPacket);
 					sendPacket(sPacket);
 					logSendPacket(sPacket);
-					if (pcState->escPressed)
-						break;
+					//if (pcState->escPressed) 
+            		//	break; 
 					resetPcState(pcState);
 					sPacketBuffer[sPacket.fcs] = sPacket;
 			}
