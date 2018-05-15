@@ -137,6 +137,14 @@ void *guiThread(void *vargp){
     widg.l[10] = GTK_LABEL( gtk_builder_get_object( builder, "label_pitch_pc" ) );
     widg.l[11] = GTK_LABEL( gtk_builder_get_object( builder, "label_yaw_pc" ) );
     widg.l[12] = GTK_LABEL( gtk_builder_get_object( builder, "label_lift_pc" ) );
+    widg.l[13] = GTK_LABEL( gtk_builder_get_object( builder, "label_roll_keyboard" ) );
+    widg.l[14] = GTK_LABEL( gtk_builder_get_object( builder, "label_pitch_keyboard" ) );
+    widg.l[15] = GTK_LABEL( gtk_builder_get_object( builder, "label_yaw_keyboard" ) );
+    widg.l[16] = GTK_LABEL( gtk_builder_get_object( builder, "label_lift_keyboard" ) );
+    widg.l[17] = GTK_LABEL( gtk_builder_get_object( builder, "label_roll_joystick" ) );
+    widg.l[18] = GTK_LABEL( gtk_builder_get_object( builder, "label_pitch_joystick" ) );
+    widg.l[19] = GTK_LABEL( gtk_builder_get_object( builder, "label_yaw_joystick" ) );
+    widg.l[20] = GTK_LABEL( gtk_builder_get_object( builder, "label_lift_joystick" ) );
     widg.lb[0] = GTK_LEVEL_BAR( gtk_builder_get_object( builder, "levelbar_motor1" ) );
     widg.lb[1] = GTK_LEVEL_BAR( gtk_builder_get_object( builder, "levelbar_motor2" ) );
     widg.lb[2] = GTK_LEVEL_BAR( gtk_builder_get_object( builder, "levelbar_motor3" ) );

@@ -85,7 +85,7 @@ struct pcState *pcStateGui;
 typedef struct _Widgets Widgets;
 struct _Widgets
 {
-	GtkLabel *l[13];
+	GtkLabel *l[21];
 	GtkLevelBar *lb[4];
 	GtkProgressBar *pb[1];
 };
@@ -137,7 +137,7 @@ void on_button_wireless_clicked(GtkButton *button, Widgets *widg);
 void on_button_abort_clicked(GtkButton *button, Widgets *widg);
 void on_button_up_clicked(GtkButton *button, Widgets *widg);
 void on_button_down_clicked(GtkButton *button, Widgets *widg);
-
+void printPcStatusGUI(SRPacket sPacket);
 
 bool emptiedBuffer;
 

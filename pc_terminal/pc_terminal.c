@@ -672,24 +672,51 @@ void logReceivePacket(SRPacket *rPacket){
 	}
 }
 
-//@Author Alex Lyrakis
-void logSendPacket(SRPacket sPacket){
+//@Author Georgios Giannakaras
+void printPcStatusGUI(SRPacket sPacket){
 	char guiText[20];
 	uint16_t lift;
+
+	//Print pc state to GUI
+	for (int i = 2; i < 5; ++i)
+	{
+		sprintf(guiText, "%hhu", sPacket.payload[i]);
+		gtk_label_set_label(widg.l[i+7], guiText);
+	}
+	lift = sPacket.payload[5] << 8 | sPacket.payload[6];
+	sprintf(guiText, "%hu", lift);
+	gtk_label_set_label(widg.l[12], guiText);
+
+	//Print keyboard to GUI
+	sprintf(guiText, "%hhu", pcStateGui->rollValue);
+	gtk_label_set_label(widg.l[13], guiText);
+	sprintf(guiText, "%hhu", pcStateGui->pitchValue);
+	gtk_label_set_label(widg.l[14], guiText);
+	sprintf(guiText, "%hhu", pcStateGui->yawValue);
+	gtk_label_set_label(widg.l[15], guiText);
+	sprintf(guiText, "%hu", pcStateGui->liftValue);
+	gtk_label_set_label(widg.l[16], guiText);			
+
+	//Print joystick to GUI
+	sprintf(guiText, "%hhu", pcStateGui->jRollValue);
+	gtk_label_set_label(widg.l[17], guiText);
+	sprintf(guiText, "%hhu", pcStateGui->jPitchValue);
+	gtk_label_set_label(widg.l[18], guiText);
+	sprintf(guiText, "%hhu", pcStateGui->jYawValue);
+	gtk_label_set_label(widg.l[19], guiText);
+	sprintf(guiText, "%hu", pcStateGui->jThrottleValue);
+	gtk_label_set_label(widg.l[20], guiText);	
+}
+
+//@Author Alex Lyrakis
+void logSendPacket(SRPacket sPacket){
 
 	switch(sPacket.payload[0]){
 		case 3:
 			fprintf(Sfile, "Packet number: %hu | Type: %hhu | Abort: %hhu | Roll: %hhu | Pitch: %hhu | Yaw: %hhu | HeightByte1: %hhu | HeightByte0: %hhu",
 						sPacket.fcs, sPacket.payload[0], sPacket.payload[1], sPacket.payload[2], sPacket.payload[3], sPacket.payload[4], sPacket.payload[5], sPacket.payload[6]);
 			fprintf(Sfile, " | crc: %hhu \n", sPacket.crc);
-			for (int i = 2; i < 5; ++i)
-			{
-				sprintf(guiText, "%hhu", sPacket.payload[i]);
-				gtk_label_set_label(widg.l[i+7], guiText);
-			}
-			lift = sPacket.payload[5] << 8 | sPacket.payload[6];
-			sprintf(guiText, "%hu", lift);
-			gtk_label_set_label(widg.l[12], guiText);
+			printPcStatusGUI(sPacket);			
 			break;
 		case 5:
 			fprintf(Sfile, "Packet number: %hu | Type: %hhu | Mode: %hhu",
