@@ -291,7 +291,7 @@ void checkInput(char c, struct pcState *pcState)
 				{
 					case 'A':
 						pcState->escPressed = false;
-						if (pcState->pitchValue > 0 && pcState->mode == 2){
+						if (pcState->pitchValue > 0 && (pcState->mode == 2 || pcState->mode == 6  || pcState->mode == 5)){
 							pcState->upPressed = true;
 							pcState->pitchValue -= 1;
 						}
@@ -299,7 +299,7 @@ void checkInput(char c, struct pcState *pcState)
 						break;
 					case 'B':
 						pcState->escPressed = false;
-						if (pcState->pitchValue < 180 && pcState->mode == 2){
+						if (pcState->pitchValue < 180 && (pcState->mode == 2 || pcState->mode == 6  || pcState->mode == 5)){
 							pcState->downPressed = true;
 							pcState->pitchValue += 1;
 						}
@@ -307,7 +307,7 @@ void checkInput(char c, struct pcState *pcState)
 						break;
 					case 'C':
 						pcState->escPressed = false;
-						if (pcState->rollValue > 0 && pcState->mode == 2){
+						if (pcState->rollValue > 0 && (pcState->mode == 2 || pcState->mode == 6  || pcState->mode == 5)){
 							pcState->rightPressed = true;
 							pcState->rollValue -= 1;
 						}
@@ -315,7 +315,7 @@ void checkInput(char c, struct pcState *pcState)
 						break;
 					case 'D':
 						pcState->escPressed = false;
-						if (pcState->rollValue < 180 && pcState->mode == 2){
+						if (pcState->rollValue < 180 && (pcState->mode == 2 || pcState->mode == 6  || pcState->mode == 5)){
 							pcState->leftPressed = true;
 							pcState->rollValue += 1;
 						}
@@ -360,13 +360,13 @@ void checkInput(char c, struct pcState *pcState)
 			pcState->mode = 8;
 			break;
 		case 'a':
-			if (pcState->liftValue <=1000 && pcState->mode == 2){
+			if (pcState->liftValue < 1000 && (pcState->mode == 2 || pcState->mode == 4)){
 				pcState->liftValue +=10;
 				pcState->aPressed = true;
      		 }
 			break;
 		case 'z':
-			if (pcState->liftValue >= 10 && pcState->mode == 2){
+			if (pcState->liftValue > 0 && (pcState->mode == 2 || pcState->mode == 4)){
 				pcState->zPressed = true;
 				pcState->liftValue -=10;
 			}
