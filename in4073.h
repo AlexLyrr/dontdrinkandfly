@@ -130,6 +130,7 @@ typedef struct {
 	bool hasPacket;
 	bool sendStatus;
 	bool sendMotorStatus;
+	bool sendTimings;
 	uint8_t packetError;
 	uint16_t packetAck;
 	bool sendAck;
@@ -164,6 +165,16 @@ typedef struct {
 	uint8_t controlRollUser;
 	
 
+	uint32_t timeLoop;
+	uint32_t timeLoopMax;
+	uint32_t timeLoopPacket;
+	uint32_t timeLoopPacketMax;
+	uint32_t timeLoopApp;
+	uint32_t timeLoopAppMax;
+	uint32_t timeLoopControl;
+	uint32_t timeLoopControlMax;
+	uint32_t timeLoopSensor;
+	uint32_t timeLoopSensorMax;
 } State;
 State state;
 bool systemDone;
@@ -191,6 +202,7 @@ void writeDroneStatus();
 void writeError(uint8_t errorCode);
 void writeMotorStatus();
 void writeAck(uint16_t packetNumber);
+void writeTimings();
 
 int root(int a, int n);
 int iPow(int a, int e);

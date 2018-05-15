@@ -62,6 +62,7 @@ int main(void)
 	state.sendStatus = false;
 	state.sendAck = false;
 	state.sendMotorStatus = false;
+	state.sendTimings = false;
 	state.packetError = 0;
 
 	state.pChanged = false;
@@ -77,10 +78,18 @@ int main(void)
 	int32_t panicStep = 0;
 	systemDone = false;
 	appClock = 0;
+	uint32_t start;
 
 	while (!systemDone) {
+		start = get_time_us();
+
 		communicationComponentLoop();
 		packetComponentLoop();
+		
+		state.timeLoopPacket = start - get_time_us();
+		if (state.timeLoopPacket > state.timeLoopPacketMax) {
+			state.timeLoopPacketMax = state.timeLoopPacket;
+		}
 
 		switch(state.currentMode) {
 			case 0:
@@ -153,6 +162,11 @@ int main(void)
 				break;
 		}
 
+		state.timeLoopControl = start - get_time_us() - state.timeLoopPacket;
+		if (state.timeLoopControl > state.timeLoopControlMax) {
+			state.timeLoopControlMax = state.timeLoopControl;
+		}
+
 		if (check_timer_flag()) {
 			if (appClock%2 == 0) {
 				nrf_gpio_pin_toggle(YELLOW);
@@ -162,6 +176,7 @@ int main(void)
 			}
 			if (appClock%1000 == 0) {
 				state.sendStatus = true;
+				state.sendTimings = true;
 			}
 			if (appClock%5 == 0) {
 				adc_request_sample();
@@ -209,9 +224,16 @@ int main(void)
 
 			clear_timer_flag();
 			appClock++;
+
+			
+		}
+		state.timeLoopApp = start - get_time_us() - state.timeLoopPacket - state.timeLoopControl;
+		if (state.timeLoopApp > state.timeLoopAppMax) {
+			state.timeLoopAppMax = state.timeLoopApp;
 		}
 
 		if (check_sensor_int_flag()) {
+			
 			get_dmp_data();
 			if (state.currentMode == 3 && !state.calibrated) { // Calibrate mode
 				state.calibratePhiOffset = phi;
@@ -220,6 +242,11 @@ int main(void)
 				state.calibrated = true;
 			}
 			controlComponentLoop();
+		}
+
+		state.timeLoopSensor = start - get_time_us() - state.timeLoopPacket - state.timeLoopControl - state.timeLoopApp;
+		if (state.timeLoopSensor > state.timeLoopSensorMax) {
+			state.timeLoopSensorMax = state.timeLoopSensor;
 		}
 
 		if (state.packetError != 0) {
@@ -235,7 +262,14 @@ int main(void)
 		} else if (state.sendMotorStatus) {
 			state.sendMotorStatus = false;
 			writeMotorStatus();
+		} else if (state.sendTimings) {
+			state.sendTimings = false;
+			writeTimings();
 		}
+		state.timeLoop = start - get_time_us();
+		if (state.timeLoop > state.timeLoopMax) {
+			state.timeLoopMax = state.timeLoop;
+		}	
 	}
 
 	printf("\n\t Goodbye \n\n");

@@ -154,3 +154,11 @@ void writeAck(uint16_t packetNumber) {
 		0x00
 	);
 }
+
+void writeTimings() {
+	state.timeLoopMax = 0;
+	state.timeLoopPacketMax = 0;
+	state.timeLoopAppMax = 0;
+	state.timeLoopControlMax = 0;
+	state.timeLoopSensorMax = 0;
+}
