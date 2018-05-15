@@ -96,7 +96,7 @@ G_MODULE_EXPORT void on_button_abort_clicked(GtkButton *button, Widgets *widg)
 
 G_MODULE_EXPORT void on_button_up_clicked(GtkButton *button, Widgets *widg)
 {
-	if (pcStateGui->liftValue <=1000){
+	if (pcStateGui->liftValue < 1000){
 		pcStateGui->liftValue +=10;
 		pcStateGui->aPressed = true;
  	}
@@ -104,7 +104,7 @@ G_MODULE_EXPORT void on_button_up_clicked(GtkButton *button, Widgets *widg)
 
 G_MODULE_EXPORT void on_button_down_clicked(GtkButton *button, Widgets *widg)
 {	
-	if (pcStateGui->liftValue >10){
+	if (pcStateGui->liftValue >= 10){
 		pcStateGui->zPressed = true;
 		pcStateGui->liftValue -=10;
 	}

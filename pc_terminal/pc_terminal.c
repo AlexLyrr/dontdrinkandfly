@@ -366,13 +366,13 @@ void checkInput(char c, struct pcState *pcState)
      		 }
 			break;
 		case 'z':
-			if (pcState->liftValue >10 && pcState->mode == 2){
+			if (pcState->liftValue >= 10 && pcState->mode == 2){
 				pcState->zPressed = true;
 				pcState->liftValue -=10;
 			}
 			break;
 		case 'q':
-			if (pcState->yawValue > 10 && pcState->mode == 2){
+			if (pcState->yawValue >= 10 && pcState->mode == 2){
 				pcState->qPressed = true;
 				pcState->yawValue -= 10;
 			}
@@ -391,7 +391,7 @@ void checkInput(char c, struct pcState *pcState)
 
 			break;
 		case 'j':
-			if (pcState->PValue > 1 && pcState->mode == 4){
+			if (pcState->PValue >= 1 && pcState->mode == 4){
 				pcState->jPressed = true;
 				pcState->PValue -= 1;
 			}
@@ -403,7 +403,7 @@ void checkInput(char c, struct pcState *pcState)
 			}
 			break;
 		case 'k':
-			if (pcState->P1Value > 1 && pcState->mode == 5){
+			if (pcState->P1Value >= 1 && pcState->mode == 5){
 				pcState->kkPressed = true;
 				pcState->P1Value -= 1;
 			}
@@ -415,7 +415,7 @@ void checkInput(char c, struct pcState *pcState)
 			}
 			break;
 		case 'l':
-			if (pcState->P2Value > 1 && pcState->mode == 6){
+			if (pcState->P2Value >= 1 && pcState->mode == 6){
 				pcState->lPressed = true;
 				pcState->P2Value -= 1;
 			}
@@ -675,7 +675,7 @@ void logReceivePacket(SRPacket *rPacket){
 //@Author Alex Lyrakis
 void logSendPacket(SRPacket sPacket){
 	char guiText[20];
-	uint8_t lift;
+	uint16_t lift;
 
 	switch(sPacket.payload[0]){
 		case 3:
@@ -740,6 +740,9 @@ void updatePcState(struct pcState *pcState){
 	}
 	if (pcState->tYawValue > 180){
 		pcState->tYawValue = 180;
+	}
+	if( (pcState->tLiftValue < 200) && (pcState->liftValue >= 10) ){
+		pcState->tLiftValue += 190;
 	}
 }
 
