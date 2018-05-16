@@ -619,7 +619,7 @@ void logReceivePacket(SRPacket rPacket){
 			motor[1] = rPacket.payload[3] << 8 | rPacket.payload[4];
 			motor[2] = rPacket.payload[5] << 8 | rPacket.payload[6];
 			motor[3] = rPacket.payload[7] << 8 | rPacket.payload[8];
-			if(counter % 5 == 0 && (pcStateGui->mode == 4 || pcStateGui->mode == 5 || pcStateGui->mode == 6)){
+			if(counter % 15 == 0 && (pcStateGui->mode == 4 || pcStateGui->mode == 5 || pcStateGui->mode == 6)){
 				printMotorStatusGUI(&rPacket);
 			}
 			if(pcStateGui->mode == 2){
