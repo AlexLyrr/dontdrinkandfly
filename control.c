@@ -44,10 +44,23 @@ int16_t displacement;
 // 		prevTime = get_time_us();
 // }
 
+
 void yawControl() {
 	uint16_t yaw = state.controlYawUser * 100;
 	state.controlYaw = (uint8_t) state.pYaw * (yaw - sr);
 }
+
+/* This implementation works for me, needs to be tested on drone
+void yawControl() {
+	int32_t eps = ((int32_t) state.controlYawUser - 90) - (sr >> 7);
+	int32_t yawValue = (state.pYaw * eps) + 90;
+	if (yawValue > 180)
+		yawValue = 180;
+	if (yawValue < 0)
+		yawValue = 0;
+	state.controlYaw = (uint8_t) yawValue;
+}
+*/
 
 /*
 
