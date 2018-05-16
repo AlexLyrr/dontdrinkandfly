@@ -78,7 +78,7 @@ int main(void)
 	int32_t panicStep = 0;
 	systemDone = false;
 	appClock = 0;
-	uint32_t start;
+	uint32_t start = 0;
 
 	while (!systemDone) {
 		#ifdef APPLICATION_TIMINGS

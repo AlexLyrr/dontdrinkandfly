@@ -169,16 +169,16 @@ typedef struct {
 
 	
 
-	uint32_t timeLoop;
-	uint32_t timeLoopMax;
-	uint32_t timeLoopPacket;
-	uint32_t timeLoopPacketMax;
-	uint32_t timeLoopApp;
-	uint32_t timeLoopAppMax;
-	uint32_t timeLoopControl;
-	uint32_t timeLoopControlMax;
-	uint32_t timeLoopSensor;
-	uint32_t timeLoopSensorMax;
+	int32_t timeLoop;
+	int32_t timeLoopMax;
+	int32_t timeLoopPacket;
+	int32_t timeLoopPacketMax;
+	int32_t timeLoopApp;
+	int32_t timeLoopAppMax;
+	int32_t timeLoopControl;
+	int32_t timeLoopControlMax;
+	int32_t timeLoopSensor;
+	int32_t timeLoopSensorMax;
 } State;
 State state;
 bool systemDone;

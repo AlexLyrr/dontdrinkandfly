@@ -594,7 +594,8 @@ void initLogFiles(){
 void logReceivePacket(SRPacket rPacket){
 	uint16_t motor[4];
 	float battery;
-	uint32_t val;
+	uint32_t val, val2;
+	char guiText[30];
 	static int counter = 0;
 
 	counter++;
@@ -638,22 +639,23 @@ void logReceivePacket(SRPacket rPacket){
 			printf("Receive pong %u\n", val);
 			break;
 		case 14:
-			val = rPacket.payload[2] << 24 | rPacket.payload[3] << 16 | rPacket.payload[4] << 8 | rPacket.payload[5];
-			switch(rPacket.payload[1]) {
+			val = rPacket->payload[2] << 24 | rPacket->payload[3] << 16 | rPacket->payload[4] << 8 | rPacket->payload[5];
+			val2 = rPacket->payload[6] << 24 | rPacket->payload[7] << 16 | rPacket->payload[8] << 8 | rPacket->payload[9];
+			switch(rPacket->payload[1]) {
 				case 1:
-					printf("Loop time: %u\n", val);
+					printf("Loop time=%u, last=%u\n", val, val2);
 					break;
 				case 2:
-					printf("Packet Loop time: %u\n", val);
+					printf("Packet Loop time=%u, last=%u\n", val, val2);
 					break;
 				case 3:
-					printf("Control Loop time: %u\n", val);
+					printf("Control Loop time=%u, last=%u\n", val, val2);
 					break;
 				case 4:
-					printf("Application Loop time: %u\n", val);
+					printf("Application Loop time=%u, last=%u\n", val, val2);
 					break;
 				case 5:
-					printf("Sensor Loop time: %u\n", val);
+					printf("Sensor Loop time=%u, last=%u\n", val, val2);
 					break;
 			}
 			break;
