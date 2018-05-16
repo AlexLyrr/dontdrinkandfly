@@ -528,11 +528,11 @@ void receivePacket(SRPacket *rPacket){
 
 	while(pcReQueue.count >= PACKET_LENGTH && foundPacket == false){
 		if(queuePeekpc(&pcReQueue, 0) == PREAMPLE_B1 && queuePeekpc(&pcReQueue, 1) == PREAMPLE_B2){
-			for(uint16_t j = 2; j < PACKET_LENGTH - 1; j++){
+			for(uint16_t j = 2; j < (PACKET_LENGTH - 1); j++){
 				crc = crc8_table[crc ^ queuePeekpc(&pcReQueue, j)];
 			}
 			crcTemp = queuePeekpc(&pcReQueue, PACKET_LENGTH - 1);
-			if(crc == crcTemp){
+			if (crc == crcTemp) {
 				foundPacket = true;
 				//discard preamble bytes
 				dequeuepc(&pcReQueue);
@@ -545,15 +545,13 @@ void receivePacket(SRPacket *rPacket){
 				}
 				//discard crc
 				dequeuepc(&pcReQueue);
+				printf("Received %hhu\n", rPacket->payload[0]);
 				switch(rPacket->payload[0]) {
-
 					case 2:
-						logReceivePacket(rPacket);
-						break;
 					case 7:
-						logReceivePacket(rPacket);
-						break;
 					case 10:
+					case 12:
+					case 14:
 						logReceivePacket(rPacket);
 						break;
 					case 11:
@@ -562,8 +560,8 @@ void receivePacket(SRPacket *rPacket){
 						break;
 
 				}
-			}
-			else{
+			} else {
+				printf("Invalid CRC, expected:%hhu but got:%hhu\n", crcTemp, crc);
 				dequeuepc(&pcReQueue);
 			}
 		}
@@ -596,6 +594,7 @@ void logReceivePacket(SRPacket *rPacket){
 	uint16_t motor[4];
 	float battery;
 	char guiText[30];
+	uint32_t val;
 
 	switch(rPacket->payload[0]){
 		case 2:
@@ -668,6 +667,33 @@ void logReceivePacket(SRPacket *rPacket){
 				rPacket->fcs, rPacket->payload[0], motor[0], motor[1], motor[2], motor[3]);
 			fprintf(Rfile, "Packet number: %hu | Type: %hhu | Motor1: %hu | Motor2: %hu | Motor3: %hu | Motor4: %hu\n",
 				rPacket->fcs, rPacket->payload[0], motor[0], motor[1], motor[2], motor[3]);
+			break;
+		case 12:
+			printf("Receive ping\n");
+			break;
+		case 13:
+			val = rPacket->payload[1] << 24 | rPacket->payload[2] << 16 | rPacket->payload[3] << 8 | rPacket->payload[4]; 
+			printf("Receive pong %u\n", val);
+			break;
+		case 14:
+			val = rPacket->payload[1] << 24 | rPacket->payload[2] << 16 | rPacket->payload[3] << 8 | rPacket->payload[4];
+			switch(rPacket->payload[0]) {
+				case 1:
+					printf("Loop time: %u\n", val);
+					break;
+				case 2:
+					printf("Packet Loop time: %u\n", val);
+					break;
+				case 3:
+					printf("Control Loop time: %u\n", val);
+					break;
+				case 4:
+					printf("Application Loop time: %u\n", val);
+					break;
+				case 5:
+					printf("Sensor Loop time: %u\n", val);
+					break;
+			}
 			break;
 	}
 }

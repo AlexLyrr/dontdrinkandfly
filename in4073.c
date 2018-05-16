@@ -81,15 +81,19 @@ int main(void)
 	uint32_t start;
 
 	while (!systemDone) {
+		#ifdef APPLICATION_TIMINGS
 		start = get_time_us();
+		#endif
 
 		communicationComponentLoop();
 		packetComponentLoop();
 		
+		#ifdef APPLICATION_TIMINGS
 		state.timeLoopPacket = start - get_time_us();
 		if (state.timeLoopPacket > state.timeLoopPacketMax) {
 			state.timeLoopPacketMax = state.timeLoopPacket;
 		}
+		#endif
 
 		switch(state.currentMode) {
 			case 0:
@@ -161,11 +165,12 @@ int main(void)
 				}
 				break;
 		}
-
+		#ifdef APPLICATION_TIMINGS
 		state.timeLoopControl = start - get_time_us() - state.timeLoopPacket;
 		if (state.timeLoopControl > state.timeLoopControlMax) {
 			state.timeLoopControlMax = state.timeLoopControl;
 		}
+		#endif
 
 		if (check_timer_flag()) {
 			if (appClock%2 == 0) {
@@ -176,7 +181,9 @@ int main(void)
 			}
 			if (appClock%1000 == 0) {
 				state.sendStatus = true;
+				#ifdef APPLICATION_TIMINGS
 				state.sendTimings = true;
+				#endif
 			}
 			if (appClock%5 == 0) {
 				adc_request_sample();
@@ -227,10 +234,13 @@ int main(void)
 
 			
 		}
+
+		#ifdef APPLICATION_TIMINGS
 		state.timeLoopApp = start - get_time_us() - state.timeLoopPacket - state.timeLoopControl;
 		if (state.timeLoopApp > state.timeLoopAppMax) {
 			state.timeLoopAppMax = state.timeLoopApp;
 		}
+		#endif
 
 		if (check_sensor_int_flag()) {
 			
@@ -243,12 +253,12 @@ int main(void)
 			}
 			controlComponentLoop();
 		}
-
+		#ifdef APPLICATION_TIMINGS
 		state.timeLoopSensor = start - get_time_us() - state.timeLoopPacket - state.timeLoopControl - state.timeLoopApp;
 		if (state.timeLoopSensor > state.timeLoopSensorMax) {
 			state.timeLoopSensorMax = state.timeLoopSensor;
 		}
-
+		#endif
 		if (state.packetError != 0) {
 			writeError(state.packetError);
 			state.packetError = 0;
@@ -264,12 +274,16 @@ int main(void)
 			writeMotorStatus();
 		} else if (state.sendTimings) {
 			state.sendTimings = false;
+			#ifdef APPLICATION_TIMINGS
 			writeTimings();
+			#endif
 		}
+		#ifdef APPLICATION_TIMINGS
 		state.timeLoop = start - get_time_us();
 		if (state.timeLoop > state.timeLoopMax) {
 			state.timeLoopMax = state.timeLoop;
 		}	
+		#endif
 	}
 
 	printf("\n\t Goodbye \n\n");
