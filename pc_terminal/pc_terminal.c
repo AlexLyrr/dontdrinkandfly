@@ -301,7 +301,7 @@ void checkInput(char c, struct pcState *pcState)
 				{
 					case 'A':
 						pcState->escPressed = false;
-						if (pcState->pitchValue > 0 && (pcState->mode == 2 || pcState->mode == 6  || pcState->mode == 5)){
+						if (pcState->pitchValue > 75 && (pcState->mode == 2 || pcState->mode == 6  || pcState->mode == 5)){
 							pcState->upPressed = true;
 							pcState->pitchValue -= 1;
 						}
@@ -309,7 +309,7 @@ void checkInput(char c, struct pcState *pcState)
 						break;
 					case 'B':
 						pcState->escPressed = false;
-						if (pcState->pitchValue < 180 && (pcState->mode == 2 || pcState->mode == 6  || pcState->mode == 5)){
+						if (pcState->pitchValue < 105 && (pcState->mode == 2 || pcState->mode == 6  || pcState->mode == 5)){
 							pcState->downPressed = true;
 							pcState->pitchValue += 1;
 						}
@@ -317,7 +317,7 @@ void checkInput(char c, struct pcState *pcState)
 						break;
 					case 'C':
 						pcState->escPressed = false;
-						if (pcState->rollValue > 0 && (pcState->mode == 2 || pcState->mode == 6  || pcState->mode == 5)){
+						if (pcState->rollValue > 75 && (pcState->mode == 2 || pcState->mode == 6  || pcState->mode == 5)){
 							pcState->rightPressed = true;
 							pcState->rollValue -= 1;
 						}
@@ -325,7 +325,7 @@ void checkInput(char c, struct pcState *pcState)
 						break;
 					case 'D':
 						pcState->escPressed = false;
-						if (pcState->rollValue < 180 && (pcState->mode == 2 || pcState->mode == 6  || pcState->mode == 5)){
+						if (pcState->rollValue < 105 && (pcState->mode == 2 || pcState->mode == 6  || pcState->mode == 5)){
 							pcState->leftPressed = true;
 							pcState->rollValue += 1;
 						}
@@ -370,7 +370,7 @@ void checkInput(char c, struct pcState *pcState)
 			pcState->mode = 8;
 			break;
 		case 'a':
-			if (pcState->liftValue < 1000 && (pcState->mode == 2 || pcState->mode == 4)){
+			if (pcState->liftValue < 1000 && (pcState->mode == 2  || pcState->mode == 4)){
 				pcState->liftValue +=10;
 				pcState->aPressed = true;
      		 }
@@ -835,7 +835,6 @@ void printPcStatusGUI(SRPacket *sPacket){
 
 //@Author Alex Lyrakis
 void logSendPacket(SRPacket sPacket){
-
 	switch(sPacket.payload[0]){
 		case 3:
 			fprintf(Sfile, "Packet number: %hu | Type: %hhu | Abort: %hhu | Roll: %hhu | Pitch: %hhu | Yaw: %hhu | HeightByte1: %hhu | HeightByte0: %hhu",
