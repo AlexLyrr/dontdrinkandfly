@@ -145,9 +145,6 @@ void update_motors(void)
 		if (ae[i] > 550){
 			ae[i] = 550;
 		}
-		if (ae[i] < 200 && state.controlLift != 0){
-			ae[i] = 200;
-		}
 	}
 	motor[0] = ae[0];
 	motor[1] = ae[1];

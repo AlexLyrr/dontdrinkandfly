@@ -604,42 +604,42 @@ void logReceivePacket(SRPacket *rPacket){
 			printf("System time: %hhu | Packet number: %hu | Type: %hhu | Mode: %hhu | Battery: %f | Roll: %hhu | Pitch: %hhu | Height: %hhu\n",
 				rPacket->payload[6], rPacket->fcs, rPacket->payload[0], rPacket->payload[1], battery, rPacket->payload[3], rPacket->payload[4], rPacket->payload[5]);
 			fprintf(Rfile, "System time: %hu | Packet number: %hu | Type: %hhu | Mode: %hu | Battery: %hu | Roll: %hu | Pitch: %hu | Height: %hu\n",
-				rPacket->payload[6], rPacket->fcs, rPacket->payload[0], rPacket->payload[1], rPacket->payload[2], rPacket->payload[3], 
+				rPacket->payload[6], rPacket->fcs, rPacket->payload[0], rPacket->payload[1], rPacket->payload[2], rPacket->payload[3],
 				rPacket->payload[4], rPacket->payload[5]);
 				sprintf(guiText, "%f V", battery);
 				gtk_label_set_label(widg.l[5], guiText);
-				calculateBatteryStatus(battery);	
-				switch(rPacket->payload[1]){	
+				calculateBatteryStatus(battery);
+				switch(rPacket->payload[1]){
 					case 0:
 						sprintf(guiText, "Safe");
 						break;
 					case 1:
 						sprintf(guiText, "Panic");
-						break;					
+						break;
 					case 2:
 						sprintf(guiText, "Manual");
-						break;					
+						break;
 					case 3:
 						sprintf(guiText, "Calibration");
-						break;					
+						break;
 					case 4:
 						sprintf(guiText, "Yaw");
-						break;					
+						break;
 					case 5:
 						sprintf(guiText, "Full Control");
 						break;
 					case 6:
 						sprintf(guiText, "Raw");
-						break;					
+						break;
 					case 7:
 						sprintf(guiText, "Height");
-						break;					
+						break;
 					case 8:
 						sprintf(guiText, "Wireless");
-						break;					
-				}				
-				gtk_label_set_label(widg.l[4], guiText);	
-				
+						break;
+				}
+				gtk_label_set_label(widg.l[4], guiText);
+
 				for (int i = 3; i < 6; ++i)
 				{
 					sprintf(guiText, "%hhu", rPacket->payload[i]);
@@ -662,7 +662,7 @@ void logReceivePacket(SRPacket *rPacket){
 				gtk_label_set_label(widg.l[i], guiText);
 				gtk_level_bar_set_value (widg.lb[i], motor[i]);
 			}
-			
+
 
 			printf("Packet number: %hu | Type: %hhu | Motor1: %hu | Motor2: %hu | Motor3: %hu | Motor4: %hu\n",
 				rPacket->fcs, rPacket->payload[0], motor[0], motor[1], motor[2], motor[3]);
@@ -695,7 +695,7 @@ void printPcStatusGUI(SRPacket sPacket){
 	sprintf(guiText, "%hhu", pcStateGui->yawValue);
 	gtk_label_set_label(widg.l[15], guiText);
 	sprintf(guiText, "%hu", pcStateGui->liftValue);
-	gtk_label_set_label(widg.l[16], guiText);			
+	gtk_label_set_label(widg.l[16], guiText);
 
 	//Print joystick to GUI
 	sprintf(guiText, "%hhu", pcStateGui->jRollValue);
@@ -705,7 +705,7 @@ void printPcStatusGUI(SRPacket sPacket){
 	sprintf(guiText, "%hhu", pcStateGui->jYawValue);
 	gtk_label_set_label(widg.l[19], guiText);
 	sprintf(guiText, "%hu", pcStateGui->jThrottleValue);
-	gtk_label_set_label(widg.l[20], guiText);	
+	gtk_label_set_label(widg.l[20], guiText);
 }
 
 //@Author Alex Lyrakis
@@ -716,7 +716,7 @@ void logSendPacket(SRPacket sPacket){
 			fprintf(Sfile, "Packet number: %hu | Type: %hhu | Abort: %hhu | Roll: %hhu | Pitch: %hhu | Yaw: %hhu | HeightByte1: %hhu | HeightByte0: %hhu",
 						sPacket.fcs, sPacket.payload[0], sPacket.payload[1], sPacket.payload[2], sPacket.payload[3], sPacket.payload[4], sPacket.payload[5], sPacket.payload[6]);
 			fprintf(Sfile, " | crc: %hhu \n", sPacket.crc);
-			printPcStatusGUI(sPacket);			
+			printPcStatusGUI(sPacket);
 			break;
 		case 5:
 			fprintf(Sfile, "Packet number: %hu | Type: %hhu | Mode: %hhu",
@@ -740,7 +740,7 @@ void updatePcState(struct pcState *pcState){
 	pcState->tYawValue = pcState->yawValue + pcState->jYawValue - 90;
 	if (pcState->tRollValue < 0) {
 		pcState->tRollValue = 0;
-	} 
+	}
 	else if (pcState->tRollValue > 180) {
     pcState->tRollValue = 180;
 	}
@@ -752,7 +752,7 @@ void updatePcState(struct pcState *pcState){
     }
     if (pcState->tYawValue < 0) {
       pcState->tYawValue = 0;
-    } 
+    }
     else if (pcState->tYawValue > 180) {
       pcState->tYawValue = 180;
     }
@@ -767,10 +767,11 @@ void updatePcState(struct pcState *pcState){
 	}
 	if (pcState->tYawValue > 180){
 		pcState->tYawValue = 180;
-	}
+	}/*
 	if( (pcState->tLiftValue < 200) && (pcState->liftValue >= 10) ){
 		pcState->tLiftValue += 190;
-	}
+	}*/
+
 }
 
 void initReceivedACK(){
@@ -832,7 +833,7 @@ int main(int argc, char **argv)
 	{
 		//beginLoop = clock();
 		//clock_gettime(CLOCK_MONOTONIC_RAW, &start);
-		
+
 		if ((c = term_getchar_nb()) != -1)	// Read from keyboard and store in fd_RS232
 		{
 			checkInput(c, pcState);
@@ -863,8 +864,8 @@ int main(int argc, char **argv)
 					setPacket(pcState, &sPacket);
 					sendPacket(sPacket);
 					logSendPacket(sPacket);
-					//if (pcState->escPressed) 
-            		//	break; 
+					//if (pcState->escPressed)
+            		//	break;
 					resetPcState(pcState);
 					sPacketBuffer[sPacket.fcs] = sPacket;
 			}
