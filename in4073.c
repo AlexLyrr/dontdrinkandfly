@@ -63,12 +63,14 @@ int main(void)
 	state.sendAck = false;
 	state.sendMotorStatus = false;
 	state.sendTimings = false;
+	state.sendPing = false;
+
 	state.packetError = 0;
 
 	state.pChanged = false;
-	state.pRoll = 1;
-	state.pPitch = 1;
-	state.pYaw = 1;
+	state.pRoll = 100;
+	state.pPitch = 100;
+	state.pYaw = 100;
 
 	state.calibrated = false;
 	state.calibratePhiOffset = 0;
@@ -183,6 +185,7 @@ int main(void)
 				state.sendStatus = true;
 				#ifdef APPLICATION_TIMINGS
 				state.sendTimings = true;
+				state.sendPing = true;
 				#endif
 			}
 			if (appClock%5 == 0) {
@@ -277,6 +280,9 @@ int main(void)
 			#ifdef APPLICATION_TIMINGS
 			writeTimings();
 			#endif
+		} else if (state.sendPing) {
+			state.sendPing = false;
+			writePing(get_time_us());
 		}
 		#ifdef APPLICATION_TIMINGS
 		state.timeLoop = get_time_us() - start;

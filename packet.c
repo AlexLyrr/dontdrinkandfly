@@ -77,7 +77,8 @@ void parsePacketSetP() {
 
 void parsePacketPing() {
 	writePacket(13, state.currentPacket[5], state.currentPacket[6], state.currentPacket[7], state.currentPacket[8],
-	0x00, 0x00, 0x00, 0x00, 0x00);
+	state.currentPacket[9], state.currentPacket[10], state.currentPacket[11], state.currentPacket[12],
+	0x00);
 }
 
 /*
@@ -197,4 +198,12 @@ void writeTimings() {
 	state.timeLoopControlMax = 0;
 	state.timeLoopSensor = 0;
 	state.timeLoopSensorMax = 0;
+}
+
+void writePing(uint32_t clock) {
+	writePacket(12, 0,0,0,0, (clock >> 24) & 0xFF, (clock >> 16) & 0xFF, (clock >> 8) & 0xFF, clock & 0xFF, 0);
+}
+
+void writePong(uint32_t clock) {
+	writePacket(13, 0,0,0,0, (clock >> 24) & 0xFF, (clock >> 16) & 0xFF, (clock >> 8) & 0xFF, clock & 0xFF, 0);
 }

@@ -136,6 +136,7 @@ typedef struct {
 	uint8_t packetError;
 	uint16_t packetAck;
 	bool sendAck;
+	bool sendPing;
 
 	uint16_t packetNumber;
 	uint8_t currentPacket[PACKET_LENGTH];
@@ -208,6 +209,7 @@ void writeError(uint8_t errorCode);
 void writeMotorStatus();
 void writeAck(uint16_t packetNumber);
 void writeTimings();
+void writePing();
 
 int root(int a, int n);
 int iPow(int a, int e);

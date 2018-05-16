@@ -60,6 +60,16 @@ static uint8_t const crc8_table[] = {
     0xbd, 0x83, 0xc1, 0xff};
 
 struct termios 	savetty;
+#include <sys/time.h>
+
+/**
+ * Returns the current time in microseconds.
+ */
+uint64_t getMicrotime(){
+	struct timeval currentTime;
+	gettimeofday(&currentTime, NULL);
+	return currentTime.tv_sec * (int)1e6 + currentTime.tv_usec;
+}
 
 void	term_initio()
 {
@@ -495,13 +505,13 @@ void setPacket(struct pcState *pcState, SRPacket *sPacket){
 				sPacket->payload[i] = 0; // null bytes
 			}
 	}
-	// Set crc
-	sPacket->crc = 0x00;
-	sPacket->crc = crc8_table[sPacket->crc ^ ((uint8_t) (sPacket->fcs >> 8))];
-	sPacket->crc = crc8_table[sPacket->crc ^ ((uint8_t) (sPacket->fcs & 0xFF))];
-	for (int i=0; i<10; i++) {
-		sPacket->crc = crc8_table[sPacket->crc ^ sPacket->payload[i]];
-	}
+	// // Set crc
+	// sPacket->crc = 0x00;
+	// sPacket->crc = crc8_table[sPacket->crc ^ ((uint8_t) (sPacket->fcs >> 8))];
+	// sPacket->crc = crc8_table[sPacket->crc ^ ((uint8_t) (sPacket->fcs & 0xFF))];
+	// for (int i=0; i<10; i++) {
+	// 	sPacket->crc = crc8_table[sPacket->crc ^ sPacket->payload[i]];
+	// }
 	// Increase packet counter
 	if (sPacketCounter == 0xFFFF)
 		sPacketCounter = 0;
@@ -517,6 +527,12 @@ void sendPacket(SRPacket sPacket){
 	rs232_putchar(sPacket.fcs & 0xFF);
 	for (int i=0; i<10; i++){
 		rs232_putchar(sPacket.payload[i]);
+	}
+	sPacket.crc = 0x00;
+	sPacket.crc = crc8_table[sPacket.crc ^ ((uint8_t) (sPacket.fcs >> 8))];
+	sPacket.crc = crc8_table[sPacket.crc ^ ((uint8_t) (sPacket.fcs & 0xFF))];
+	for (int i=0; i<10; i++) {
+		sPacket.crc = crc8_table[sPacket.crc ^ sPacket.payload[i]];
 	}
 	rs232_putchar(sPacket.crc);
 }
@@ -553,6 +569,7 @@ void receivePacket(SRPacket rPacket){
 					case 7:
 					case 10:
 					case 12:
+					case 13:
 					case 14:
 						logReceivePacket(rPacket);
 						break;
@@ -595,6 +612,7 @@ void logReceivePacket(SRPacket rPacket){
 	uint16_t motor[4];
 	float battery;
 	uint32_t val, val2;
+	uint64_t val3;
 	char guiText[30];
 	static int counter = 0;
 
@@ -616,10 +634,10 @@ void logReceivePacket(SRPacket rPacket){
 			fprintf(Rfile, "Type: %hhu | ERROR: %hu\n", rPacket.payload[0], rPacket.payload[1]);
 			break;
 		case 10:
-			motor[0] = rPacket.payload[1] << 8 | rPacket.payload[2];
-			motor[1] = rPacket.payload[3] << 8 | rPacket.payload[4];
-			motor[2] = rPacket.payload[5] << 8 | rPacket.payload[6];
-			motor[3] = rPacket.payload[7] << 8 | rPacket.payload[8];
+			motor[0] = (uint16_t) rPacket.payload[1] << 8 | (uint16_t)rPacket.payload[2];
+			motor[1] = (uint16_t)rPacket.payload[3] << 8 | (uint16_t)rPacket.payload[4];
+			motor[2] = (uint16_t)rPacket.payload[5] << 8 | (uint16_t)rPacket.payload[6];
+			motor[3] = (uint16_t)rPacket.payload[7] << 8 | (uint16_t)rPacket.payload[8];
 			if(counter % 15 == 0 && (pcStateGui->mode == 4 || pcStateGui->mode == 5 || pcStateGui->mode == 6)){
 				//printMotorStatusGUI(&rPacket);
 			}
@@ -633,15 +651,23 @@ void logReceivePacket(SRPacket rPacket){
 			break;
 		case 12:
 			printf("Receive ping\n");
+			writePing();
 			break;
 		case 13:
-			val = rPacket.payload[1] << 24 | rPacket.payload[2] << 16 | rPacket.payload[3] << 8 | rPacket.payload[4]; 
-			printf("Receive pong %u\n", val);
+			val3 = ((uint64_t)rPacket.payload[1] << 56) | 
+				((uint64_t)rPacket.payload[2] << 48) | 
+				((uint64_t)rPacket.payload[3] << 40) | 
+				((uint64_t)rPacket.payload[4] << 32) | 
+				((uint64_t)rPacket.payload[5] << 24) | 
+				((uint64_t)rPacket.payload[6] << 16) | 
+				((uint64_t)rPacket.payload[7] << 8) | 
+				((uint64_t)rPacket.payload[8]); 
+			printf("Receive pong %lu\n", getMicrotime() - val3);
 			break;
 		case 14:
-			val = rPacket->payload[2] << 24 | rPacket->payload[3] << 16 | rPacket->payload[4] << 8 | rPacket->payload[5];
-			val2 = rPacket->payload[6] << 24 | rPacket->payload[7] << 16 | rPacket->payload[8] << 8 | rPacket->payload[9];
-			switch(rPacket->payload[1]) {
+			val = (uint32_t)rPacket.payload[2] << 24 | (uint32_t)rPacket.payload[3] << 16 | (uint32_t)rPacket.payload[4] << 8 | (uint32_t)rPacket.payload[5];
+			val2 = (uint32_t)rPacket.payload[6] << 24 | (uint32_t)rPacket.payload[7] << 16 | (uint32_t)rPacket.payload[8] << 8 | (uint32_t)rPacket.payload[9];
+			switch(rPacket.payload[1]) {
 				case 1:
 					printf("Loop time=%u, last=%u\n", val, val2);
 					break;
@@ -660,6 +686,25 @@ void logReceivePacket(SRPacket rPacket){
 			}
 			break;
 	}
+}
+
+void writePing() {
+	SRPacket rPacket;
+	rPacket.fcs = 0;
+	uint64_t time = getMicrotime();
+	rPacket.payload[0] = 12;
+	rPacket.payload[1] = (time >> 56) & 0xFF;
+	rPacket.payload[2] = (time >> 48) & 0xFF;
+	rPacket.payload[3] = (time >> 40) & 0xFF;
+	rPacket.payload[4] = (time >> 32) & 0xFF;
+	rPacket.payload[5] = (time >> 24) & 0xFF;
+	rPacket.payload[6] = (time >> 16) & 0xFF;
+	rPacket.payload[7] = (time >> 8) & 0xFF;
+	rPacket.payload[8] = (time) & 0xFF;
+
+	printf("%hhu", rPacket.payload[1]);
+	
+	sendPacket(rPacket);
 }
 
 //@Author Georgios Giannakaras
@@ -919,8 +964,7 @@ int main(int argc, char **argv)
 	//pthread_create(&guithread, NULL, guiThread, NULL);
 
 	//send & receive
-	for (;;)
-	{
+	while(1) {
 		//beginLoop = clock();
 		//clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 
@@ -930,9 +974,9 @@ int main(int argc, char **argv)
 		}
 
 		// Read from joystic and update pcState
-    #ifdef JOYSTICK_ENABLE
+   	 	#ifdef JOYSTICK_ENABLE
 		checkJoystick(pcState);
-    #endif
+    	#endif
 
 		// Read from fd_RS232
 		if ((c = rs232_getchar_nb()) != -1){
@@ -947,21 +991,23 @@ int main(int argc, char **argv)
 			}
 		}
 
-		if ((clock()-timeLastPacket)> 50){
-			//TBD: Based on our pcState and protocol we have to put a sequence of bytes using rs232_putchar(c);
-			//		After we have to reset the pcState.
-			if (sthPressed(pcState) || pcState->jChanged){
-					updatePcState(pcState);
-					setPacket(pcState, &sPacket);
-					sendPacket(sPacket);
-					logSendPacket(sPacket);
-					//if (pcState->escPressed)
-            		//	break;
-					resetPcState(pcState);
-					sPacketBuffer[sPacket.fcs] = sPacket;
-			}
-			timeLastPacket = clock();
+		if (sthPressed(pcState) || pcState->jChanged){
+				updatePcState(pcState);
+				setPacket(pcState, &sPacket);
+				sendPacket(sPacket);
+				logSendPacket(sPacket);
+				//if (pcState->escPressed)
+				//	break;
+				resetPcState(pcState);
+				sPacketBuffer[sPacket.fcs] = sPacket;
 		}
+
+		// if ((clock()-timeLastPacket)> 50){
+		// 	//TBD: Based on our pcState and protocol we have to put a sequence of bytes using rs232_putchar(c);
+		// 	//		After we have to reset the pcState.
+			
+		// 	timeLastPacket = clock();
+		// }
 
 		/*
 		endLoop = clock();
