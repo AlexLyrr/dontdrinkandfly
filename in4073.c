@@ -51,7 +51,7 @@ int main(void)
 	imu_init(true, 100);
 	baro_init();
 	spi_flash_init();
-	ble_init();
+	// ble_init();
 
 	state.currentMode = 0;
 	state.nextMode = 0;
@@ -68,9 +68,9 @@ int main(void)
 	state.packetError = 0;
 
 	state.pChanged = false;
-	state.pRoll = 100;
-	state.pPitch = 100;
-	state.pYaw = 100;
+	state.pRoll = 50;
+	state.pPitch = 50;
+	state.pYaw = 50;
 
 	state.calibrated = false;
 	state.calibratePhiOffset = 0;
@@ -118,7 +118,7 @@ int main(void)
 				if (state.controlChanged) {
 					run_filters_and_control(); // TODO: rename function
 					state.controlChanged = false;
-					state.sendMotorStatus = true;
+					// state.sendMotorStatus = true;
 					// writeMotorStatus(); // TODO: move to the end of the control loop
 				}
 				break;
@@ -131,7 +131,7 @@ int main(void)
 				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
 					yawControl();
 					run_filters_and_control();
-					writeMotorStatus();
+					// writeMotorStatus();
 				}
 				if (state.controlChanged) { // We don't need to do anything extra yet when this happens
 					state.controlChanged = false;
@@ -144,7 +144,7 @@ int main(void)
 				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
 					rollControl();
 					run_filters_and_control();
-					writeMotorStatus();
+					// writeMotorStatus();
 				}
 				if (state.controlChanged) { // We don't need to do anything extra yet when this happens
 					state.controlChanged = false;
@@ -157,7 +157,7 @@ int main(void)
 				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
 					pitchControl();
 					run_filters_and_control();
-					writeMotorStatus();
+					// writeMotorStatus
 				}
 				if (state.controlChanged) { // We don't need to do anything extra yet when this happens
 					state.controlChanged = false;
@@ -183,6 +183,7 @@ int main(void)
 			}
 			if (appClock%200 == 0) {
 				state.sendStatus = true;
+				state.sendMotorStatus = true;
 				#ifdef APPLICATION_TIMINGS
 				state.sendTimings = true;
 				state.sendPing = true;

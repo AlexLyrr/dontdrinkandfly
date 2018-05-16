@@ -1,6 +1,6 @@
 
 CC=gcc
-CFLAGS = -g -Wall -lm
+CFLAGS = -g -Wall -lm 
 EXEC = ./pc-terminal
 
 all:
@@ -8,7 +8,7 @@ all:
 	#$(CC) $(CFLAGS) pc_terminal.c pcqueue.c joystick.c -lm eslgui.c -o $(EXEC) `pkg-config --cflags --libs gtk+-3.0 gmodule-2.0` -pthread
 
 joystick:
-	$(CC) $(CFLAGS) pc_terminal.c pcqueue.c joystick.c eslgui.c -lm -o -DJOSTICK_ENABLE $(EXEC) `pkg-config --cflags --libs gtk+-3.0 gmodule-2.0` -pthread
+	$(CC) $(CFLAGS) -D JOYSTICK_ENABLE pc_terminal.c pcqueue.c joystick.c eslgui.c -o $(EXEC) `pkg-config --cflags --libs gtk+-3.0 gmodule-2.0` -pthread
 
 run:
 	$(EXEC)

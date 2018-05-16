@@ -121,7 +121,7 @@ void ble_send(void);
 #define PANIC_STEPS (5000 / TIMER_PERIOD)
 #define PACKET_BODY_LENGTH 10
 #define PACKET_LENGTH (PACKET_BODY_LENGTH + 5)
-#define APPLICATION_TIMINGS 1
+#define APPLICATION_TIMINGS 0
 
 typedef struct {
 	uint8_t nextMode;

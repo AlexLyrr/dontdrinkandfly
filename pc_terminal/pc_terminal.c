@@ -92,7 +92,7 @@ void	term_exitio()
 
 void	term_puts(char *s)
 {
-	fprintf(stderr,"%s",s);
+	// fprintf(stderr,"%s",s);
 }
 
 void	term_putchar(char c)
@@ -623,15 +623,15 @@ void logReceivePacket(SRPacket rPacket){
       		battery = (((float) rPacket.payload[2]) * 7 / 100) + 1.2;
 			printf("System time: %hhu | Packet number: %hu | Type: %hhu | Mode: %hhu | Battery: %f | Roll: %hhu | Pitch: %hhu | Height: %hhu\n",
 				rPacket.payload[6], rPacket.fcs, rPacket.payload[0], rPacket.payload[1], battery, rPacket.payload[3], rPacket.payload[4], rPacket.payload[5]);
-			fprintf(Rfile, "System time: %hu | Packet number: %hu | Type: %hhu | Mode: %hu | Battery: %hu | Roll: %hu | Pitch: %hu | Height: %hu\n",
-				rPacket.payload[6], rPacket.fcs, rPacket.payload[0], rPacket.payload[1], rPacket.payload[2], rPacket.payload[3],
-				rPacket.payload[4], rPacket.payload[5]);
+			// fprintf(Rfile, "System time: %hu | Packet number: %hu | Type: %hhu | Mode: %hu | Battery: %hu | Roll: %hu | Pitch: %hu | Height: %hu\n",
+				// rPacket.payload[6], rPacket.fcs, rPacket.payload[0], rPacket.payload[1], rPacket.payload[2], rPacket.payload[3],
+				// rPacket.payload[4], rPacket.payload[5]);
 			//calculateBatteryStatus(battery);
 			//printDroneStatusGUI(&rPacket);
 			break;
 		case 7:
 			printf("Type: %hhu | ERROR: %hhu\n", rPacket.payload[0], rPacket.payload[1]);
-			fprintf(Rfile, "Type: %hhu | ERROR: %hu\n", rPacket.payload[0], rPacket.payload[1]);
+			// fprintf(Rfile, "Type: %hhu | ERROR: %hu\n", rPacket.payload[0], rPacket.payload[1]);
 			break;
 		case 10:
 			motor[0] = (uint16_t) rPacket.payload[1] << 8 | (uint16_t)rPacket.payload[2];
@@ -646,8 +646,8 @@ void logReceivePacket(SRPacket rPacket){
 			}
 			printf("Packet number: %hu | Type: %hhu | Motor1: %hu | Motor2: %hu | Motor3: %hu | Motor4: %hu\n",
 				rPacket.fcs, rPacket.payload[0], motor[0], motor[1], motor[2], motor[3]);
-			fprintf(Rfile, "Packet number: %hu | Type: %hhu | Motor1: %hu | Motor2: %hu | Motor3: %hu | Motor4: %hu\n",
-				rPacket.fcs, rPacket.payload[0], motor[0], motor[1], motor[2], motor[3]);
+			// fprintf(Rfile, "Packet number: %hu | Type: %hhu | Motor1: %hu | Motor2: %hu | Motor3: %hu | Motor4: %hu\n",
+				// rPacket.fcs, rPacket.payload[0], motor[0], motor[1], motor[2], motor[3]);
 			break;
 		case 12:
 			printf("Receive ping\n");
@@ -837,20 +837,20 @@ void printPcStatusGUI(SRPacket *sPacket){
 void logSendPacket(SRPacket sPacket){
 	switch(sPacket.payload[0]){
 		case 3:
-			fprintf(Sfile, "Packet number: %hu | Type: %hhu | Abort: %hhu | Roll: %hhu | Pitch: %hhu | Yaw: %hhu | HeightByte1: %hhu | HeightByte0: %hhu",
-						sPacket.fcs, sPacket.payload[0], sPacket.payload[1], sPacket.payload[2], sPacket.payload[3], sPacket.payload[4], sPacket.payload[5], sPacket.payload[6]);
-			fprintf(Sfile, " | crc: %hhu \n", sPacket.crc);
+			// fprintf(Sfile, "Packet number: %hu | Type: %hhu | Abort: %hhu | Roll: %hhu | Pitch: %hhu | Yaw: %hhu | HeightByte1: %hhu | HeightByte0: %hhu",
+						// sPacket.fcs, sPacket.payload[0], sPacket.payload[1], sPacket.payload[2], sPacket.payload[3], sPacket.payload[4], sPacket.payload[5], sPacket.payload[6]);
+			// fprintf(Sfile, " | crc: %hhu \n", sPacket.crc);
 			//printPcStatusGUI(&sPacket);
 			break;
 		case 5:
-			fprintf(Sfile, "Packet number: %hu | Type: %hhu | Mode: %hhu",
-						sPacket.fcs, sPacket.payload[0], sPacket.payload[1]);
-			fprintf(Sfile, " | crc: %hhu \n", sPacket.crc);
+			// fprintf(Sfile, "Packet number: %hu | Type: %hhu | Mode: %hhu",
+						// sPacket.fcs, sPacket.payload[0], sPacket.payload[1]);
+			// fprintf(Sfile, " | crc: %hhu \n", sPacket.crc);
 			break;
 		case 9:
-			fprintf(Sfile, "Packet number: %hu | Type: %hhu | P_rollByte1: %hhu | P_rollByte0: %hhu | P_pitchByte1: %hhu | P_pitchByte0: %hhu | P_yawByte1: %hhu | P_yawByte0: %hhu",
-						sPacket.fcs, sPacket.payload[0], sPacket.payload[1], sPacket.payload[2], sPacket.payload[3], sPacket.payload[4], sPacket.payload[5], sPacket.payload[6]);
-			fprintf(Sfile, " | crc: %hhu \n", sPacket.crc);
+			// fprintf(Sfile, "Packet number: %hu | Type: %hhu | P_rollByte1: %hhu | P_rollByte0: %hhu | P_pitchByte1: %hhu | P_pitchByte0: %hhu | P_yawByte1: %hhu | P_yawByte0: %hhu",
+						// sPacket.fcs, sPacket.payload[0], sPacket.payload[1], sPacket.payload[2], sPacket.payload[3], sPacket.payload[4], sPacket.payload[5], sPacket.payload[6]);
+			// fprintf(Sfile, " | crc: %hhu \n", sPacket.crc);
 			break;
 	}
 }
@@ -956,7 +956,7 @@ int main(int argc, char **argv)
 	SRPacket rPacket;
 	bool bufferCleared = false;
 	int c;
-	clock_t timeLastPacket = clock();
+	long timeLastPacket = getMicrotime();
 	pthread_t guithread;
 	initializations(pcState);
 	pcStateGui = pcState;
@@ -990,23 +990,23 @@ int main(int argc, char **argv)
 			}
 		}
 
-		if (sthPressed(pcState) || pcState->jChanged){
-				updatePcState(pcState);
-				setPacket(pcState, &sPacket);
-				sendPacket(sPacket);
-				logSendPacket(sPacket);
-				//if (pcState->escPressed)
-				//	break;
-				resetPcState(pcState);
-				sPacketBuffer[sPacket.fcs] = sPacket;
-		}
+		if ((getMicrotime() - timeLastPacket) > 5000){
+			if (sthPressed(pcState) || pcState->jChanged){
+					updatePcState(pcState);
+					setPacket(pcState, &sPacket);
+					sendPacket(sPacket);
+					logSendPacket(sPacket);
+					//if (pcState->escPressed)
+					//	break;
+					resetPcState(pcState);
+					sPacketBuffer[sPacket.fcs] = sPacket;
+			}
 
-		// if ((clock()-timeLastPacket)> 50){
-		// 	//TBD: Based on our pcState and protocol we have to put a sequence of bytes using rs232_putchar(c);
-		// 	//		After we have to reset the pcState.
+			//TBD: Based on our pcState and protocol we have to put a sequence of bytes using rs232_putchar(c);
+			//		After we have to reset the pcState.
 			
-		// 	timeLastPacket = clock();
-		// }
+			timeLastPacket = getMicrotime();
+		}
 
 		/*
 		endLoop = clock();
