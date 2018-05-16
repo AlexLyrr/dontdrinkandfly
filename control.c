@@ -45,10 +45,13 @@ int16_t displacement;
 // }
 
 void yawControl() {
-	uint16_t yaw = state.controlYaw * 100;
+	uint16_t yaw = state.controlYawUser * 100;
 	state.controlYaw = (uint8_t) state.pYaw * (yaw - sr);
 }
 
+/*
+
+// Implementation with velocity
 void pitchControl() {
 	int32_t eps = ((int32_t) state.controlPitchUser - 90) - (sq / 100);
 	int32_t pitchValue = (state.pPitch * eps) + 90;
@@ -58,7 +61,21 @@ void pitchControl() {
 		pitchValue = 0;
 	state.controlPitch = (uint8_t) pitchValue;
 }
+*/
 
+// Implementation with angles
+void pitchControl(){
+	int32_t eps = ((int32_t) state.controlPitchUser - 90) - ((theta - state.calibrateThetaOffset) >> 8);
+	int32_t pitchValue = (state.pPitch * eps) + 90;
+	if (pitchValue > 180)
+		pitchValue = 180;
+	if (pitchValue < 0)
+		pitchValue = 0;
+	state.controlPitch = (uint8_t) pitchValue;
+}
+
+/*
+// Impleentation with velocity
 void rollControl() {
 	int32_t eps = ((int32_t) state.controlRollUser - 90) - (sp / 100);
 	int32_t rollValue = (state.pRoll * eps) + 90;
@@ -68,6 +85,32 @@ void rollControl() {
 		rollValue = 0;
 	state.controlRoll = (uint8_t) rollValue;
 }
+*/
+
+// Implementation with angles
+void rollControl(){
+	int32_t eps = ((int32_t) state.controlRollUser - 90) - ((psi - state.calibratePsiOffset) >> 8);
+	int32_t rollValue = (state.pRoll * eps) + 90;
+	if (rollValue > 180)
+		rollValue = 180;
+	if (rollValue < 0)
+		rollValue = 0;
+	state.controlRoll = (uint8_t) rollValue;
+}
+
+/*
+
+// Implementation with velocity
+void pitchControl() {
+	int32_t eps = ((int32_t) state.controlPitchUser - 90) - (sq / 100);
+	int32_t pitchValue = (state.pPitch * eps) + 90;
+	if (pitchValue > 180)
+		pitchValue = 180;
+	if (pitchValue < 0)
+		pitchValue = 0;
+	state.controlPitch = (uint8_t) pitchValue;
+}
+*/
 
 /*
 void pitchControl() {
@@ -101,9 +144,6 @@ void update_motors(void)
 	for (int i = 0; i<4 ; i++){
 		if (ae[i] > 550){
 			ae[i] = 550;
-		}
-		if (ae[i] < 200 && state.controlLift != 0){
-			ae[i] = 200;
 		}
 	}
 	motor[0] = ae[0];
