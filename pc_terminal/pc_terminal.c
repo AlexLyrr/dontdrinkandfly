@@ -765,7 +765,7 @@ void updatePcState(struct pcState *pcState){
 	if (pcState->tPitchValue > 105){
 		pcState->tPitchValue = 105;
 	}
-	if (pcState->tRollValue < 75){	
+	if (pcState->tRollValue < 75){
 		pcState->tRollValue = 75;
 	}
 	if (pcState->tPitchValue < 75){
@@ -774,7 +774,7 @@ void updatePcState(struct pcState *pcState){
 
 	if (pcState->tYawValue > 180){
 		pcState->tYawValue = 180;
-	}
+	}/*
 	if( (pcState->tLiftValue < 200) && (pcState->liftValue >= 10) ){	// Motors start moving after 200 rpm
 		pcState->tLiftValue += 190;
 	}*/
