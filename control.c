@@ -45,7 +45,7 @@ int16_t displacement;
 // }
 
 void yawControl() {
-	uint16_t yaw = state.controlYaw * 100;
+	uint16_t yaw = state.controlYawUser * 100;
 	state.controlYaw = (uint8_t) state.pYaw * (yaw - sr);
 }
 
