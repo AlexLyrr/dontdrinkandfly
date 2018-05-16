@@ -372,13 +372,13 @@ void checkInput(char c, struct pcState *pcState)
 			}
 			break;
 		case 'q':
-			if (pcState->yawValue >= 10 && pcState->mode == 2){
+			if (pcState->yawValue >= 10 && (pcState->mode == 2 || pcState->mode == 4)){
 				pcState->qPressed = true;
 				pcState->yawValue -= 10;
 			}
 			break;
 		case 'w':
-			if (pcState->yawValue < 180 && pcState->mode == 2){
+			if (pcState->yawValue < 180 && (pcState->mode == 2 || pcState->mode == 4)){
 				pcState->wPressed = true;
 				pcState->yawValue += 10;
 			}
@@ -522,7 +522,7 @@ void sendPacket(SRPacket sPacket){
 }
 
 //@Author George Giannakaras
-void receivePacket(SRPacket *rPacket){
+void receivePacket(SRPacket rPacket){
 	uint8_t crc = 0x00, crcTemp;
 	bool foundPacket = false;
 
@@ -540,15 +540,15 @@ void receivePacket(SRPacket *rPacket){
 				dequeuepc(&pcReQueue);
 				dequeuepc(&pcReQueue);
 
-				rPacket->fcs = dequeuepc(&pcReQueue) << 8;
-				rPacket->fcs = rPacket->fcs | dequeuepc(&pcReQueue);
+				rPacket.fcs = dequeuepc(&pcReQueue) << 8;
+				rPacket.fcs = rPacket.fcs | dequeuepc(&pcReQueue);
 				for(int j = 0; j < PACKET_BODY_LENGTH; j++){
-					rPacket->payload[j] = dequeuepc(&pcReQueue);
+					rPacket.payload[j] = dequeuepc(&pcReQueue);
 				}
 				//discard crc
 				dequeuepc(&pcReQueue);
 				// printf("Received %hhu\n", rPacket->payload[0]);
-				switch(rPacket->payload[0]) {
+				switch(rPacket.payload[0]) {
 					case 2:
 					case 7:
 					case 10:
@@ -558,9 +558,8 @@ void receivePacket(SRPacket *rPacket){
 						break;
 					case 11:
 						//Ack
-						receivedACK[rPacket->fcs] = true;
+						receivedACK[rPacket.fcs] = true;
 						break;
-
 				}
 			} else {
 				printf("Invalid CRC, expected:%hhu but got:%hhu\n", crcTemp, crc);
@@ -592,94 +591,55 @@ void initLogFiles(){
 }
 
 //@Author George Giannakaras
-void logReceivePacket(SRPacket *rPacket){
+void logReceivePacket(SRPacket rPacket){
 	uint16_t motor[4];
 	float battery;
-	char guiText[30];
 	uint32_t val;
+	static int counter = 0;
 
-	switch(rPacket->payload[0]){
+	counter++;
+	switch(rPacket.payload[0]){
 		case 2:
 			emptiedBuffer = true;
-      		battery = (((float) rPacket->payload[2]) * 7 / 100) + 1.2;
+      		battery = (((float) rPacket.payload[2]) * 7 / 100) + 1.2;
 			printf("System time: %hhu | Packet number: %hu | Type: %hhu | Mode: %hhu | Battery: %f | Roll: %hhu | Pitch: %hhu | Height: %hhu\n",
-				rPacket->payload[6], rPacket->fcs, rPacket->payload[0], rPacket->payload[1], battery, rPacket->payload[3], rPacket->payload[4], rPacket->payload[5]);
+				rPacket.payload[6], rPacket.fcs, rPacket.payload[0], rPacket.payload[1], battery, rPacket.payload[3], rPacket.payload[4], rPacket.payload[5]);
 			fprintf(Rfile, "System time: %hu | Packet number: %hu | Type: %hhu | Mode: %hu | Battery: %hu | Roll: %hu | Pitch: %hu | Height: %hu\n",
-				rPacket->payload[6], rPacket->fcs, rPacket->payload[0], rPacket->payload[1], rPacket->payload[2], rPacket->payload[3],
-				rPacket->payload[4], rPacket->payload[5]);
-				sprintf(guiText, "%f V", battery);
-				gtk_label_set_label(widg.l[5], guiText);
-				calculateBatteryStatus(battery);
-				switch(rPacket->payload[1]){
-					case 0:
-						sprintf(guiText, "Safe");
-						break;
-					case 1:
-						sprintf(guiText, "Panic");
-						break;
-					case 2:
-						sprintf(guiText, "Manual");
-						break;
-					case 3:
-						sprintf(guiText, "Calibration");
-						break;
-					case 4:
-						sprintf(guiText, "Yaw");
-						break;
-					case 5:
-						sprintf(guiText, "Full Control");
-						break;
-					case 6:
-						sprintf(guiText, "Raw");
-						break;
-					case 7:
-						sprintf(guiText, "Height");
-						break;
-					case 8:
-						sprintf(guiText, "Wireless");
-						break;
-				}
-				gtk_label_set_label(widg.l[4], guiText);
-
-				for (int i = 3; i < 6; ++i)
-				{
-					sprintf(guiText, "%hhu", rPacket->payload[i]);
-					gtk_label_set_label(widg.l[i+3], guiText);
-				}
+				rPacket.payload[6], rPacket.fcs, rPacket.payload[0], rPacket.payload[1], rPacket.payload[2], rPacket.payload[3],
+				rPacket.payload[4], rPacket.payload[5]);
+				//calculateBatteryStatus(battery);
+			printDroneStatusGUI(&rPacket);
 			break;
 		case 7:
-			printf("Type: %hhu | ERROR: %hhu\n", rPacket->payload[0], rPacket->payload[1]);
-			fprintf(Rfile, "Type: %hhu | ERROR: %hu\n", rPacket->payload[0], rPacket->payload[1]);
+			printf("Type: %hhu | ERROR: %hhu\n", rPacket.payload[0], rPacket.payload[1]);
+			fprintf(Rfile, "Type: %hhu | ERROR: %hu\n", rPacket.payload[0], rPacket.payload[1]);
 			break;
 		case 10:
-			motor[0] = rPacket->payload[1] << 8 | rPacket->payload[2];
-			motor[1] = rPacket->payload[3] << 8 | rPacket->payload[4];
-			motor[2] = rPacket->payload[5] << 8 | rPacket->payload[6];
-			motor[3] = rPacket->payload[7] << 8 | rPacket->payload[8];
-
-			for (int i = 0; i < 4; ++i)
-			{
-				sprintf(guiText, "%hu RPM", motor[i]);
-				gtk_label_set_label(widg.l[i], guiText);
-				gtk_level_bar_set_value (widg.lb[i], motor[i]);
+			motor[0] = rPacket.payload[1] << 8 | rPacket.payload[2];
+			motor[1] = rPacket.payload[3] << 8 | rPacket.payload[4];
+			motor[2] = rPacket.payload[5] << 8 | rPacket.payload[6];
+			motor[3] = rPacket.payload[7] << 8 | rPacket.payload[8];
+			if(counter % 5 == 0 && (pcStateGui->mode == 4 || pcStateGui->mode == 5 || pcStateGui->mode == 6)){
+				printMotorStatusGUI(&rPacket);
 			}
-
-
+			if(pcStateGui->mode == 2){
+				printMotorStatusGUI(&rPacket);
+			}
 			printf("Packet number: %hu | Type: %hhu | Motor1: %hu | Motor2: %hu | Motor3: %hu | Motor4: %hu\n",
-				rPacket->fcs, rPacket->payload[0], motor[0], motor[1], motor[2], motor[3]);
+				rPacket.fcs, rPacket.payload[0], motor[0], motor[1], motor[2], motor[3]);
 			fprintf(Rfile, "Packet number: %hu | Type: %hhu | Motor1: %hu | Motor2: %hu | Motor3: %hu | Motor4: %hu\n",
-				rPacket->fcs, rPacket->payload[0], motor[0], motor[1], motor[2], motor[3]);
+				rPacket.fcs, rPacket.payload[0], motor[0], motor[1], motor[2], motor[3]);
 			break;
 		case 12:
 			printf("Receive ping\n");
 			break;
 		case 13:
-			val = rPacket->payload[1] << 24 | rPacket->payload[2] << 16 | rPacket->payload[3] << 8 | rPacket->payload[4]; 
+			val = rPacket.payload[1] << 24 | rPacket.payload[2] << 16 | rPacket.payload[3] << 8 | rPacket.payload[4]; 
 			printf("Receive pong %u\n", val);
 			break;
 		case 14:
-			val = rPacket->payload[2] << 24 | rPacket->payload[3] << 16 | rPacket->payload[4] << 8 | rPacket->payload[5];
-			switch(rPacket->payload[1]) {
+			val = rPacket.payload[2] << 24 | rPacket.payload[3] << 16 | rPacket.payload[4] << 8 | rPacket.payload[5];
+			switch(rPacket.payload[1]) {
 				case 1:
 					printf("Loop time: %u\n", val);
 					break;
@@ -701,17 +661,107 @@ void logReceivePacket(SRPacket *rPacket){
 }
 
 //@Author Georgios Giannakaras
-void printPcStatusGUI(SRPacket sPacket){
+void calculateBatteryStatus(float battery)
+{
+		char guiText[20];
+		float temp_battery, fraction;
+		float battery_range = BATTERY_MAX - BATTERY_MIN;
+		int battery_final;
+
+		temp_battery = (battery - BATTERY_MIN);
+		battery_range = battery_range / 100;
+		temp_battery = temp_battery / battery_range;
+		battery_final = (int) temp_battery;
+		fraction = temp_battery / 100;
+		if (battery_final < 0)
+		{
+			battery_final = 0;
+			fraction = 0;
+		}
+		else if(battery_final > 100){
+			battery_final = 100;
+			fraction = 1;
+		}
+		gtk_progress_bar_set_fraction (widg.pb[0], fraction);
+		sprintf(guiText, "%d%%", battery_final);
+		gtk_progress_bar_set_text (widg.pb[0], guiText);
+}
+
+//@Author Georgios Giannakaras
+void printMotorStatusGUI(SRPacket *rPacket){
+	char guiText[30];
+	uint16_t motor[4];
+
+	motor[0] = rPacket->payload[1] << 8 | rPacket->payload[2];
+	motor[1] = rPacket->payload[3] << 8 | rPacket->payload[4];
+	motor[2] = rPacket->payload[5] << 8 | rPacket->payload[6];
+	motor[3] = rPacket->payload[7] << 8 | rPacket->payload[8];
+	for (int i = 0; i < 4; ++i)
+	{
+		sprintf(guiText, "%hu RPM", motor[i]);
+		gtk_label_set_label(widg.l[i], guiText);
+		gtk_level_bar_set_value (widg.lb[i], motor[i]);
+	}
+}
+
+//@Author Georgios Giannakaras
+void printDroneStatusGUI(SRPacket *rPacket){
+	char guiText[30];
+	float battery;
+
+	battery = (((float) rPacket->payload[2]) * 7 / 100) + 1.2;
+	sprintf(guiText, "%f V", battery);
+	gtk_label_set_label(widg.l[5], guiText);
+	switch(rPacket->payload[1]){
+		case 0:
+			sprintf(guiText, "Safe");
+			break;
+		case 1:
+			sprintf(guiText, "Panic");
+			break;
+		case 2:
+			sprintf(guiText, "Manual");
+			break;
+		case 3:
+			sprintf(guiText, "Calibration");
+			break;
+		case 4:
+			sprintf(guiText, "Yaw");
+			break;
+		case 5:
+			sprintf(guiText, "Full Control");
+			break;
+		case 6:
+			sprintf(guiText, "Raw");
+			break;
+		case 7:
+			sprintf(guiText, "Height");
+			break;
+		case 8:
+			sprintf(guiText, "Wireless");
+			break;
+	}
+	gtk_label_set_label(widg.l[4], guiText);
+
+	for (int i = 3; i < 6; ++i)
+	{
+		sprintf(guiText, "%hhu", rPacket->payload[i]);
+		gtk_label_set_label(widg.l[i+3], guiText);
+	}
+}
+
+//@Author Georgios Giannakaras
+void printPcStatusGUI(SRPacket *sPacket){
 	char guiText[20];
 	uint16_t lift;
 
 	//Print pc state to GUI
 	for (int i = 2; i < 5; ++i)
 	{
-		sprintf(guiText, "%hhu", sPacket.payload[i]);
+		sprintf(guiText, "%hhu", sPacket->payload[i]);
 		gtk_label_set_label(widg.l[i+7], guiText);
 	}
-	lift = sPacket.payload[5] << 8 | sPacket.payload[6];
+	lift = sPacket->payload[5] << 8 | sPacket->payload[6];
 	sprintf(guiText, "%hu", lift);
 	gtk_label_set_label(widg.l[12], guiText);
 
@@ -744,7 +794,7 @@ void logSendPacket(SRPacket sPacket){
 			fprintf(Sfile, "Packet number: %hu | Type: %hhu | Abort: %hhu | Roll: %hhu | Pitch: %hhu | Yaw: %hhu | HeightByte1: %hhu | HeightByte0: %hhu",
 						sPacket.fcs, sPacket.payload[0], sPacket.payload[1], sPacket.payload[2], sPacket.payload[3], sPacket.payload[4], sPacket.payload[5], sPacket.payload[6]);
 			fprintf(Sfile, " | crc: %hhu \n", sPacket.crc);
-			printPcStatusGUI(sPacket);
+			printPcStatusGUI(&sPacket);
 			break;
 		case 5:
 			fprintf(Sfile, "Packet number: %hu | Type: %hhu | Mode: %hhu",
@@ -887,7 +937,7 @@ int main(int argc, char **argv)
 				enqueuepc(&pcReQueue, (uint8_t) c);
 			}
 			if(pcReQueue.count >= PACKET_LENGTH) {
-				receivePacket(&rPacket);
+				receivePacket(rPacket);
 			}
 		}
 

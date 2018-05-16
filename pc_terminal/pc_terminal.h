@@ -108,11 +108,11 @@ SRPacket sPacketBuffer[65535];
 bool receivedACK[65535];
 
 void initializations(struct pcState *pcState);
-void logReceivePacket(SRPacket *rPacket);
+void logReceivePacket(SRPacket rPacket);
 void logSendPacket(SRPacket sPacket);
 void initReceivedACK();
 void initLogFiles();
-void receivePacket(SRPacket *rPacket);
+void receivePacket(SRPacket rPacket);
 void sendPacket(SRPacket sPacket);
 void setPacket(struct pcState *pcState, SRPacket *sPacket);
 bool sthPressed(struct pcState *pcState);
@@ -137,7 +137,9 @@ void on_button_wireless_clicked(GtkButton *button, Widgets *widg);
 void on_button_abort_clicked(GtkButton *button, Widgets *widg);
 void on_button_up_clicked(GtkButton *button, Widgets *widg);
 void on_button_down_clicked(GtkButton *button, Widgets *widg);
-void printPcStatusGUI(SRPacket sPacket);
+void printPcStatusGUI(SRPacket *sPacket);
+void printMotorStatusGUI(SRPacket *rPacket);
+void printDroneStatusGUI(SRPacket *rPacket);
 
 bool emptiedBuffer;
 

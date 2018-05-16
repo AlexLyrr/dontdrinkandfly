@@ -6,33 +6,6 @@
 
 #include "pc_terminal.h"
 
-//@Author Georgios Giannakaras
-void calculateBatteryStatus(float battery)
-{
-		char guiText[20];
-		float temp_battery, fraction;
-		float battery_range = BATTERY_MAX - BATTERY_MIN;
-		int battery_final;
-
-		temp_battery = (battery - BATTERY_MIN);
-		battery_range = battery_range / 100;
-		temp_battery = temp_battery / battery_range;
-		battery_final = (int) temp_battery;
-		fraction = temp_battery / 100;
-		if (battery_final < 0)
-		{
-			battery_final = 0;
-			fraction = 0;
-		}
-		else if(battery_final > 100){
-			battery_final = 100;
-			fraction = 1;
-		}
-		gtk_progress_bar_set_fraction (widg.pb[0], fraction);
-		sprintf(guiText, "%d%%", battery_final);
-		gtk_progress_bar_set_text (widg.pb[0], guiText);
-}
-
 //For all the below G_MODULE_EXPORT functions @Author Georgios Giannakaras
 //
 G_MODULE_EXPORT void on_button_safe_clicked(GtkButton *button, Widgets *widg)
