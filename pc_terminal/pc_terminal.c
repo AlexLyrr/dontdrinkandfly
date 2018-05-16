@@ -528,7 +528,9 @@ void receivePacket(SRPacket *rPacket){
 
 	while(pcReQueue.count >= PACKET_LENGTH && foundPacket == false){
 		if(queuePeekpc(&pcReQueue, 0) == PREAMPLE_B1 && queuePeekpc(&pcReQueue, 1) == PREAMPLE_B2){
+			crc = 0x00;
 			for(uint16_t j = 2; j < (PACKET_LENGTH - 1); j++){
+				// printf("Byte(%hu) %hhu ", j, queuePeekpc(&pcReQueue, j));
 				crc = crc8_table[crc ^ queuePeekpc(&pcReQueue, j)];
 			}
 			crcTemp = queuePeekpc(&pcReQueue, PACKET_LENGTH - 1);
@@ -545,7 +547,7 @@ void receivePacket(SRPacket *rPacket){
 				}
 				//discard crc
 				dequeuepc(&pcReQueue);
-				printf("Received %hhu\n", rPacket->payload[0]);
+				// printf("Received %hhu\n", rPacket->payload[0]);
 				switch(rPacket->payload[0]) {
 					case 2:
 					case 7:
@@ -676,8 +678,8 @@ void logReceivePacket(SRPacket *rPacket){
 			printf("Receive pong %u\n", val);
 			break;
 		case 14:
-			val = rPacket->payload[1] << 24 | rPacket->payload[2] << 16 | rPacket->payload[3] << 8 | rPacket->payload[4];
-			switch(rPacket->payload[0]) {
+			val = rPacket->payload[2] << 24 | rPacket->payload[3] << 16 | rPacket->payload[4] << 8 | rPacket->payload[5];
+			switch(rPacket->payload[1]) {
 				case 1:
 					printf("Loop time: %u\n", val);
 					break;
@@ -855,7 +857,7 @@ int main(int argc, char **argv)
 	SRPacket sPacket;
 	SRPacket rPacket;
 	bool bufferCleared = false;
-	char c;
+	int c;
 	clock_t timeLastPacket = clock();
 	pthread_t guithread;
 	initializations(pcState);
@@ -887,7 +889,6 @@ int main(int argc, char **argv)
 			if(pcReQueue.count >= PACKET_LENGTH) {
 				receivePacket(&rPacket);
 			}
-			//term_putchar(c);
 		}
 
 		if ((clock()-timeLastPacket)> 50){

@@ -89,7 +89,7 @@ int main(void)
 		packetComponentLoop();
 		
 		#ifdef APPLICATION_TIMINGS
-		state.timeLoopPacket = start - get_time_us();
+		state.timeLoopPacket = get_time_us() - start;
 		if (state.timeLoopPacket > state.timeLoopPacketMax) {
 			state.timeLoopPacketMax = state.timeLoopPacket;
 		}
@@ -166,7 +166,7 @@ int main(void)
 				break;
 		}
 		#ifdef APPLICATION_TIMINGS
-		state.timeLoopControl = start - get_time_us() - state.timeLoopPacket;
+		state.timeLoopControl = get_time_us() - start - state.timeLoopPacket;
 		if (state.timeLoopControl > state.timeLoopControlMax) {
 			state.timeLoopControlMax = state.timeLoopControl;
 		}
@@ -179,7 +179,7 @@ int main(void)
 			if (appClock%100 == 0) { // Every second
 				nrf_gpio_pin_toggle(BLUE);
 			}
-			if (appClock%1000 == 0) {
+			if (appClock%200 == 0) {
 				state.sendStatus = true;
 				#ifdef APPLICATION_TIMINGS
 				state.sendTimings = true;
@@ -236,7 +236,7 @@ int main(void)
 		}
 
 		#ifdef APPLICATION_TIMINGS
-		state.timeLoopApp = start - get_time_us() - state.timeLoopPacket - state.timeLoopControl;
+		state.timeLoopApp = get_time_us() - start - state.timeLoopPacket - state.timeLoopControl;
 		if (state.timeLoopApp > state.timeLoopAppMax) {
 			state.timeLoopAppMax = state.timeLoopApp;
 		}
@@ -254,7 +254,7 @@ int main(void)
 			controlComponentLoop();
 		}
 		#ifdef APPLICATION_TIMINGS
-		state.timeLoopSensor = start - get_time_us() - state.timeLoopPacket - state.timeLoopControl - state.timeLoopApp;
+		state.timeLoopSensor = get_time_us() - start - state.timeLoopPacket - state.timeLoopControl - state.timeLoopApp;
 		if (state.timeLoopSensor > state.timeLoopSensorMax) {
 			state.timeLoopSensorMax = state.timeLoopSensor;
 		}
@@ -279,7 +279,7 @@ int main(void)
 			#endif
 		}
 		#ifdef APPLICATION_TIMINGS
-		state.timeLoop = start - get_time_us();
+		state.timeLoop = get_time_us() - start;
 		if (state.timeLoop > state.timeLoopMax) {
 			state.timeLoopMax = state.timeLoop;
 		}	
