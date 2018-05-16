@@ -102,6 +102,8 @@ typedef struct{
 	uint8_t crc;
 } SRPacket;
 
+SRPacket sPacketGUI, rPacketGUI;
+
 FILE *Rfile;
 FILE *Sfile;
 

@@ -21,6 +21,7 @@
 #include <assert.h>
 #include <float.h>
 #include <gtk/gtk.h>
+#include <glib.h>
 #include <pthread.h>
 
 #include "pc_terminal.h"
@@ -548,10 +549,17 @@ void receivePacket(SRPacket rPacket){
 				//discard crc
 				dequeuepc(&pcReQueue);
 				// printf("Received %hhu\n", rPacket->payload[0]);
+				rPacketGUI = rPacket;
 				switch(rPacket.payload[0]) {
 					case 2:
+						logReceivePacket(rPacket);
+						break;
 					case 7:
+						logReceivePacket(rPacket);
+						break;
 					case 10:
+						logReceivePacket(rPacket);
+						break;
 					case 12:
 					case 14:
 						logReceivePacket(rPacket);
@@ -608,7 +616,8 @@ void logReceivePacket(SRPacket rPacket){
 				rPacket.payload[6], rPacket.fcs, rPacket.payload[0], rPacket.payload[1], rPacket.payload[2], rPacket.payload[3],
 				rPacket.payload[4], rPacket.payload[5]);
 			//calculateBatteryStatus(battery);
-			//printDroneStatusGUI(&rPacket);
+			//g_idle_add((GSourceFunc) printDroneStatusGUI, &rPacketGUI);
+			printDroneStatusGUI(&rPacket);
 			break;
 		case 7:
 			printf("Type: %hhu | ERROR: %hhu\n", rPacket.payload[0], rPacket.payload[1]);
@@ -619,12 +628,8 @@ void logReceivePacket(SRPacket rPacket){
 			motor[1] = rPacket.payload[3] << 8 | rPacket.payload[4];
 			motor[2] = rPacket.payload[5] << 8 | rPacket.payload[6];
 			motor[3] = rPacket.payload[7] << 8 | rPacket.payload[8];
-			if(counter % 15 == 0 && (pcStateGui->mode == 4 || pcStateGui->mode == 5 || pcStateGui->mode == 6)){
-				//printMotorStatusGUI(&rPacket);
-			}
-			if(pcStateGui->mode == 2){
-				//printMotorStatusGUI(&rPacket);
-			}
+			//g_idle_add((GSourceFunc) printMotorStatusGUI, &rPacketGUI);
+			printMotorStatusGUI(&rPacket);
 			printf("Packet number: %hu | Type: %hhu | Motor1: %hu | Motor2: %hu | Motor3: %hu | Motor4: %hu\n",
 				rPacket.fcs, rPacket.payload[0], motor[0], motor[1], motor[2], motor[3]);
 			fprintf(Rfile, "Packet number: %hu | Type: %hhu | Motor1: %hu | Motor2: %hu | Motor3: %hu | Motor4: %hu\n",
@@ -755,6 +760,7 @@ void printPcStatusGUI(SRPacket *sPacket){
 	char guiText[20];
 	uint16_t lift;
 
+	printf("INPC PRINT PC STATUS\n");
 	//Print pc state to GUI
 	for (int i = 2; i < 5; ++i)
 	{
@@ -793,7 +799,8 @@ void logSendPacket(SRPacket sPacket){
 			fprintf(Sfile, "Packet number: %hu | Type: %hhu | Abort: %hhu | Roll: %hhu | Pitch: %hhu | Yaw: %hhu | HeightByte1: %hhu | HeightByte0: %hhu",
 						sPacket.fcs, sPacket.payload[0], sPacket.payload[1], sPacket.payload[2], sPacket.payload[3], sPacket.payload[4], sPacket.payload[5], sPacket.payload[6]);
 			fprintf(Sfile, " | crc: %hhu \n", sPacket.crc);
-			//printPcStatusGUI(&sPacket);
+			//g_idle_add((GSourceFunc) printPcStatusGUI, &sPacketGUI);
+			printPcStatusGUI(&sPacketGUI);
 			break;
 		case 5:
 			fprintf(Sfile, "Packet number: %hu | Type: %hhu | Mode: %hhu",
@@ -876,9 +883,7 @@ void initializations(struct pcState *pcState){
 	term_puts("Initialized termios...\n");
 	rs232_open();
 	term_puts("Initialized rs232...\n");
-  #ifdef JOYSTICK_ENABLE
-	openJoystick();
-  #endif
+	//openJoystick();
 	term_puts("Initialized joystick...\n");
 
 	term_puts("Type ^C to exit\n");
@@ -913,7 +918,7 @@ int main(int argc, char **argv)
 	pthread_t guithread;
 	initializations(pcState);
 	pcStateGui = pcState;
-	//pthread_create(&guithread, NULL, guiThread, NULL);
+	pthread_create(&guithread, NULL, guiThread, NULL);
 
 	//send & receive
 	for (;;)
@@ -927,9 +932,7 @@ int main(int argc, char **argv)
 		}
 
 		// Read from joystic and update pcState
-    #ifdef JOYSTICK_ENABLE
-		checkJoystick(pcState);
-    #endif
+		//checkJoystick(pcState);
 
 		// Read from fd_RS232
 		if ((c = rs232_getchar_nb()) != -1){
@@ -951,6 +954,7 @@ int main(int argc, char **argv)
 					updatePcState(pcState);
 					setPacket(pcState, &sPacket);
 					sendPacket(sPacket);
+					sPacketGUI = sPacket;
 					logSendPacket(sPacket);
 					//if (pcState->escPressed)
             		//	break;
