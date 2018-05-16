@@ -161,8 +161,10 @@ typedef struct {
 	uint8_t controlPitch;
 	uint8_t controlYaw;
 	uint16_t controlLift;
+	uint8_t controlYawUser;
 	uint8_t controlPitchUser;
 	uint8_t controlRollUser;
+
 	
 
 	uint32_t timeLoop;

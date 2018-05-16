@@ -777,7 +777,7 @@ void updatePcState(struct pcState *pcState){
 	}
 	if( (pcState->tLiftValue < 200) && (pcState->liftValue >= 10) ){	// Motors start moving after 200 rpm
 		pcState->tLiftValue += 190;
-	}*/
+	}
 
 }
 
@@ -830,9 +830,8 @@ int main(int argc, char **argv)
 	char c;
 	clock_t timeLastPacket = clock();
 	pthread_t guithread;
-
+	pcStateGui = (struct pcState*) calloc(1, sizeof(struct pcState));
 	initializations(pcState);
-	pcStateGui = pcState;
 	pthread_create(&guithread, NULL, guiThread, NULL);
 
 	//send & receive
@@ -878,6 +877,7 @@ int main(int argc, char **argv)
 			}
 			timeLastPacket = clock();
 		}
+		pcStateGui = *pcState;
 
 		/*
 		endLoop = clock();
