@@ -777,7 +777,7 @@ void updatePcState(struct pcState *pcState){
 	}/*
 	if( (pcState->tLiftValue < 200) && (pcState->liftValue >= 10) ){	// Motors start moving after 200 rpm
 		pcState->tLiftValue += 190;
-	}
+	}*/
 
 }
 
