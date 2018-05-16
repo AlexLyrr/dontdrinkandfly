@@ -608,8 +608,8 @@ void logReceivePacket(SRPacket rPacket){
 			fprintf(Rfile, "System time: %hu | Packet number: %hu | Type: %hhu | Mode: %hu | Battery: %hu | Roll: %hu | Pitch: %hu | Height: %hu\n",
 				rPacket.payload[6], rPacket.fcs, rPacket.payload[0], rPacket.payload[1], rPacket.payload[2], rPacket.payload[3],
 				rPacket.payload[4], rPacket.payload[5]);
-				//calculateBatteryStatus(battery);
-			printDroneStatusGUI(&rPacket);
+			//calculateBatteryStatus(battery);
+			//printDroneStatusGUI(&rPacket);
 			break;
 		case 7:
 			printf("Type: %hhu | ERROR: %hhu\n", rPacket.payload[0], rPacket.payload[1]);
@@ -621,10 +621,10 @@ void logReceivePacket(SRPacket rPacket){
 			motor[2] = rPacket.payload[5] << 8 | rPacket.payload[6];
 			motor[3] = rPacket.payload[7] << 8 | rPacket.payload[8];
 			if(counter % 15 == 0 && (pcStateGui->mode == 4 || pcStateGui->mode == 5 || pcStateGui->mode == 6)){
-				printMotorStatusGUI(&rPacket);
+				//printMotorStatusGUI(&rPacket);
 			}
 			if(pcStateGui->mode == 2){
-				printMotorStatusGUI(&rPacket);
+				//printMotorStatusGUI(&rPacket);
 			}
 			printf("Packet number: %hu | Type: %hhu | Motor1: %hu | Motor2: %hu | Motor3: %hu | Motor4: %hu\n",
 				rPacket.fcs, rPacket.payload[0], motor[0], motor[1], motor[2], motor[3]);
@@ -796,7 +796,7 @@ void logSendPacket(SRPacket sPacket){
 			fprintf(Sfile, "Packet number: %hu | Type: %hhu | Abort: %hhu | Roll: %hhu | Pitch: %hhu | Yaw: %hhu | HeightByte1: %hhu | HeightByte0: %hhu",
 						sPacket.fcs, sPacket.payload[0], sPacket.payload[1], sPacket.payload[2], sPacket.payload[3], sPacket.payload[4], sPacket.payload[5], sPacket.payload[6]);
 			fprintf(Sfile, " | crc: %hhu \n", sPacket.crc);
-			printPcStatusGUI(&sPacket);
+			//printPcStatusGUI(&sPacket);
 			break;
 		case 5:
 			fprintf(Sfile, "Packet number: %hu | Type: %hhu | Mode: %hhu",
@@ -916,7 +916,7 @@ int main(int argc, char **argv)
 	pthread_t guithread;
 	initializations(pcState);
 	pcStateGui = pcState;
-	pthread_create(&guithread, NULL, guiThread, NULL);
+	//pthread_create(&guithread, NULL, guiThread, NULL);
 
 	//send & receive
 	for (;;)
