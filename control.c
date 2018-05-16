@@ -89,7 +89,7 @@ void rollControl() {
 
 // Implementation with angles
 void rollControl(){
-	int32_t eps = ((int32_t) state.controlRollUser - 90) - ((psi - state.calibratePsiOffset) >> 8);
+	int32_t eps = ((int32_t) state.controlRollUser - 90) - ((phi - state.calibratePhiOffset) >> 8);
 	int32_t rollValue = (state.pRoll * eps) + 90;
 	if (rollValue > 180)
 		rollValue = 180;
