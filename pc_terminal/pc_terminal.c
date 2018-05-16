@@ -877,7 +877,9 @@ void initializations(struct pcState *pcState){
 	term_puts("Initialized termios...\n");
 	rs232_open();
 	term_puts("Initialized rs232...\n");
-	//openJoystick();
+  #ifdef JOYSTICK_ENABLE
+	openJoystick();
+  #endif
 	term_puts("Initialized joystick...\n");
 
 	term_puts("Type ^C to exit\n");
@@ -926,7 +928,9 @@ int main(int argc, char **argv)
 		}
 
 		// Read from joystic and update pcState
-		//checkJoystick(pcState);
+    #ifdef JOYSTICK_ENABLE
+		checkJoystick(pcState);
+    #endif
 
 		// Read from fd_RS232
 		if ((c = rs232_getchar_nb()) != -1){

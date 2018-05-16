@@ -11,6 +11,7 @@
 #define PACKET_LENGTH (PACKET_BODY_LENGTH + 5)
 #define BATTERY_MAX 12.6
 #define BATTERY_MIN 10.5
+#define JOYSTICK_ENABLE 1
 
 int fd_joystick;
 // @Author: George Giannakaras
