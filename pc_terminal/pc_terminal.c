@@ -21,12 +21,13 @@
 #include <assert.h>
 #include <float.h>
 #include <gtk/gtk.h>
+#include <glib.h>
 #include <pthread.h>
 
 #include "pc_terminal.h"
 #include "pcqueue.h"
 #include "joystick.h"
-
+#define GUIACTIVATED
 //#include <sys/time.h>
 
 /*------------------------------------------------------------
@@ -564,10 +565,17 @@ void receivePacket(SRPacket rPacket){
 				//discard crc
 				dequeuepc(&pcReQueue);
 				// printf("Received %hhu\n", rPacket->payload[0]);
+				rPacketGUI = rPacket;
 				switch(rPacket.payload[0]) {
 					case 2:
+						logReceivePacket(rPacket);
+						break;
 					case 7:
+						logReceivePacket(rPacket);
+						break;
 					case 10:
+						logReceivePacket(rPacket);
+						break;
 					case 12:
 					case 13:
 					case 14:
@@ -613,7 +621,6 @@ void logReceivePacket(SRPacket rPacket){
 	float battery;
 	uint32_t val, val2;
 	uint64_t val3;
-	char guiText[30];
 	static int counter = 0;
 
 	counter++;
@@ -623,11 +630,16 @@ void logReceivePacket(SRPacket rPacket){
       		battery = (((float) rPacket.payload[2]) * 7 / 100) + 1.2;
 			printf("System time: %hhu | Packet number: %hu | Type: %hhu | Mode: %hhu | Battery: %f | Roll: %hhu | Pitch: %hhu | Height: %hhu\n",
 				rPacket.payload[6], rPacket.fcs, rPacket.payload[0], rPacket.payload[1], battery, rPacket.payload[3], rPacket.payload[4], rPacket.payload[5]);
-			// fprintf(Rfile, "System time: %hu | Packet number: %hu | Type: %hhu | Mode: %hu | Battery: %hu | Roll: %hu | Pitch: %hu | Height: %hu\n",
-				// rPacket.payload[6], rPacket.fcs, rPacket.payload[0], rPacket.payload[1], rPacket.payload[2], rPacket.payload[3],
-				// rPacket.payload[4], rPacket.payload[5]);
-			//calculateBatteryStatus(battery);
-			//printDroneStatusGUI(&rPacket);
+			fprintf(Rfile, "System time: %hu | Packet number: %hu | Type: %hhu | Mode: %hu | Battery: %hu | Roll: %hu | Pitch: %hu | Height: %hu\n",
+				rPacket.payload[6], rPacket.fcs, rPacket.payload[0], rPacket.payload[1], rPacket.payload[2], rPacket.payload[3],
+				rPacket.payload[4], rPacket.payload[5]);
+			#ifdef GUIACTIVATED
+				g_idle_add ((GSourceFunc) calculateBatteryStatus, &battery);
+				//calculateBatteryStatus(battery);
+				g_idle_add ((GSourceFunc) printDroneStatusGUI, &rPacket);
+				//printDroneStatusGUI(&rPacket);
+				printModeGUI(&rPacket);
+			#endif
 			break;
 		case 7:
 			printf("Type: %hhu | ERROR: %hhu\n", rPacket.payload[0], rPacket.payload[1]);
@@ -638,16 +650,14 @@ void logReceivePacket(SRPacket rPacket){
 			motor[1] = (uint16_t)rPacket.payload[3] << 8 | (uint16_t)rPacket.payload[4];
 			motor[2] = (uint16_t)rPacket.payload[5] << 8 | (uint16_t)rPacket.payload[6];
 			motor[3] = (uint16_t)rPacket.payload[7] << 8 | (uint16_t)rPacket.payload[8];
-			if(counter % 15 == 0 && (pcStateGui->mode == 4 || pcStateGui->mode == 5 || pcStateGui->mode == 6)){
+			#ifdef GUIACTIVATED
+				g_idle_add ((GSourceFunc) printMotorStatusGUI, &rPacketGUI);
 				//printMotorStatusGUI(&rPacket);
-			}
-			if(pcStateGui->mode == 2){
-				//printMotorStatusGUI(&rPacket);
-			}
+			#endif
 			printf("Packet number: %hu | Type: %hhu | Motor1: %hu | Motor2: %hu | Motor3: %hu | Motor4: %hu\n",
 				rPacket.fcs, rPacket.payload[0], motor[0], motor[1], motor[2], motor[3]);
-			// fprintf(Rfile, "Packet number: %hu | Type: %hhu | Motor1: %hu | Motor2: %hu | Motor3: %hu | Motor4: %hu\n",
-				// rPacket.fcs, rPacket.payload[0], motor[0], motor[1], motor[2], motor[3]);
+			fprintf(Rfile, "Packet number: %hu | Type: %hhu | Motor1: %hu | Motor2: %hu | Motor3: %hu | Motor4: %hu\n",
+				rPacket.fcs, rPacket.payload[0], motor[0], motor[1], motor[2], motor[3]);
 			break;
 		case 12:
 			printf("Receive ping\n");
@@ -732,6 +742,9 @@ void calculateBatteryStatus(float battery)
 		gtk_progress_bar_set_fraction (widg.pb[0], fraction);
 		sprintf(guiText, "%d%%", battery_final);
 		gtk_progress_bar_set_text (widg.pb[0], guiText);
+
+		sprintf(guiText, "%f V", battery);
+		gtk_label_set_label(widg.l[5], guiText);
 }
 
 //@Author Georgios Giannakaras
@@ -739,10 +752,10 @@ void printMotorStatusGUI(SRPacket *rPacket){
 	char guiText[30];
 	uint16_t motor[4];
 
-	motor[0] = rPacket->payload[1] << 8 | rPacket->payload[2];
-	motor[1] = rPacket->payload[3] << 8 | rPacket->payload[4];
-	motor[2] = rPacket->payload[5] << 8 | rPacket->payload[6];
-	motor[3] = rPacket->payload[7] << 8 | rPacket->payload[8];
+	motor[0] = rPacketGUI.payload[1] << 8 | rPacketGUI.payload[2];
+	motor[1] = rPacketGUI.payload[3] << 8 | rPacketGUI.payload[4];
+	motor[2] = rPacketGUI.payload[5] << 8 | rPacketGUI.payload[6];
+	motor[3] = rPacketGUI.payload[7] << 8 | rPacketGUI.payload[8];
 	for (int i = 0; i < 4; ++i)
 	{
 		sprintf(guiText, "%hu RPM", motor[i]);
@@ -752,13 +765,9 @@ void printMotorStatusGUI(SRPacket *rPacket){
 }
 
 //@Author Georgios Giannakaras
-void printDroneStatusGUI(SRPacket *rPacket){
+void printModeGUI(SRPacket *rPacket){
 	char guiText[30];
-	float battery;
 
-	battery = (((float) rPacket->payload[2]) * 7 / 100) + 1.2;
-	sprintf(guiText, "%f V", battery);
-	gtk_label_set_label(widg.l[5], guiText);
 	switch(rPacket->payload[1]){
 		case 0:
 			sprintf(guiText, "Safe");
@@ -789,10 +798,15 @@ void printDroneStatusGUI(SRPacket *rPacket){
 			break;
 	}
 	gtk_label_set_label(widg.l[4], guiText);
+}
+
+//@Author Georgios Giannakaras
+void printDroneStatusGUI(SRPacket *rPacket){
+	char guiText[30];
 
 	for (int i = 3; i < 6; ++i)
 	{
-		sprintf(guiText, "%hhu", rPacket->payload[i]);
+		sprintf(guiText, "%hhu", rPacketGUI.payload[i]);
 		gtk_label_set_label(widg.l[i+3], guiText);
 	}
 }
@@ -805,10 +819,10 @@ void printPcStatusGUI(SRPacket *sPacket){
 	//Print pc state to GUI
 	for (int i = 2; i < 5; ++i)
 	{
-		sprintf(guiText, "%hhu", sPacket->payload[i]);
+		sprintf(guiText, "%hhu", sPacketGUI.payload[i]);
 		gtk_label_set_label(widg.l[i+7], guiText);
 	}
-	lift = sPacket->payload[5] << 8 | sPacket->payload[6];
+	lift = sPacketGUI.payload[5] << 8 | sPacketGUI.payload[6];
 	sprintf(guiText, "%hu", lift);
 	gtk_label_set_label(widg.l[12], guiText);
 
@@ -837,10 +851,13 @@ void printPcStatusGUI(SRPacket *sPacket){
 void logSendPacket(SRPacket sPacket){
 	switch(sPacket.payload[0]){
 		case 3:
-			// fprintf(Sfile, "Packet number: %hu | Type: %hhu | Abort: %hhu | Roll: %hhu | Pitch: %hhu | Yaw: %hhu | HeightByte1: %hhu | HeightByte0: %hhu",
-						// sPacket.fcs, sPacket.payload[0], sPacket.payload[1], sPacket.payload[2], sPacket.payload[3], sPacket.payload[4], sPacket.payload[5], sPacket.payload[6]);
-			// fprintf(Sfile, " | crc: %hhu \n", sPacket.crc);
-			//printPcStatusGUI(&sPacket);
+			fprintf(Sfile, "Packet number: %hu | Type: %hhu | Abort: %hhu | Roll: %hhu | Pitch: %hhu | Yaw: %hhu | HeightByte1: %hhu | HeightByte0: %hhu",
+						sPacket.fcs, sPacket.payload[0], sPacket.payload[1], sPacket.payload[2], sPacket.payload[3], sPacket.payload[4], sPacket.payload[5], sPacket.payload[6]);
+			fprintf(Sfile, " | crc: %hhu \n", sPacket.crc);
+			#ifdef GUIACTIVATED
+				g_idle_add ((GSourceFunc) printPcStatusGUI, &sPacket);
+			#endif
+				//printPcStatusGUI(&sPacket);
 			break;
 		case 5:
 			// fprintf(Sfile, "Packet number: %hu | Type: %hhu | Mode: %hhu",
@@ -923,9 +940,7 @@ void initializations(struct pcState *pcState){
 	term_puts("Initialized termios...\n");
 	rs232_open();
 	term_puts("Initialized rs232...\n");
-  #ifdef JOYSTICK_ENABLE
-	openJoystick();
-  #endif
+	//openJoystick();
 	term_puts("Initialized joystick...\n");
 
 	term_puts("Type ^C to exit\n");
@@ -960,7 +975,7 @@ int main(int argc, char **argv)
 	pthread_t guithread;
 	initializations(pcState);
 	pcStateGui = pcState;
-	//pthread_create(&guithread, NULL, guiThread, NULL);
+	pthread_create(&guithread, NULL, guiThread, NULL);
 
 	//send & receive
 	while(1) {
@@ -974,7 +989,7 @@ int main(int argc, char **argv)
 
 		// Read from joystic and update pcState
    	 	#ifdef JOYSTICK_ENABLE
-		checkJoystick(pcState);
+		//checkJoystick(pcState);
     	#endif
 
 		// Read from fd_RS232
@@ -995,6 +1010,7 @@ int main(int argc, char **argv)
 					updatePcState(pcState);
 					setPacket(pcState, &sPacket);
 					sendPacket(sPacket);
+					sPacketGUI = sPacket;
 					logSendPacket(sPacket);
 					//if (pcState->escPressed)
 					//	break;
@@ -1018,6 +1034,7 @@ int main(int argc, char **argv)
 		*/
 	}
 
+	free(pcState);
 	term_exitio();
 	rs232_close();
 	fclose(Rfile);

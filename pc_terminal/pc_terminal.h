@@ -102,6 +102,8 @@ typedef struct{
 	uint8_t crc;
 } SRPacket;
 
+SRPacket sPacketGUI, rPacketGUI;
+
 FILE *Rfile;
 FILE *Sfile;
 
@@ -141,6 +143,8 @@ void on_button_down_clicked(GtkButton *button, Widgets *widg);
 void printPcStatusGUI(SRPacket *sPacket);
 void printMotorStatusGUI(SRPacket *rPacket);
 void printDroneStatusGUI(SRPacket *rPacket);
+void printModeGUI(SRPacket *rPacket);
+void writePing();
 
 bool emptiedBuffer;
 

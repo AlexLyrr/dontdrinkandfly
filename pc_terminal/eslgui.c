@@ -3,7 +3,8 @@
 //*@Author Georgios Giannakaras
 //*
 //*****************************
-
+#include <glib.h>
+#include <gtk/gtk.h>
 #include "pc_terminal.h"
 
 //For all the below G_MODULE_EXPORT functions @Author Georgios Giannakaras
