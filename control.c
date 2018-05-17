@@ -15,42 +15,6 @@ uint32_t prevTime = 0;
 int16_t prevDisp = 0;
 int16_t displacement;
 
-// void restoreDisp(){
-// 	if (abs(displacement - prevDisp) > 0 && sr > 0){
-// 		state.controlYaw = 45;
-// 	} else if (abs(displacement - prevDisp) > 0 && sr < 0){
-// 		state.controlYaw = 135;
-// 	} else if (abs(displacement - prevDisp) < 0 && sr > 0){
-// 		// TODO
-// 	} else if (abs(displacement - prevDisp) < 0 && sr < 0){
-// 		// TODO
-// 	}
-// 	prevDisp = displacement;
-// }
-//
-// void yawControl() {
-// 		if (prevTime == 0){
-// 			displacement = 0;
-// 		}
-// 		else{
-// 			if (abs(sr)>10){
-// 				displacement += (get_time_us() - prevTime) * sr;
-// 				restoreDisp();
-// 			} else{
-// 				prevDisp = 0;
-// 				state.controlYaw = 90;
-// 			}
-// 		}
-// 		prevTime = get_time_us();
-// }
-
-
-void yawControl() {
-	uint16_t yaw = state.controlYawUser * 100;
-	state.controlYaw = (uint8_t) state.pYaw * (yaw - sr);
-}
-
-/* This implementation works for me, needs to be tested on drone
 void yawControl() {
 	int32_t eps = ((int32_t) state.controlYawUser - 90) - (sr >> 7);
 	int32_t yawValue = (state.pYaw * eps) + 90;
@@ -60,7 +24,6 @@ void yawControl() {
 		yawValue = 0;
 	state.controlYaw = (uint8_t) yawValue;
 }
-*/
 
 /*
 
@@ -173,17 +136,6 @@ void run_filters_and_control()
 	// ae[0] = xxx, ae[1] = yyy etc etc
 	//controlLift: 0-1000
 	//controlPitch, controlRoll, controlYaw: 0-180
-	// uint16_t adjust = 10000;
-	// uint32_t controlPitch = adjust * state.controlPitch;
-	// uint32_t controlRoll = adjust * state.controlRoll;
-	// uint32_t controlYaw = adjust * state.controlYaw;
-	// uint32_t controlLift = state.controlLift;
-	// ae[0] = (((controlPitch + (180*adjust - controlYaw))/180) * controlLift)/adjust;
-	// ae[1] = (((controlRoll + controlYaw)/180) * controlLift)/adjust;
-	// ae[2] = ((((180*adjust - controlPitch) + (180*adjust - controlYaw))/180) * controlLift)/adjust;
-	// ae[3] = ((((180*adjust - controlRoll) + controlYaw)/180) * controlLift)/adjust;
-
-
 	uint32_t controlPitch = state.controlPitch;
 	uint32_t controlRoll = state.controlRoll;
 	uint32_t controlYaw = state.controlYaw;
