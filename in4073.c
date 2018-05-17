@@ -15,8 +15,6 @@
 
 #include "in4073.h"
 
-
-
 /*
  *
  * @author Joseph Verburg
@@ -68,9 +66,9 @@ int main(void)
 	state.packetError = 0;
 
 	state.pChanged = false;
-	state.pRoll = 50;
-	state.pPitch = 50;
-	state.pYaw = 50;
+	state.p1 = 5;
+	state.p2 = 5;
+	state.pYaw = 1;
 
 	state.calibrated = false;
 	state.calibratePhiOffset = 0;
@@ -80,7 +78,7 @@ int main(void)
 	int32_t panicStep = 0;
 	systemDone = false;
 	appClock = 0;
-	uint32_t start = 0;
+	//uint32_t start = 0;
 
 	while (!systemDone) {
 		#ifdef APPLICATION_TIMINGS
@@ -119,7 +117,7 @@ int main(void)
 					run_filters_and_control(); // TODO: rename function
 					state.controlChanged = false;
 					// state.sendMotorStatus = true;
-					// writeMotorStatus(); // TODO: move to the end of the control loop
+					writeMotorStatus(); // TODO: move to the end of the control loop
 				}
 				break;
 			case 3: // Calibration
@@ -131,7 +129,9 @@ int main(void)
 				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
 					yawControl();
 					run_filters_and_control();
-					// writeMotorStatus();
+					#ifdef DEBUGGING
+					writeMotorStatus();
+					#endif
 				}
 				if (state.controlChanged) { // We don't need to do anything extra yet when this happens
 					state.controlChanged = false;
@@ -144,7 +144,9 @@ int main(void)
 				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
 					rollControl();
 					run_filters_and_control();
-					// writeMotorStatus();
+					#ifdef DEBUGGING
+					writeMotorStatus();
+					#endif
 				}
 				if (state.controlChanged) { // We don't need to do anything extra yet when this happens
 					state.controlChanged = false;
@@ -157,7 +159,9 @@ int main(void)
 				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
 					pitchControl();
 					run_filters_and_control();
-					// writeMotorStatus
+					#ifdef DEBUGGING
+					writeMotorStatus();
+					#endif
 				}
 				if (state.controlChanged) { // We don't need to do anything extra yet when this happens
 					state.controlChanged = false;
@@ -183,7 +187,9 @@ int main(void)
 			}
 			if (appClock%200 == 0) {
 				state.sendStatus = true;
+				#ifndef DEBUGGING
 				state.sendMotorStatus = true;
+				#endif
 				#ifdef APPLICATION_TIMINGS
 				state.sendTimings = true;
 				state.sendPing = true;
@@ -253,6 +259,9 @@ int main(void)
 				state.calibratePhiOffset = phi;
 				state.calibrateThetaOffset = theta;
 				state.calibratePsiOffset = psi;
+				state.calibrateSpOffset = sp;
+				state.calibrateSqOffset = sq;
+				state.calibrateSrOffset = sr;
 				state.calibrated = true;
 			}
 			controlComponentLoop();

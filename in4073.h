@@ -22,6 +22,7 @@
 #include "app_util_platform.h"
 #include <math.h>
 
+
 #define RED		22
 #define YELLOW		24
 #define GREEN		28
@@ -29,6 +30,7 @@
 #define INT_PIN		5
 #define PREAMPLE_B1 0x13
 #define PREAMPLE_B2 0x37
+#define DEBUGGING
 
 // Control
 int16_t motor[4], ae[4];
@@ -121,7 +123,7 @@ void ble_send(void);
 #define PANIC_STEPS (5000 / TIMER_PERIOD)
 #define PACKET_BODY_LENGTH 10
 #define PACKET_LENGTH (PACKET_BODY_LENGTH + 5)
-#define APPLICATION_TIMINGS 0
+//#define APPLICATION_TIMINGS 0
 
 typedef struct {
 	uint8_t nextMode;
@@ -150,14 +152,18 @@ typedef struct {
 	uint8_t motor4Offset;
 
 	bool pChanged;
-	uint16_t pRoll;
-	uint16_t pPitch;
+	uint16_t p1;
+	uint16_t p2;
 	uint16_t pYaw;
 
 	bool calibrated;
 	int16_t calibratePhiOffset;
 	int16_t calibrateThetaOffset;
 	int16_t calibratePsiOffset;
+	int16_t calibrateSpOffset;
+	int16_t calibrateSqOffset;
+	int16_t calibrateSrOffset;
+	
 
 	bool controlChanged;
 	uint8_t controlRoll;

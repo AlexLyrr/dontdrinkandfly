@@ -69,8 +69,8 @@ void parsePacketSetMode() {
  * @author Joseph Verburg
  */
 void parsePacketSetP() {
-	state.pRoll = state.currentPacket[5] << 8 | state.currentPacket[6];
-	state.pPitch = state.currentPacket[7] << 8 | state.currentPacket[8];
+	state.p1 = state.currentPacket[5] << 8 | state.currentPacket[6];
+	state.p2 = state.currentPacket[7] << 8 | state.currentPacket[8];
 	state.pYaw = state.currentPacket[9] << 8 | state.currentPacket[10];
 	state.pChanged = true;
 }

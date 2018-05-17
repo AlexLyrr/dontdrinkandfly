@@ -228,25 +228,14 @@ doupload:
 
 upload: default doupload
 
-pc-compile: 
+pc: 
 	cd pc_terminal/; make
-
-pc-joystick-compile: 
-	cd pc_terminal/; make joystick
-
-pc-joystick-run:
-	cd pc_terminal/; make run
-
-pc-joystick: pc-joystick-compile pc-joystick-run
 
 pc-run:
 	cd pc_terminal/; make run
 	
-pc: pc-compile pc-run
 
 upload-run: default pc doupload
 	cd pc_terminal/; make run
-
-upload-joystick: pc-joystick-compile default doupload pc-joystick-run 
 
 

@@ -13,6 +13,11 @@
 #define BATTERY_MIN 10.5
 // #define JOYSTICK_ENABLE 1
 
+
+extern const uint8_t crc8_table[];
+
+extern int serial_device;
+int fd_RS232;
 int fd_joystick;
 // @Author: George Giannakaras
 struct pcState{
@@ -81,6 +86,7 @@ struct pcState{
 };
 
 struct pcState *pcStateGui;
+struct pcState *pcState;
 
 //@Author Georgios Giannakaras
 typedef struct _Widgets Widgets;
@@ -111,21 +117,29 @@ SRPacket sPacketBuffer[65535];
 bool receivedACK[65535];
 
 void initializations(struct pcState *pcState);
-void logReceivePacket(SRPacket rPacket);
-void logSendPacket(SRPacket sPacket);
-void initReceivedACK();
-void initLogFiles();
-void receivePacket(SRPacket rPacket);
-void sendPacket(SRPacket sPacket);
 void setPacket(struct pcState *pcState, SRPacket *sPacket);
-bool sthPressed(struct pcState *pcState);
-bool setPAttempt(struct pcState *pcState);
-bool setControlAttempt(struct pcState *pcState);
-bool setModeAttempt(struct pcState *pcState);
-void checkInput(char c, struct pcState *pcState);
-void initPcState(struct pcState *pcState);
-void resetPcState(struct pcState *pcState);
+void sendPacket(SRPacket sPacket);
+void logReceivePacket(SRPacket rPacket);
+void receivePacket(SRPacket rPacket);
+void initLogFiles();
+void logSendPacket(SRPacket sPacket);
 void updatePcState(struct pcState *pcState);
+void initReceivedACK();
+//void logReceivePacket(SRPacket rPacket);
+//void logSendPacket(SRPacket sPacket);
+//void initReceivedACK();
+//void initLogFiles();
+//void receivePacket(SRPacket rPacket);
+//void sendPacket(SRPacket sPacket);
+//void setPacket(struct pcState *pcState, SRPacket *sPacket);
+//bool sthPressed(struct pcState *pcState);
+//bool setPAttempt(struct pcState *pcState);
+//bool setControlAttempt(struct pcState *pcState);
+//bool setModeAttempt(struct pcState *pcState);
+//void checkInput(char c, struct pcState *pcState);
+//void initPcState(struct pcState *pcState);
+//void resetPcState(struct pcState *pcState);
+//void updatePcState(struct pcState *pcState);
 void calculateBatteryStatus(float battery);
 void *guiThread(void *vargp);
 void on_button_safe_clicked(GtkButton *button, Widgets *widg);
@@ -145,6 +159,7 @@ void printMotorStatusGUI(SRPacket *rPacket);
 void printDroneStatusGUI(SRPacket *rPacket);
 void printModeGUI(SRPacket *rPacket);
 void writePing();
+uint64_t getMicrotime();
 
 bool emptiedBuffer;
 

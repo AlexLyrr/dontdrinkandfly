@@ -27,6 +27,9 @@
 #include "pc_terminal.h"
 #include "pcqueue.h"
 #include "joystick.h"
+#include "keyboard.h"
+#include "rs232.h"
+//#include "commLog.h"
 #define GUIACTIVATED
 //#include <sys/time.h>
 
@@ -35,8 +38,7 @@
  *------------------------------------------------------------
  */
 
-
-static uint8_t const crc8_table[] = {
+const uint8_t crc8_table[] = {
     0xea, 0xd4, 0x96, 0xa8, 0x12, 0x2c, 0x6e, 0x50, 0x7f, 0x41, 0x03, 0x3d,
     0x87, 0xb9, 0xfb, 0xc5, 0xa5, 0x9b, 0xd9, 0xe7, 0x5d, 0x63, 0x21, 0x1f,
     0x30, 0x0e, 0x4c, 0x72, 0xc8, 0xf6, 0xb4, 0x8a, 0x74, 0x4a, 0x08, 0x36,
@@ -60,403 +62,11 @@ static uint8_t const crc8_table[] = {
     0xd0, 0xee, 0xac, 0x92, 0x28, 0x16, 0x54, 0x6a, 0x45, 0x7b, 0x39, 0x07,
     0xbd, 0x83, 0xc1, 0xff};
 
-struct termios 	savetty;
+struct termios savetty;
+int serial_device = 0;
+
 #include <sys/time.h>
 
-/**
- * Returns the current time in microseconds.
- */
-uint64_t getMicrotime(){
-	struct timeval currentTime;
-	gettimeofday(&currentTime, NULL);
-	return currentTime.tv_sec * (int)1e6 + currentTime.tv_usec;
-}
-
-void	term_initio()
-{
-	struct termios tty;
-
-	tcgetattr(0, &savetty);
-	tcgetattr(0, &tty);
-
-	tty.c_lflag &= ~(ECHO|ECHONL|ICANON|IEXTEN);
-	tty.c_cc[VTIME] = 0;
-	tty.c_cc[VMIN] = 0;
-
-	tcsetattr(0, TCSADRAIN, &tty);
-}
-
-void	term_exitio()
-{
-	tcsetattr(0, TCSADRAIN, &savetty);
-}
-
-void	term_puts(char *s)
-{
-	// fprintf(stderr,"%s",s);
-}
-
-void	term_putchar(char c)
-{
-	putc(c,stderr);
-}
-
-int	term_getchar_nb()
-{
-        static unsigned char 	line [2];
-
-        if (read(0,line,1)) // note: destructive read
-        		return (int) line[0];
-
-        return -1;
-}
-
-int	term_getchar()
-{
-        int    c;
-
-        while ((c = term_getchar_nb()) == -1)
-                ;
-        return c;
-}
-
-/*------------------------------------------------------------
- * Serial I/O
- * 8 bits, 1 stopbit, no parity,
- * 115,200 baud
- *------------------------------------------------------------
- */
-int serial_device = 0;
-int fd_RS232;
-
-void rs232_open(void)
-{
-  	char *name;
-  	int result;
-  	struct termios	tty;
-
-    fd_RS232 = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY);  // Hardcode your serial port here, or request it as an argument at runtime
-
-	assert(fd_RS232>=0);
-
-  	result = isatty(fd_RS232);
-  	assert(result == 1);
-
-  	name = ttyname(fd_RS232);
-  	assert(name != 0);
-
-  	result = tcgetattr(fd_RS232, &tty);
-	assert(result == 0);
-
-	tty.c_iflag = IGNBRK; /* ignore break condition */
-	tty.c_oflag = 0;
-	tty.c_lflag = 0;
-
-	tty.c_cflag = (tty.c_cflag & ~CSIZE) | CS8; /* 8 bits-per-character */
-	tty.c_cflag |= CLOCAL | CREAD; /* Ignore model status + read input */
-
-	cfsetospeed(&tty, B115200);
-	cfsetispeed(&tty, B115200);
-
-	tty.c_cc[VMIN]  = 0;
-	tty.c_cc[VTIME] = 1; // added timeout
-
-	tty.c_iflag &= ~(IXON|IXOFF|IXANY);
-
-	result = tcsetattr (fd_RS232, TCSANOW, &tty); /* non-canonical */
-
-	tcflush(fd_RS232, TCIOFLUSH); /* flush I/O buffer */
-}
-
-
-void 	rs232_close(void)
-{
-  	int 	result;
-
-  	result = close(fd_RS232);
-  	assert (result==0);
-}
-
-
-int	rs232_getchar_nb()
-{
-	int 		result;
-	unsigned char 	c;
-
-	result = read(fd_RS232, &c, 1);
-
-	if (result == 0)
-		return -1;
-
-	else
-	{
-		assert(result == 1);
-		return (int) c;
-	}
-}
-
-
-int 	rs232_getchar()
-{
-	int 	c;
-
-	while ((c = rs232_getchar_nb()) == -1)
-		;
-	return c;
-}
-
-
-int 	rs232_putchar(char c)
-{
-	int result;
-
-	do {
-		result = (int) write(fd_RS232, &c, 1);
-	} while (result == 0);
-
-	assert(result == 1);
-	return result;
-}
-
-
-// @Author: Alex Lyrakis
-void resetPcState(struct pcState *pcState){
-	pcState->escPressed = false;
-	pcState->n0Pressed = false;
-	pcState->n1Pressed = false;
-	pcState->n2Pressed = false;
-	pcState->n3Pressed = false;
-	pcState->n4Pressed = false;
-	pcState->n5Pressed = false;
-	pcState->n6Pressed = false;
-	pcState->n7Pressed = false;
-	pcState->n8Pressed = false;
-
-	pcState->upPressed = false;
-	pcState->downPressed = false;
-	pcState->leftPressed = false;
-	pcState->rightPressed = false;
-
-	pcState->aPressed = false;
-	pcState->zPressed = false;
-	pcState->qPressed = false;
-	pcState->wPressed = false;
-	pcState->uPressed = false;
-	pcState->jPressed = false;
-	pcState->iPressed = false;
-	pcState->kkPressed = false;
-	pcState->oPressed = false;
-	pcState->lPressed = false;
-
-
-	//JOYSTIC
-	pcState->jChanged = false;
-	pcState->jThrottleUp = false;
-	pcState->jThrottleDown = false;
-	pcState->jLeft = false;
-	pcState->jRight = false;
-	pcState->jForward = false;
-	pcState->jBackward = false;
-	pcState->jTwistClockwise = false;
-	pcState->jTwistCounterClockwise = false;
-	pcState->jFire = false;
-}
-
-
-// @Author: George Giannakaras
-void initPcState(struct pcState *pcState){
-  pcState->liftValue = 0;
-  pcState->rollValue = 90;
-  pcState->pitchValue = 90;
-  pcState->yawValue = 90;
-  pcState->PValue = 0;
-  pcState->P1Value = 0;
-  pcState->P2Value = 0;
-
-  //JOYSTIC
-  pcState->jThrottleValue = 0;
-  pcState->jRollValue = 90;
-  pcState->jPitchValue = 90;
-  pcState->jYawValue = 90;
-
-  // Probably initialization of keyboard and joystic values have to be switched
-
-  //TOTAL
-  pcState->tLiftValue = 0;
-  pcState->tRollValue = 90;
-  pcState->tPitchValue = 90;
-  pcState->tYawValue = 90;
-}
-
-// @Author: Alex Lyrakis
-void checkInput(char c, struct pcState *pcState)
-{
-	switch (c)
-	{
-		case 27:
-			pcState->escPressed = true;
-			c = term_getchar_nb();
-			if (c == 91){					// If we have one 'Esc' and '[' in a row, that means it is probably an arrow command.
-				c = term_getchar_nb();
-				switch (c)
-				{
-					case 'A':
-						pcState->escPressed = false;
-						if (pcState->pitchValue > 75 && (pcState->mode == 2 || pcState->mode == 6  || pcState->mode == 5)){
-							pcState->upPressed = true;
-							pcState->pitchValue -= 1;
-						}
-
-						break;
-					case 'B':
-						pcState->escPressed = false;
-						if (pcState->pitchValue < 105 && (pcState->mode == 2 || pcState->mode == 6  || pcState->mode == 5)){
-							pcState->downPressed = true;
-							pcState->pitchValue += 1;
-						}
-
-						break;
-					case 'C':
-						pcState->escPressed = false;
-						if (pcState->rollValue > 75 && (pcState->mode == 2 || pcState->mode == 6  || pcState->mode == 5)){
-							pcState->rightPressed = true;
-							pcState->rollValue -= 1;
-						}
-
-						break;
-					case 'D':
-						pcState->escPressed = false;
-						if (pcState->rollValue < 105 && (pcState->mode == 2 || pcState->mode == 6  || pcState->mode == 5)){
-							pcState->leftPressed = true;
-							pcState->rollValue += 1;
-						}
-						break;
-				}
-			}
-			break;
-		case '0':
-			pcState->n0Pressed = true;
-			pcState->mode = 0;
-			break;
-		case '1':
-			pcState->n1Pressed = true;
-			pcState->mode = 1;
-			break;
-		case '2':
-			pcState->n2Pressed = true;
-			pcState->mode = 2;
-			break;
-		case '3':
-			pcState->n3Pressed = true;
-			pcState->mode = 3;
-			break;
-		case '4':
-			pcState->n4Pressed = true;
-			pcState->mode = 4;
-			break;
-		case '5':
-			pcState->n5Pressed = true;
-			pcState->mode = 5;
-			break;
-		case '6':
-			pcState->n6Pressed = true;
-			pcState->mode = 6;
-			break;
-		case '7':
-			pcState->n7Pressed = true;
-			pcState->mode = 7;
-			break;
-		case '8':
-			pcState->n8Pressed = true;
-			pcState->mode = 8;
-			break;
-		case 'a':
-			if (pcState->liftValue < 1000 && (pcState->mode == 2  || pcState->mode == 4)){
-				pcState->liftValue +=10;
-				pcState->aPressed = true;
-     		 }
-			break;
-		case 'z':
-			if (pcState->liftValue > 0 && (pcState->mode == 2 || pcState->mode == 4)){
-				pcState->zPressed = true;
-				pcState->liftValue -=10;
-			}
-			break;
-		case 'q':
-			if (pcState->yawValue >= 10 && (pcState->mode == 2 || pcState->mode == 4)){
-				pcState->qPressed = true;
-				pcState->yawValue -= 10;
-			}
-			break;
-		case 'w':
-			if (pcState->yawValue < 180 && (pcState->mode == 2 || pcState->mode == 4)){
-				pcState->wPressed = true;
-				pcState->yawValue += 10;
-			}
-			break;
-		case 'u':
-			if (pcState->PValue < 100 && pcState->mode == 4){
-				pcState->uPressed = true;
-				pcState->PValue += 1;
-			}
-
-			break;
-		case 'j':
-			if (pcState->PValue >= 1 && pcState->mode == 4){
-				pcState->jPressed = true;
-				pcState->PValue -= 1;
-			}
-			break;
-		case 'i':
-			if (pcState->P1Value < 100 && pcState->mode == 5){
-				pcState->iPressed = true;
-				pcState->P1Value += 1;
-			}
-			break;
-		case 'k':
-			if (pcState->P1Value >= 1 && pcState->mode == 5){
-				pcState->kkPressed = true;
-				pcState->P1Value -= 1;
-			}
-			break;
-		case 'o':
-			if (pcState->P2Value < 100 && pcState->mode == 6){
-				pcState->oPressed = true;
-				pcState->P2Value += 1;
-			}
-			break;
-		case 'l':
-			if (pcState->P2Value >= 1 && pcState->mode == 6){
-				pcState->lPressed = true;
-				pcState->P2Value -= 1;
-			}
-			break;
-	}
-}
-
-// @Author Alex Lyrakis
-bool setModeAttempt(struct pcState *pcState){
-	return (pcState->n0Pressed || pcState->n1Pressed || pcState->n2Pressed || pcState->n3Pressed || pcState->n4Pressed || pcState->n5Pressed
-		|| pcState->n6Pressed || pcState->n7Pressed || pcState->n8Pressed);
-}
-
-bool setControlAttempt(struct pcState *pcState){
-	return (pcState->escPressed || pcState->aPressed || pcState->zPressed || pcState->qPressed || pcState->wPressed || pcState->upPressed || pcState->downPressed ||
-		pcState->leftPressed || pcState->rightPressed || pcState->qPressed || pcState->wPressed);
-}
-
-bool setPAttempt(struct pcState *pcState){
-	return (pcState->uPressed || pcState->jPressed || pcState->iPressed || pcState->kkPressed || pcState->oPressed || pcState->lPressed);
-}
-
-bool sthPressed(struct pcState *pcState){
-	return (pcState->n0Pressed || pcState->n1Pressed || pcState->n2Pressed || pcState->n3Pressed || pcState->n4Pressed || pcState->n5Pressed
-				|| pcState->n6Pressed || pcState->n7Pressed || pcState->n8Pressed || pcState->aPressed || pcState->zPressed || pcState->qPressed ||
-				 pcState->wPressed || pcState->uPressed || pcState->jPressed || pcState->iPressed || pcState->kkPressed || pcState->oPressed ||
-				 pcState->lPressed || pcState->leftPressed || pcState->rightPressed || pcState->upPressed || pcState->downPressed || pcState->escPressed ||
-				 pcState->jThrottleUp || pcState->jThrottleDown || pcState->jLeft || pcState->jRight || pcState->jForward || pcState->jBackward ||
-				 pcState->jTwistClockwise || pcState->jTwistCounterClockwise || pcState->jFire);
-}
 
 // @Author Alex Lyrakis
 void setPacket(struct pcState *pcState, SRPacket *sPacket){
@@ -597,6 +207,7 @@ void receivePacket(SRPacket rPacket){
 	}
 }
 
+
 //@Author Alex Lyrakis
 void initLogFiles(){
 	Rfile = fopen("logReceivePacket.txt", "a");
@@ -697,6 +308,142 @@ void logReceivePacket(SRPacket rPacket){
 			break;
 	}
 }
+
+
+//@Author Alex Lyrakis
+void logSendPacket(SRPacket sPacket){
+	switch(sPacket.payload[0]){
+		case 3:
+			fprintf(Sfile, "Packet number: %hu | Type: %hhu | Abort: %hhu | Roll: %hhu | Pitch: %hhu | Yaw: %hhu | HeightByte1: %hhu | HeightByte0: %hhu",
+						sPacket.fcs, sPacket.payload[0], sPacket.payload[1], sPacket.payload[2], sPacket.payload[3], sPacket.payload[4], sPacket.payload[5], sPacket.payload[6]);
+			fprintf(Sfile, " | crc: %hhu \n", sPacket.crc);
+			#ifdef GUIACTIVATED
+				g_idle_add ((GSourceFunc) printPcStatusGUI, &sPacket);
+			#endif
+				//printPcStatusGUI(&sPacket);
+			break;
+		case 5:
+			// fprintf(Sfile, "Packet number: %hu | Type: %hhu | Mode: %hhu",
+						// sPacket.fcs, sPacket.payload[0], sPacket.payload[1]);
+			// fprintf(Sfile, " | crc: %hhu \n", sPacket.crc);
+			break;
+		case 9:
+			// fprintf(Sfile, "Packet number: %hu | Type: %hhu | P_rollByte1: %hhu | P_rollByte0: %hhu | P_pitchByte1: %hhu | P_pitchByte0: %hhu | P_yawByte1: %hhu | P_yawByte0: %hhu",
+						// sPacket.fcs, sPacket.payload[0], sPacket.payload[1], sPacket.payload[2], sPacket.payload[3], sPacket.payload[4], sPacket.payload[5], sPacket.payload[6]);
+			// fprintf(Sfile, " | crc: %hhu \n", sPacket.crc);
+			break;
+	}
+}
+
+//@Author Alex Lyrakis
+void updatePcState(struct pcState *pcState){
+
+	pcState->tLiftValue = pcState->liftValue + pcState->jThrottleValue;
+	pcState->tRollValue = pcState->rollValue + pcState->jRollValue - 90;
+	pcState->tPitchValue = pcState->pitchValue + pcState->jPitchValue - 90;
+	pcState->tYawValue = pcState->yawValue + pcState->jYawValue - 90;
+	if (pcState->tRollValue < 0) {
+		pcState->tRollValue = 0;
+	}
+	else if (pcState->tRollValue > 180) {
+    pcState->tRollValue = 180;
+	}
+    if (pcState->tPitchValue < 0) {
+    pcState->tPitchValue = 0;
+    }
+    else if (pcState->tPitchValue > 180) {
+    pcState->tPitchValue = 180;
+    }
+    if (pcState->tYawValue < 0) {
+      pcState->tYawValue = 0;
+    }
+    else if (pcState->tYawValue > 180) {
+      pcState->tYawValue = 180;
+    }
+	if (pcState->tLiftValue > 1000){
+		pcState->tLiftValue = 1000;
+	}
+	/*
+	if( (pcState->tLiftValue < 200) && (pcState->liftValue >= 10) ){	// Motors start moving after 200 rpm
+		pcState->tLiftValue += 190;
+	}
+	*/
+}
+
+void initReceivedACK(){
+	for(int i = 0; i < 65535; i++){
+		receivedACK[i] = false;
+	}
+}
+
+
+
+
+/**
+ * Returns the current time in microseconds.
+ */
+uint64_t getMicrotime(){
+	struct timeval currentTime;
+	gettimeofday(&currentTime, NULL);
+	return currentTime.tv_sec * (int)1e6 + currentTime.tv_usec;
+}
+
+void	term_initio()
+{
+	struct termios tty;
+
+	tcgetattr(0, &savetty);
+	tcgetattr(0, &tty);
+
+	tty.c_lflag &= ~(ECHO|ECHONL|ICANON|IEXTEN);
+	tty.c_cc[VTIME] = 0;
+	tty.c_cc[VMIN] = 0;
+
+	tcsetattr(0, TCSADRAIN, &tty);
+}
+
+void	term_exitio()
+{
+	tcsetattr(0, TCSADRAIN, &savetty);
+}
+
+void	term_puts(char *s)
+{
+	// fprintf(stderr,"%s",s);
+}
+
+void	term_putchar(char c)
+{
+	putc(c,stderr);
+}
+
+int	term_getchar_nb()
+{
+        static unsigned char 	line [2];
+
+        if (read(0,line,1)) // note: destructive read
+        		return (int) line[0];
+
+        return -1;
+}
+
+int	term_getchar()
+{
+        int    c;
+
+        while ((c = term_getchar_nb()) == -1)
+                ;
+        return c;
+}
+
+/*------------------------------------------------------------
+ * Serial I/O
+ * 8 bits, 1 stopbit, no parity,
+ * 115,200 baud
+ *------------------------------------------------------------
+ */
+
+
 
 void writePing() {
 	SRPacket rPacket;
@@ -847,88 +594,7 @@ void printPcStatusGUI(SRPacket *sPacket){
 	gtk_label_set_label(widg.l[20], guiText);
 }
 
-//@Author Alex Lyrakis
-void logSendPacket(SRPacket sPacket){
-	switch(sPacket.payload[0]){
-		case 3:
-			fprintf(Sfile, "Packet number: %hu | Type: %hhu | Abort: %hhu | Roll: %hhu | Pitch: %hhu | Yaw: %hhu | HeightByte1: %hhu | HeightByte0: %hhu",
-						sPacket.fcs, sPacket.payload[0], sPacket.payload[1], sPacket.payload[2], sPacket.payload[3], sPacket.payload[4], sPacket.payload[5], sPacket.payload[6]);
-			fprintf(Sfile, " | crc: %hhu \n", sPacket.crc);
-			#ifdef GUIACTIVATED
-				g_idle_add ((GSourceFunc) printPcStatusGUI, &sPacket);
-			#endif
-				//printPcStatusGUI(&sPacket);
-			break;
-		case 5:
-			// fprintf(Sfile, "Packet number: %hu | Type: %hhu | Mode: %hhu",
-						// sPacket.fcs, sPacket.payload[0], sPacket.payload[1]);
-			// fprintf(Sfile, " | crc: %hhu \n", sPacket.crc);
-			break;
-		case 9:
-			// fprintf(Sfile, "Packet number: %hu | Type: %hhu | P_rollByte1: %hhu | P_rollByte0: %hhu | P_pitchByte1: %hhu | P_pitchByte0: %hhu | P_yawByte1: %hhu | P_yawByte0: %hhu",
-						// sPacket.fcs, sPacket.payload[0], sPacket.payload[1], sPacket.payload[2], sPacket.payload[3], sPacket.payload[4], sPacket.payload[5], sPacket.payload[6]);
-			// fprintf(Sfile, " | crc: %hhu \n", sPacket.crc);
-			break;
-	}
-}
 
-//@Author Alex Lyrakis
-void updatePcState(struct pcState *pcState){
-
-	pcState->tLiftValue = pcState->liftValue + pcState->jThrottleValue;
-	pcState->tRollValue = pcState->rollValue + pcState->jRollValue - 90;
-	pcState->tPitchValue = pcState->pitchValue + pcState->jPitchValue - 90;
-	pcState->tYawValue = pcState->yawValue + pcState->jYawValue - 90;
-	if (pcState->tRollValue < 0) {
-		pcState->tRollValue = 0;
-	}
-	else if (pcState->tRollValue > 180) {
-    pcState->tRollValue = 180;
-	}
-    if (pcState->tPitchValue < 0) {
-    pcState->tPitchValue = 0;
-    }
-    else if (pcState->tPitchValue > 180) {
-    pcState->tPitchValue = 180;
-    }
-    if (pcState->tYawValue < 0) {
-      pcState->tYawValue = 0;
-    }
-    else if (pcState->tYawValue > 180) {
-      pcState->tYawValue = 180;
-    }
-	if (pcState->tLiftValue > 1000){
-		pcState->tLiftValue = 1000;
-	}
-	if (pcState->tRollValue > 105){
-		pcState->tRollValue = 105;
-	}
-	if (pcState->tPitchValue > 105){
-		pcState->tPitchValue = 105;
-	}
-	if (pcState->tRollValue < 75){	
-		pcState->tRollValue = 75;
-	}
-	if (pcState->tPitchValue < 75){
-		pcState->tPitchValue = 75;
-	}
-
-	if (pcState->tYawValue > 180){
-		pcState->tYawValue = 180;
-	}
-	/*
-	if( (pcState->tLiftValue < 200) && (pcState->liftValue >= 10) ){	// Motors start moving after 200 rpm
-		pcState->tLiftValue += 190;
-	}
-	*/
-
-}
-
-void initReceivedACK(){
-	for(int i = 0; i < 65535; i++){
-		receivedACK[i] = false;
-	}
-}
 
 //@Author Georgios Giannakaras
 void initializations(struct pcState *pcState){
@@ -965,20 +631,21 @@ void initializations(struct pcState *pcState){
  */
 int main(int argc, char **argv)
 {
-	struct pcState *pcState;
 	pcState = (struct pcState*) calloc(1, sizeof(struct pcState));
 	SRPacket sPacket;
 	SRPacket rPacket;
 	bool bufferCleared = false;
 	int c;
 	long timeLastPacket = getMicrotime();
-	pthread_t guithread;
 	initializations(pcState);
 	pcStateGui = pcState;
+	#ifdef GUIACTIVATED
+	pthread_t guithread;
 	pthread_create(&guithread, NULL, guiThread, NULL);
-
+	#endif
 	//send & receive
 	while(1) {
+
 		//beginLoop = clock();
 		//clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 
@@ -1005,7 +672,7 @@ int main(int argc, char **argv)
 			}
 		}
 
-		if ((getMicrotime() - timeLastPacket) > 5000){
+		if ((getMicrotime() - timeLastPacket) > 5){
 			if (sthPressed(pcState) || pcState->jChanged){
 					updatePcState(pcState);
 					setPacket(pcState, &sPacket);

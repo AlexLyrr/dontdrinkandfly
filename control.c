@@ -15,8 +15,21 @@ uint32_t prevTime = 0;
 int16_t prevDisp = 0;
 int16_t displacement;
 
+
+/* 
+
+Notes: 
+
+Multipliers P1, P2 around 5, Roll/Pitch work for values between 0-15
+Multiplier P around 4, Yaw work for values between 0-15
+
+TBD: 
+
+map range 90-180 to 0-15 or the other way around.
+*/
+
 void yawControl() {
-	int32_t eps = ((int32_t) state.controlYawUser - 90) - (sr >> 7);
+	int32_t eps = ((int32_t) state.controlYawUser - 90) - (((int32_t) sr - state.calibrateSrOffset) >> 7);
 	int32_t yawValue = (state.pYaw * eps) + 90;
 	if (yawValue > 180)
 		yawValue = 180;
@@ -25,24 +38,11 @@ void yawControl() {
 	state.controlYaw = (uint8_t) yawValue;
 }
 
-/*
-
-// Implementation with velocity
-void pitchControl() {
-	int32_t eps = ((int32_t) state.controlPitchUser - 90) - (sq / 100);
-	int32_t pitchValue = (state.pPitch * eps) + 90;
-	if (pitchValue > 180)
-		pitchValue = 180;
-	if (pitchValue < 0)
-		pitchValue = 0;
-	state.controlPitch = (uint8_t) pitchValue;
-}
-*/
-
-// Implementation with angles
 void pitchControl(){
 	int32_t eps = ((int32_t) state.controlPitchUser - 90) - ((theta - state.calibrateThetaOffset) >> 8);
-	int32_t pitchValue = (state.pPitch * eps) + 90;
+	int32_t pitchValue = (state.p1 * eps);
+	int32_t eps2 = pitchValue - ((sq - state.calibrateSqOffset) >> 7);
+	pitchValue = (state.p2 * eps2) + 90;
 	if (pitchValue > 180)
 		pitchValue = 180;
 	if (pitchValue < 0)
@@ -50,8 +50,19 @@ void pitchControl(){
 	state.controlPitch = (uint8_t) pitchValue;
 }
 
+void rollControl(){
+	int32_t eps = ((int32_t) state.controlRollUser - 90) - ((phi - state.calibratePhiOffset) >> 8);
+	int32_t rollValue = (state.p1 * eps);
+	int32_t eps2 = rollValue - ((sp - state.calibrateSpOffset) >> 7);
+	rollValue = (state.p2 * eps2) + 90;
+	if (rollValue > 180)
+		rollValue = 180;
+	if (rollValue < 0)
+		rollValue = 0;
+	state.controlRoll = (uint8_t) rollValue;
+}
+
 /*
-// Impleentation with velocity
 void rollControl() {
 	int32_t eps = ((int32_t) state.controlRollUser - 90) - (sp / 100);
 	int32_t rollValue = (state.pRoll * eps) + 90;
@@ -63,7 +74,8 @@ void rollControl() {
 }
 */
 
-// Implementation with angles
+
+/*
 void rollControl(){
 	int32_t eps = ((int32_t) state.controlRollUser - 90) - ((phi - state.calibratePhiOffset) >> 8);
 	int32_t rollValue = (state.pRoll * eps) + 90;
@@ -73,10 +85,9 @@ void rollControl(){
 		rollValue = 0;
 	state.controlRoll = (uint8_t) rollValue;
 }
+*/
 
 /*
-
-// Implementation with velocity
 void pitchControl() {
 	int32_t eps = ((int32_t) state.controlPitchUser - 90) - (sq / 100);
 	int32_t pitchValue = (state.pPitch * eps) + 90;
