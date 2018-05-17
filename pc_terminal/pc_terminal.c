@@ -490,8 +490,9 @@ void calculateBatteryStatus(float battery)
 		sprintf(guiText, "%d%%", battery_final);
 		gtk_progress_bar_set_text (widg.pb[0], guiText);
 
-		sprintf(guiText, "%f V", battery);
+		sprintf(guiText, "%0.3f V", battery);
 		gtk_label_set_label(widg.l[5], guiText);
+		
 }
 
 //@Author Georgios Giannakaras
