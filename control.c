@@ -44,10 +44,23 @@ int16_t displacement;
 // 		prevTime = get_time_us();
 // }
 
+
 void yawControl() {
 	uint16_t yaw = state.controlYawUser * 100;
 	state.controlYaw = (uint8_t) state.pYaw * (yaw - sr);
 }
+
+/* This implementation works for me, needs to be tested on drone
+void yawControl() {
+	int32_t eps = ((int32_t) state.controlYawUser - 90) - (sr >> 7);
+	int32_t yawValue = (state.pYaw * eps) + 90;
+	if (yawValue > 180)
+		yawValue = 180;
+	if (yawValue < 0)
+		yawValue = 0;
+	state.controlYaw = (uint8_t) yawValue;
+}
+*/
 
 /*
 
@@ -89,7 +102,7 @@ void rollControl() {
 
 // Implementation with angles
 void rollControl(){
-	int32_t eps = ((int32_t) state.controlRollUser - 90) - ((psi - state.calibratePsiOffset) >> 8);
+	int32_t eps = ((int32_t) state.controlRollUser - 90) - ((phi - state.calibratePhiOffset) >> 8);
 	int32_t rollValue = (state.pRoll * eps) + 90;
 	if (rollValue > 180)
 		rollValue = 180;

@@ -77,7 +77,8 @@ void parsePacketSetP() {
 
 void parsePacketPing() {
 	writePacket(13, state.currentPacket[5], state.currentPacket[6], state.currentPacket[7], state.currentPacket[8],
-	0x00, 0x00, 0x00, 0x00, 0x00);
+	state.currentPacket[9], state.currentPacket[10], state.currentPacket[11], state.currentPacket[12],
+	0x00);
 }
 
 /*
@@ -167,8 +168,8 @@ void writeAck(uint16_t packetNumber) {
 void writeTimings() {
 	// writePacket(14, 1, 255, 255, 255, 251, 250, 249, 248, 247);
 	writePacket(14, 1, 
-		(state.timeLoopMax >> 24), (state.timeLoopMax >> 16) & 0xFF, (state.timeLoopMax >> 8) & 0xFF, state.timeLoopMax & 0xFF, 
-		(state.timeLoop >> 24), (state.timeLoop >> 16) & 0xFF, (state.timeLoop >> 8) & 0xFF, state.timeLoop & 0xFF);
+		(state.timeLoopMax >> 24) & 0xFF, (state.timeLoopMax >> 16) & 0xFF, (state.timeLoopMax >> 8) & 0xFF, state.timeLoopMax & 0xFF, 
+		(state.timeLoop >> 24) & 0xFF, (state.timeLoop >> 16) & 0xFF, (state.timeLoop >> 8) & 0xFF, state.timeLoop & 0xFF);
 
 	writePacket(14, 2, 
 		(state.timeLoopPacketMax >> 24) & 0xFF, (state.timeLoopPacketMax >> 16) & 0xFF, (state.timeLoopPacketMax >> 8) & 0xFF, state.timeLoopPacketMax & 0xFF, 
@@ -187,9 +188,22 @@ void writeTimings() {
 		(state.timeLoopSensor >> 24) & 0xFF, (state.timeLoopSensor >> 16) & 0xFF, (state.timeLoopSensor >> 8) & 0xFF, state.timeLoopSensor & 0xFF);
 
 
+	state.timeLoop = 0;
 	state.timeLoopMax = 0;
+	state.timeLoopPacket = 0;
 	state.timeLoopPacketMax = 0;
+	state.timeLoopApp = 0;
 	state.timeLoopAppMax = 0;
+	state.timeLoopControl = 0;
 	state.timeLoopControlMax = 0;
+	state.timeLoopSensor = 0;
 	state.timeLoopSensorMax = 0;
+}
+
+void writePing(uint32_t clock) {
+	writePacket(12, 0,0,0,0, (clock >> 24) & 0xFF, (clock >> 16) & 0xFF, (clock >> 8) & 0xFF, clock & 0xFF, 0);
+}
+
+void writePong(uint32_t clock) {
+	writePacket(13, 0,0,0,0, (clock >> 24) & 0xFF, (clock >> 16) & 0xFF, (clock >> 8) & 0xFF, clock & 0xFF, 0);
 }

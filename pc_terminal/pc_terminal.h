@@ -11,7 +11,7 @@
 #define PACKET_LENGTH (PACKET_BODY_LENGTH + 5)
 #define BATTERY_MAX 12.6
 #define BATTERY_MIN 10.5
-#define JOYSTICK_ENABLE 1
+// #define JOYSTICK_ENABLE 1
 
 int fd_joystick;
 // @Author: George Giannakaras
@@ -143,6 +143,8 @@ void on_button_down_clicked(GtkButton *button, Widgets *widg);
 void printPcStatusGUI(SRPacket *sPacket);
 void printMotorStatusGUI(SRPacket *rPacket);
 void printDroneStatusGUI(SRPacket *rPacket);
+void printModeGUI(SRPacket *rPacket);
+void writePing();
 
 bool emptiedBuffer;
 

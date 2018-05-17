@@ -121,7 +121,7 @@ void ble_send(void);
 #define PANIC_STEPS (5000 / TIMER_PERIOD)
 #define PACKET_BODY_LENGTH 10
 #define PACKET_LENGTH (PACKET_BODY_LENGTH + 5)
-#define APPLICATION_TIMINGS 1
+#define APPLICATION_TIMINGS 0
 
 typedef struct {
 	uint8_t nextMode;
@@ -136,6 +136,7 @@ typedef struct {
 	uint8_t packetError;
 	uint16_t packetAck;
 	bool sendAck;
+	bool sendPing;
 
 	uint16_t packetNumber;
 	uint8_t currentPacket[PACKET_LENGTH];
@@ -169,16 +170,16 @@ typedef struct {
 
 	
 
-	uint32_t timeLoop;
-	uint32_t timeLoopMax;
-	uint32_t timeLoopPacket;
-	uint32_t timeLoopPacketMax;
-	uint32_t timeLoopApp;
-	uint32_t timeLoopAppMax;
-	uint32_t timeLoopControl;
-	uint32_t timeLoopControlMax;
-	uint32_t timeLoopSensor;
-	uint32_t timeLoopSensorMax;
+	int32_t timeLoop;
+	int32_t timeLoopMax;
+	int32_t timeLoopPacket;
+	int32_t timeLoopPacketMax;
+	int32_t timeLoopApp;
+	int32_t timeLoopAppMax;
+	int32_t timeLoopControl;
+	int32_t timeLoopControlMax;
+	int32_t timeLoopSensor;
+	int32_t timeLoopSensorMax;
 } State;
 State state;
 bool systemDone;
@@ -208,6 +209,7 @@ void writeError(uint8_t errorCode);
 void writeMotorStatus();
 void writeAck(uint16_t packetNumber);
 void writeTimings();
+void writePing();
 
 int root(int a, int n);
 int iPow(int a, int e);

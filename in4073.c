@@ -51,7 +51,7 @@ int main(void)
 	imu_init(true, 100);
 	baro_init();
 	spi_flash_init();
-	ble_init();
+	// ble_init();
 
 	state.currentMode = 0;
 	state.nextMode = 0;
@@ -63,12 +63,14 @@ int main(void)
 	state.sendAck = false;
 	state.sendMotorStatus = false;
 	state.sendTimings = false;
+	state.sendPing = false;
+
 	state.packetError = 0;
 
 	state.pChanged = false;
-	state.pRoll = 1;
-	state.pPitch = 1;
-	state.pYaw = 1;
+	state.pRoll = 50;
+	state.pPitch = 50;
+	state.pYaw = 50;
 
 	state.calibrated = false;
 	state.calibratePhiOffset = 0;
@@ -78,7 +80,7 @@ int main(void)
 	int32_t panicStep = 0;
 	systemDone = false;
 	appClock = 0;
-	uint32_t start;
+	uint32_t start = 0;
 
 	while (!systemDone) {
 		#ifdef APPLICATION_TIMINGS
@@ -116,7 +118,7 @@ int main(void)
 				if (state.controlChanged) {
 					run_filters_and_control(); // TODO: rename function
 					state.controlChanged = false;
-					state.sendMotorStatus = true;
+					// state.sendMotorStatus = true;
 					// writeMotorStatus(); // TODO: move to the end of the control loop
 				}
 				break;
@@ -129,7 +131,7 @@ int main(void)
 				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
 					yawControl();
 					run_filters_and_control();
-					writeMotorStatus();
+					// writeMotorStatus();
 				}
 				if (state.controlChanged) { // We don't need to do anything extra yet when this happens
 					state.controlChanged = false;
@@ -142,7 +144,7 @@ int main(void)
 				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
 					rollControl();
 					run_filters_and_control();
-					writeMotorStatus();
+					// writeMotorStatus();
 				}
 				if (state.controlChanged) { // We don't need to do anything extra yet when this happens
 					state.controlChanged = false;
@@ -155,7 +157,7 @@ int main(void)
 				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
 					pitchControl();
 					run_filters_and_control();
-					writeMotorStatus();
+					// writeMotorStatus
 				}
 				if (state.controlChanged) { // We don't need to do anything extra yet when this happens
 					state.controlChanged = false;
@@ -181,8 +183,10 @@ int main(void)
 			}
 			if (appClock%200 == 0) {
 				state.sendStatus = true;
+				state.sendMotorStatus = true;
 				#ifdef APPLICATION_TIMINGS
 				state.sendTimings = true;
+				state.sendPing = true;
 				#endif
 			}
 			if (appClock%5 == 0) {
@@ -277,6 +281,9 @@ int main(void)
 			#ifdef APPLICATION_TIMINGS
 			writeTimings();
 			#endif
+		} else if (state.sendPing) {
+			state.sendPing = false;
+			writePing(get_time_us());
 		}
 		#ifdef APPLICATION_TIMINGS
 		state.timeLoop = get_time_us() - start;
