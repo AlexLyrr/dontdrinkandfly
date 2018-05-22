@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <math.h>
 #include <stdbool.h>
+
 #include "pc_terminal.h"
 
 // @Author: Alex Lyrakis
@@ -90,7 +91,7 @@ void checkInput(char c, struct pcState *pcState)
 				{
 					case 'A':
 						pcState->escPressed = false;
-						if (pcState->pitchValue > 0 && (pcState->mode == 2 || pcState->mode == 6  || pcState->mode == 5)){
+						if (pcState->pitchValue > 0 && (pcState->mode == 2 || pcState->mode == 5 || pcState->mode == 9)){
 							pcState->upPressed = true;
 							pcState->pitchValue -= 1;
 						}
@@ -98,7 +99,7 @@ void checkInput(char c, struct pcState *pcState)
 						break;
 					case 'B':
 						pcState->escPressed = false;
-						if (pcState->pitchValue < 180 && (pcState->mode == 2 || pcState->mode == 6  || pcState->mode == 5)){
+						if (pcState->pitchValue < 180 && (pcState->mode == 2 || pcState->mode == 5 || pcState->mode == 9)){
 							pcState->downPressed = true;
 							pcState->pitchValue += 1;
 						}
@@ -106,7 +107,7 @@ void checkInput(char c, struct pcState *pcState)
 						break;
 					case 'C':
 						pcState->escPressed = false;
-						if (pcState->rollValue > 0 && (pcState->mode == 2 || pcState->mode == 6  || pcState->mode == 5)){
+						if (pcState->rollValue > 0 && (pcState->mode == 2 || pcState->mode == 5 || pcState->mode == 9)){
 							pcState->rightPressed = true;
 							pcState->rollValue -= 1;
 						}
@@ -114,7 +115,7 @@ void checkInput(char c, struct pcState *pcState)
 						break;
 					case 'D':
 						pcState->escPressed = false;
-						if (pcState->rollValue < 180 && (pcState->mode == 2 || pcState->mode == 6  || pcState->mode == 5)){
+						if (pcState->rollValue < 180 && (pcState->mode == 2 || pcState->mode == 5 || pcState->mode == 9)){
 							pcState->leftPressed = true;
 							pcState->rollValue += 1;
 						}
@@ -196,25 +197,25 @@ void checkInput(char c, struct pcState *pcState)
 			}
 			break;
 		case 'i':
-			if (pcState->P1Value < 100 && (pcState->mode == 5  || pcState->mode == 6)){
+			if (pcState->P1Value < 100 && (pcState->mode == 5 || pcState->mode == 9 )){
 				pcState->iPressed = true;
 				pcState->P1Value += 1;
 			}
 			break;
 		case 'k':
-			if (pcState->P1Value > 0 && (pcState->mode == 5  || pcState->mode == 6)){
+			if (pcState->P1Value > 0 && (pcState->mode == 5 || pcState->mode == 9 )){
 				pcState->kkPressed = true;
 				pcState->P1Value -= 1;
 			}
 			break;
 		case 'o':
-			if (pcState->P2Value < 100 && (pcState->mode == 5  || pcState->mode == 6)){
+			if (pcState->P2Value < 100 && (pcState->mode == 5 || pcState->mode == 9)){
 				pcState->oPressed = true;
 				pcState->P2Value += 1;
 			}
 			break;
 		case 'l':
-			if (pcState->P2Value > 0 && (pcState->mode == 5  || pcState->mode == 6)){
+			if (pcState->P2Value > 0 && (pcState->mode == 5  || pcState->mode == 9)){
 				pcState->lPressed = true;
 				pcState->P2Value -= 1;
 			}
