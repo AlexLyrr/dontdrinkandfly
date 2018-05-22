@@ -39,7 +39,7 @@ void yawControl() {
 }
 
 void pitchControl(){
-	int32_t eps = ((int32_t) state.controlPitchUser - 90) - ((theta - state.calibrateThetaOffset) >> 8);
+	int32_t eps = ((int32_t) state.controlPitchUser - 90) - ((theta - state.calibrateThetaOffset) >> 8); 
 	int32_t pitchValue = (state.p1 * eps);
 	int32_t eps2 = pitchValue - ((sq - state.calibrateSqOffset) >> 7);
 	pitchValue = (state.p2 * eps2) + 90;

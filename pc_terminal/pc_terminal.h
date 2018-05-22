@@ -119,6 +119,7 @@ SRPacket sPacketGUI, rPacketGUI;
 FILE *Rfile;
 FILE *Sfile;
 
+int	term_getchar_nb();
 void initializations(struct pcState *pcState);
 void setPacket(struct pcState *pcState, SRPacket *sPacket);
 void sendPacket(SRPacket sPacket);

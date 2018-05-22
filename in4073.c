@@ -142,7 +142,9 @@ int main(void)
 				break;
 			case 5:
 				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
+					yawControl();
 					rollControl();
+					pitchControl();
 					run_filters_and_control();
 					#ifdef DEBUGGING
 					writeMotorStatus();
@@ -155,8 +157,9 @@ int main(void)
 					state.pChanged = false;
 				}
 				break;	
-			case 6:
+			case 9:
 				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
+					rollControl();
 					pitchControl();
 					run_filters_and_control();
 					#ifdef DEBUGGING
