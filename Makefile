@@ -239,3 +239,16 @@ upload-run: default pc doupload
 	cd pc_terminal/; make run
 
 
+# Do not touch anything below this line
+# Thank you :-)
+computer-compile:
+	cd pc_terminal; make computer
+
+joystick-compile:
+	cd pc_terminal; make joystick
+
+computer: computer-compile default upload pc-run
+
+gui: computer-compile pc-run
+
+joystick: joystick-compile default upload pc-run

@@ -7,6 +7,9 @@
  *------------------------------------------------------------
  */
 
+
+
+
 #include <stdio.h>
 #include <termios.h>
 #include <unistd.h>
@@ -20,17 +23,28 @@
 #include <stdio.h>
 #include <assert.h>
 #include <float.h>
+
+// #define GUIACTIVATED
+
+#include "./pc_terminal.h"
+
+#ifdef GUIACTIVATED
 #include <gtk/gtk.h>
 #include <glib.h>
 #include <pthread.h>
+#endif
 
-#include "pc_terminal.h"
-#include "pcqueue.h"
-#include "joystick.h"
-#include "keyboard.h"
-#include "rs232.h"
+#include "./communication.h"
+#include "./pcqueue.h"
+
+#ifdef JOYSTICK_ENABLE
+#include "./joystick.h"
+#endif
+
+#include "./keyboard.h"
+#include "./rs232.h"
+
 //#include "commLog.h"
-#define GUIACTIVATED
 //#include <sys/time.h>
 
 /*------------------------------------------------------------
@@ -68,85 +82,19 @@ int serial_device = 0;
 #include <sys/time.h>
 
 
-// @Author Alex Lyrakis
+/**
+ * @author Joseph Verburg
+ */
 void setPacket(struct pcState *pcState, SRPacket *sPacket){
-	// Set packet type
-	static uint16_t sPacketCounter = 0;
-	sPacket->fcs = sPacketCounter;
-	sPacket->payload[0] = 0; //Default type
-	if (setModeAttempt(pcState))
-		sPacket->payload[0] = 5;
-	if (setControlAttempt(pcState) || pcState->jChanged)
-		sPacket->payload[0] = 3;
-	if (setPAttempt(pcState))
-		sPacket->payload[0] = 9;
-
-	// Set payload
-	switch (sPacket->payload[0]) {
-		case 5:
-			//here we must send the packet
-			sPacket->payload[1] = pcState->mode;
-			for (int i = 2; i < PACKET_BODY_LENGTH; i++){
-				sPacket->payload[i] = 0;
-			}
-			break;
-		case 3:
-			if (pcState->escPressed || pcState->jFire){
-				sPacket->payload[1] = 0x80;	// abort byte
-			} else {
-				sPacket->payload[1] = 0;  // else zero
-			}
-			sPacket->payload[2] = (uint8_t) pcState->tRollValue;
-			sPacket->payload[3] = (uint8_t) pcState->tPitchValue;
-			sPacket->payload[4] = (uint8_t) pcState->tYawValue;
-			sPacket->payload[5] =(uint8_t) (pcState->tLiftValue >> 8);
-			sPacket->payload[6] =(uint8_t) (pcState->tLiftValue & 0xFF);
-			for (int i = 7; i < PACKET_BODY_LENGTH; i++){
-				sPacket->payload[i] = 0; // null bytes
-			}
-			break;
-		case 9:
-			sPacket->payload[1] = (pcState->P1Value >> 8);
-			sPacket->payload[2] = (pcState->P1Value & 0xFF);
-			sPacket->payload[3] = (pcState->P2Value >> 8);
-			sPacket->payload[4] = (pcState->P2Value & 0xFF);
-			sPacket->payload[5] = (pcState->PValue >> 8);
-			sPacket->payload[6] = (pcState->PValue & 0xFF);
-			for (int i = 7; i < PACKET_BODY_LENGTH; i++){
-				sPacket->payload[i] = 0; // null bytes
-			}
+	if (setModeAttempt(pcState)) {
+		writeSetMode(pcState->mode);
+	} else if (setControlAttempt(pcState) || pcState->jChanged) {
+		writeSetControl(pcState->escPressed || pcState->jFire, pcState->tRollValue, pcState->tPitchValue, pcState->tYawValue, pcState->liftValue);
+	} else if (setPAttempt(pcState)) {
+		writeSetP(pcState->P1Value, pcState->P2Value, pcState->PValue);
 	}
-	// // Set crc
-	// sPacket->crc = 0x00;
-	// sPacket->crc = crc8_table[sPacket->crc ^ ((uint8_t) (sPacket->fcs >> 8))];
-	// sPacket->crc = crc8_table[sPacket->crc ^ ((uint8_t) (sPacket->fcs & 0xFF))];
-	// for (int i=0; i<10; i++) {
-	// 	sPacket->crc = crc8_table[sPacket->crc ^ sPacket->payload[i]];
-	// }
-	// Increase packet counter
-	if (sPacketCounter == 0xFFFF)
-		sPacketCounter = 0;
-	else
-		sPacketCounter++;
 }
 
-//@Author Alex Lyrakis
-void sendPacket(SRPacket sPacket){
-	rs232_putchar(0x13);
-	rs232_putchar(0x37);
-	rs232_putchar(sPacket.fcs >> 8);
-	rs232_putchar(sPacket.fcs & 0xFF);
-	for (int i=0; i<10; i++){
-		rs232_putchar(sPacket.payload[i]);
-	}
-	sPacket.crc = 0x00;
-	sPacket.crc = crc8_table[sPacket.crc ^ ((uint8_t) (sPacket.fcs >> 8))];
-	sPacket.crc = crc8_table[sPacket.crc ^ ((uint8_t) (sPacket.fcs & 0xFF))];
-	for (int i=0; i<10; i++) {
-		sPacket.crc = crc8_table[sPacket.crc ^ sPacket.payload[i]];
-	}
-	rs232_putchar(sPacket.crc);
-}
 
 //@Author George Giannakaras
 void receivePacket(SRPacket rPacket){
@@ -175,17 +123,13 @@ void receivePacket(SRPacket rPacket){
 				//discard crc
 				dequeuepc(&pcReQueue);
 				// printf("Received %hhu\n", rPacket->payload[0]);
+				#ifdef GUIACTIVATED
 				rPacketGUI = rPacket;
+				#endif
 				switch(rPacket.payload[0]) {
 					case 2:
-						logReceivePacket(rPacket);
-						break;
 					case 7:
-						logReceivePacket(rPacket);
-						break;
 					case 10:
-						logReceivePacket(rPacket);
-						break;
 					case 12:
 					case 13:
 					case 14:
@@ -241,9 +185,9 @@ void logReceivePacket(SRPacket rPacket){
       		battery = (((float) rPacket.payload[2]) * 7 / 100) + 1.2;
 			printf("System time: %hhu | Packet number: %hu | Type: %hhu | Mode: %hhu | Battery: %f | Roll: %hhu | Pitch: %hhu | Height: %hhu\n",
 				rPacket.payload[6], rPacket.fcs, rPacket.payload[0], rPacket.payload[1], battery, rPacket.payload[3], rPacket.payload[4], rPacket.payload[5]);
-			fprintf(Rfile, "System time: %hu | Packet number: %hu | Type: %hhu | Mode: %hu | Battery: %hu | Roll: %hu | Pitch: %hu | Height: %hu\n",
-				rPacket.payload[6], rPacket.fcs, rPacket.payload[0], rPacket.payload[1], rPacket.payload[2], rPacket.payload[3],
-				rPacket.payload[4], rPacket.payload[5]);
+			// fprintf(Rfile, "System time: %hu | Packet number: %hu | Type: %hhu | Mode: %hu | Battery: %hu | Roll: %hu | Pitch: %hu | Height: %hu\n",
+			// 	rPacket.payload[6], rPacket.fcs, rPacket.payload[0], rPacket.payload[1], rPacket.payload[2], rPacket.payload[3],
+			// 	rPacket.payload[4], rPacket.payload[5]);
 			#ifdef GUIACTIVATED
 				g_idle_add ((GSourceFunc) calculateBatteryStatus, &battery);
 				//calculateBatteryStatus(battery);
@@ -267,12 +211,12 @@ void logReceivePacket(SRPacket rPacket){
 			#endif
 			printf("Packet number: %hu | Type: %hhu | Motor1: %hu | Motor2: %hu | Motor3: %hu | Motor4: %hu\n",
 				rPacket.fcs, rPacket.payload[0], motor[0], motor[1], motor[2], motor[3]);
-			fprintf(Rfile, "Packet number: %hu | Type: %hhu | Motor1: %hu | Motor2: %hu | Motor3: %hu | Motor4: %hu\n",
-				rPacket.fcs, rPacket.payload[0], motor[0], motor[1], motor[2], motor[3]);
+			// fprintf(Rfile, "Packet number: %hu | Type: %hhu | Motor1: %hu | Motor2: %hu | Motor3: %hu | Motor4: %hu\n",
+			// 	rPacket.fcs, rPacket.payload[0], motor[0], motor[1], motor[2], motor[3]);
 			break;
 		case 12:
 			printf("Receive ping\n");
-			writePing();
+			writePing(getMicrotime());
 			break;
 		case 13:
 			val3 = ((uint64_t)rPacket.payload[1] << 56) | 
@@ -314,13 +258,13 @@ void logReceivePacket(SRPacket rPacket){
 void logSendPacket(SRPacket sPacket){
 	switch(sPacket.payload[0]){
 		case 3:
-			fprintf(Sfile, "Packet number: %hu | Type: %hhu | Abort: %hhu | Roll: %hhu | Pitch: %hhu | Yaw: %hhu | HeightByte1: %hhu | HeightByte0: %hhu",
-						sPacket.fcs, sPacket.payload[0], sPacket.payload[1], sPacket.payload[2], sPacket.payload[3], sPacket.payload[4], sPacket.payload[5], sPacket.payload[6]);
-			fprintf(Sfile, " | crc: %hhu \n", sPacket.crc);
+			// fprintf(Sfile, "Packet number: %hu | Type: %hhu | Abort: %hhu | Roll: %hhu | Pitch: %hhu | Yaw: %hhu | HeightByte1: %hhu | HeightByte0: %hhu",
+			// 			sPacket.fcs, sPacket.payload[0], sPacket.payload[1], sPacket.payload[2], sPacket.payload[3], sPacket.payload[4], sPacket.payload[5], sPacket.payload[6]);
+			// fprintf(Sfile, " | crc: %hhu \n", sPacket.crc);
 			#ifdef GUIACTIVATED
 				g_idle_add ((GSourceFunc) printPcStatusGUI, &sPacket);
-			#endif
 				//printPcStatusGUI(&sPacket);
+			#endif
 			break;
 		case 5:
 			// fprintf(Sfile, "Packet number: %hu | Type: %hhu | Mode: %hhu",
@@ -369,15 +313,6 @@ void updatePcState(struct pcState *pcState){
 	}
 	*/
 }
-
-void initReceivedACK(){
-	for(int i = 0; i < 65535; i++){
-		receivedACK[i] = false;
-	}
-}
-
-
-
 
 /**
  * Returns the current time in microseconds.
@@ -443,27 +378,7 @@ int	term_getchar()
  *------------------------------------------------------------
  */
 
-
-
-void writePing() {
-	SRPacket rPacket;
-	rPacket.fcs = 0;
-	uint64_t time = getMicrotime();
-	rPacket.payload[0] = 12;
-	rPacket.payload[1] = (time >> 56) & 0xFF;
-	rPacket.payload[2] = (time >> 48) & 0xFF;
-	rPacket.payload[3] = (time >> 40) & 0xFF;
-	rPacket.payload[4] = (time >> 32) & 0xFF;
-	rPacket.payload[5] = (time >> 24) & 0xFF;
-	rPacket.payload[6] = (time >> 16) & 0xFF;
-	rPacket.payload[7] = (time >> 8) & 0xFF;
-	rPacket.payload[8] = (time) & 0xFF;
-
-	printf("%hhu", rPacket.payload[1]);
-	
-	sendPacket(rPacket);
-}
-
+#ifdef GUIACTIVATED
 //@Author Georgios Giannakaras
 void calculateBatteryStatus(float battery)
 {
@@ -595,7 +510,7 @@ void printPcStatusGUI(SRPacket *sPacket){
 	gtk_label_set_label(widg.l[20], guiText);
 }
 
-
+#endif
 
 //@Author Georgios Giannakaras
 void initializations(struct pcState *pcState){
@@ -620,7 +535,6 @@ void initializations(struct pcState *pcState){
 	}
 	printf("\n");
 	initLogFiles();
-	initReceivedACK();
 	initPcState(pcState);
 	resetPcState(pcState); // Reset values and State of PC side.
 	init_queuepc(&pcReQueue);
@@ -637,32 +551,37 @@ int main(int argc, char **argv)
 	SRPacket rPacket;
 	bool bufferCleared = false;
 	int c;
-	long timeLastPacket = getMicrotime();
 	initializations(pcState);
 	pcStateGui = pcState;
+	
 	#ifdef GUIACTIVATED
 	pthread_t guithread;
 	pthread_create(&guithread, NULL, guiThread, NULL);
 	#endif
+
+	initializeCommunication();
+	communication.lastPacketSent = 0;
+	communication.lastPacketReceived = 0;
+	communication.lastStatusUpdate = 0;
+	communication.lastPingSent = getMicrotime(); // Don't immediatly send a ping
+	communication.sendPing = false;
+
+	uint64_t start, end, maxLoopTime = 0;
 	//send & receive
 	while(1) {
-
-		//beginLoop = clock();
-		//clock_gettime(CLOCK_MONOTONIC_RAW, &start);
-
-		if ((c = term_getchar_nb()) != -1)	// Read from keyboard and store in fd_RS232
-		{
+		start = getMicrotime();
+		if ((c = term_getchar_nb()) != -1) {
 			checkInput(c, pcState);
 		}
 
 		// Read from joystic and update pcState
    	 	#ifdef JOYSTICK_ENABLE
-		//checkJoystick(pcState);
+		checkJoystick(pcState);
     	#endif
 
 		// Read from fd_RS232
 		if ((c = rs232_getchar_nb()) != -1){
-			if(c == 0x13){
+			if(!bufferCleared && c == 0x13){
 				bufferCleared = true;
 			}
 			if(bufferCleared) {
@@ -670,43 +589,47 @@ int main(int argc, char **argv)
 			}
 			if(pcReQueue.count >= PACKET_LENGTH) {
 				receivePacket(rPacket);
+				communication.lastPacketReceived = getMicrotime();
 			}
 		}
 
-		if ((getMicrotime() - timeLastPacket) > 5){
-			if (sthPressed(pcState) || pcState->jChanged){
-					updatePcState(pcState);
-					setPacket(pcState, &sPacket);
-					sendPacket(sPacket);
-					sPacketGUI = sPacket;
-					logSendPacket(sPacket);
-					//if (pcState->escPressed)
-					//	break;
-					resetPcState(pcState);
-					sPacketBuffer[sPacket.fcs] = sPacket;
-			}
-
-			//TBD: Based on our pcState and protocol we have to put a sequence of bytes using rs232_putchar(c);
-			//		After we have to reset the pcState.
-			
-			timeLastPacket = getMicrotime();
+		if ((getMicrotime() - communication.lastPingSent) > COMMUNICATION_PING_INTERVAL_US) {
+			communication.sendPing = true;
 		}
 
-		/*
-		endLoop = clock();
-		clock_gettime(CLOCK_MONOTONIC_RAW, &end);
-		uint64_t delta_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
-		loopTime = (endLoop - beginLoop))/CLOCKS_PER_SEC;
-		printf("%" PRIu64 "\n", delta_us);
-		printf("Time of loop is : %Lf \n", loopTime);
-		*/
+		if ((getMicrotime() - communication.lastPacketSent) > COMMUNICATION_MIN_DELAY_US) {
+			if (communication.sendPing) {
+				communication.sendPing = false;
+				writePing(getMicrotime());
+				communication.lastPingSent = getMicrotime();
+			} else if (sthPressed(pcState) || pcState->jChanged){
+				updatePcState(pcState);
+				setPacket(pcState, &sPacket);
+				#ifdef GUIACTIVATED
+				sPacketGUI = sPacket;
+				#endif
+				logSendPacket(sPacket);
+				resetPcState(pcState);
+
+				communication.lastPacketSent = getMicrotime();
+				maxLoopTime = 0;
+			}
+		}
+		end = getMicrotime();
+		if ((end - start) > maxLoopTime) {
+			maxLoopTime = (end - start);
+			printf("Max loop time: %u\n", maxLoopTime);
+		}
 	}
 
 	free(pcState);
+
 	term_exitio();
 	rs232_close();
+	
 	fclose(Rfile);
 	fclose(Sfile);
+	
 	term_puts("\n<exit>\n");
 
 	return 0;

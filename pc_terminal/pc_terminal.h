@@ -1,14 +1,25 @@
 #include <stdint.h>
 #include <stdbool.h>
+
+// #define GUIACTIVATED
+
+#ifdef GUIACTIVATED
 #include <gtk/gtk.h>
+#endif
 
 #ifndef PC_TERMINAL_H_
 #define PC_TERMINAL_H_
+
+
+#include "./communication.h"
 
 #define PREAMPLE_B1 0x13
 #define PREAMPLE_B2 0x37
 #define PACKET_BODY_LENGTH 10
 #define PACKET_LENGTH (PACKET_BODY_LENGTH + 5)
+
+
+
 #define BATTERY_MAX 12.6
 #define BATTERY_MIN 10.5
 // #define JOYSTICK_ENABLE 1
@@ -88,6 +99,7 @@ struct pcState{
 struct pcState *pcStateGui;
 struct pcState *pcState;
 
+#ifdef GUIACTIVATED
 //@Author Georgios Giannakaras
 typedef struct _Widgets Widgets;
 struct _Widgets
@@ -100,21 +112,12 @@ struct _Widgets
 GtkBuilder *builder;
 GtkWidget  *window;
 Widgets widg;
-
-// @Author: Alex Lyrakis
-typedef struct{
-	uint16_t fcs;
-	uint8_t payload[10];
-	uint8_t crc;
-} SRPacket;
+#endif
 
 SRPacket sPacketGUI, rPacketGUI;
 
 FILE *Rfile;
 FILE *Sfile;
-
-SRPacket sPacketBuffer[65535];
-bool receivedACK[65535];
 
 void initializations(struct pcState *pcState);
 void setPacket(struct pcState *pcState, SRPacket *sPacket);
@@ -124,22 +127,8 @@ void receivePacket(SRPacket rPacket);
 void initLogFiles();
 void logSendPacket(SRPacket sPacket);
 void updatePcState(struct pcState *pcState);
-void initReceivedACK();
-//void logReceivePacket(SRPacket rPacket);
-//void logSendPacket(SRPacket sPacket);
-//void initReceivedACK();
-//void initLogFiles();
-//void receivePacket(SRPacket rPacket);
-//void sendPacket(SRPacket sPacket);
-//void setPacket(struct pcState *pcState, SRPacket *sPacket);
-//bool sthPressed(struct pcState *pcState);
-//bool setPAttempt(struct pcState *pcState);
-//bool setControlAttempt(struct pcState *pcState);
-//bool setModeAttempt(struct pcState *pcState);
-//void checkInput(char c, struct pcState *pcState);
-//void initPcState(struct pcState *pcState);
-//void resetPcState(struct pcState *pcState);
-//void updatePcState(struct pcState *pcState);
+
+#ifdef GUIACTIVATED
 void calculateBatteryStatus(float battery);
 void *guiThread(void *vargp);
 void on_button_safe_clicked(GtkButton *button, Widgets *widg);
@@ -158,9 +147,13 @@ void printPcStatusGUI(SRPacket *sPacket);
 void printMotorStatusGUI(SRPacket *rPacket);
 void printDroneStatusGUI(SRPacket *rPacket);
 void printModeGUI(SRPacket *rPacket);
-void writePing();
+#endif 
+
 uint64_t getMicrotime();
 
 bool emptiedBuffer;
+
+
+
 
 #endif

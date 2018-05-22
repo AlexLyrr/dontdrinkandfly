@@ -34,7 +34,7 @@ void rs232_open(void)
   	result = tcgetattr(fd_RS232, &tty);
 	assert(result == 0);
 
-	tty.c_iflag = IGNBRK; /* ignore break condition */
+	tty.c_iflag &= ~IGNBRK; /* ignore break condition */
 	tty.c_oflag = 0;
 	tty.c_lflag = 0;
 
@@ -45,7 +45,7 @@ void rs232_open(void)
 	cfsetispeed(&tty, B115200);
 
 	tty.c_cc[VMIN]  = 0;
-	tty.c_cc[VTIME] = 1; // added timeout
+	tty.c_cc[VTIME] = 0; // added timeout
 
 	tty.c_iflag &= ~(IXON|IXOFF|IXANY);
 
