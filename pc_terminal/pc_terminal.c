@@ -245,10 +245,10 @@ void logReceivePacket(SRPacket rPacket){
 				rPacket.payload[4], rPacket.payload[5]);
 			#ifdef GUIACTIVATED
 				//g_idle_add ((GSourceFunc) calculateBatteryStatus, &battery);
-				calculateBatteryStatus(battery);
+				//calculateBatteryStatus(battery);
 				g_idle_add ((GSourceFunc) printDroneStatusGUI, &rPacket);
 				//printDroneStatusGUI(&rPacket);
-				printModeGUI(&rPacket);
+				//printModeGUI(&rPacket);
 			#endif
 			break;
 		case 7:
