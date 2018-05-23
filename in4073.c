@@ -78,6 +78,7 @@ int main(void)
 	int32_t panicStep = 0;
 	systemDone = false;
 	appClock = 0;
+	uint32_t timeLastPacket = get_time_us();
 	//uint32_t start = 0;
 
 	while (!systemDone) {
@@ -289,6 +290,24 @@ int main(void)
 			} else if (state.sendPing) {
 				state.sendPing = false;
 				writePing(get_time_us());
+			}
+
+			//safety features
+			if (state.packetReceived) {
+				nrf_gpio_pin_toggle(GREEN);
+				state.packetReceived = false;
+				timeLastPacket = get_time_us();
+			} else {
+				if (state.currentMode != 0) {
+					if ((get_time_us() - timeLastPacket) > 2000000){
+						state.nextMode = 1;
+					}
+				}
+			}
+
+			//if (bat_volt < 133){ // with drone
+			if (bat_volt < 68) { //without drone
+				state.nextMode = 1;
 			}
 		}
 

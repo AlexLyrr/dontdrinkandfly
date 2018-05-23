@@ -139,6 +139,7 @@ typedef struct {
 	uint16_t packetAck;
 	bool sendAck;
 	bool sendPing;
+	bool packetReceived;
 
 	uint16_t packetNumber;
 	uint8_t currentPacket[PACKET_LENGTH];
