@@ -196,7 +196,7 @@ void checkInput(char c, struct pcState *pcState)
 
 			break;
 		case 'j':
-			if (pcState->PValue > 0 && (pcState->mode == 4 || pcState->mode == 5){
+			if (pcState->PValue > 0 && (pcState->mode == 4 || pcState->mode == 5)){
 				pcState->jPressed = true;
 				pcState->PValue -= 1;
 			}
