@@ -30,7 +30,6 @@
 #include "keyboard.h"
 #include "rs232.h"
 //#include "commLog.h"
-//#define GUIACTIVATED
 //#include <sys/time.h>
 
 /*------------------------------------------------------------
