@@ -229,8 +229,6 @@ void initLogFiles(){
 
 //@Author George Giannakaras
 void logReceivePacket(SRPacket rPacket){
-	
-	float battery;
 	uint32_t val, val2;
 	uint64_t val3;
 	static int counter = 0;
@@ -239,17 +237,19 @@ void logReceivePacket(SRPacket rPacket){
 	switch(rPacket.payload[0]){
 		case 2:
 			emptiedBuffer = true;
-      		battery = (((float) rPacket.payload[2]) * 7 / 100) + 1.2;
+      		battery.batteryVolt = (((float) rPacket.payload[2]) * 7 / 100) + 1.2;
 			printf("System time: %hhu | Packet number: %hu | Type: %hhu | Mode: %hhu | Battery: %f | Roll: %hhu | Pitch: %hhu | Height: %hhu\n",
-				rPacket.payload[6], rPacket.fcs, rPacket.payload[0], rPacket.payload[1], battery, rPacket.payload[3], rPacket.payload[4], rPacket.payload[5]);
+				rPacket.payload[6], rPacket.fcs, rPacket.payload[0], rPacket.payload[1], battery.batteryVolt, rPacket.payload[3], rPacket.payload[4], rPacket.payload[5]);
 			fprintf(Rfile, "System time: %hu | Packet number: %hu | Type: %hhu | Mode: %hu | Battery: %hu | Roll: %hu | Pitch: %hu | Height: %hu\n",
 				rPacket.payload[6], rPacket.fcs, rPacket.payload[0], rPacket.payload[1], rPacket.payload[2], rPacket.payload[3],
 				rPacket.payload[4], rPacket.payload[5]);
 			#ifdef GUIACTIVATED
-				//g_idle_add ((GSourceFunc) calculateBatteryStatus, &battery);
-				//calculateBatteryStatus(battery);
+				calculateBatteryStatus();
+				g_idle_add ((GSourceFunc) printBatteryStatusGUI, NULL);				
 				g_idle_add ((GSourceFunc) printDroneStatusGUI, &rPacket);
 				//printDroneStatusGUI(&rPacket);
+				caluclateDroneMode(&rPacket);
+				g_idle_add ((GSourceFunc) printModeGUI, &rPacket);
 				//printModeGUI(&rPacket);
 			#endif
 			break;
@@ -480,34 +480,40 @@ void writePing() {
 }
 
 //@Author Georgios Giannakaras
-void calculateBatteryStatus(float battery)
+void calculateBatteryStatus()
 {
-		char guiText[20];
-		float temp_battery, fraction;
+		float temp_battery;
 		float battery_range = BATTERY_MAX - BATTERY_MIN;
 		int battery_final;
 
-		temp_battery = (battery - BATTERY_MIN);
+		temp_battery = (battery.batteryVolt - BATTERY_MIN);
 		battery_range = battery_range / 100;
 		temp_battery = temp_battery / battery_range;
 		battery_final = (int) temp_battery;
-		fraction = temp_battery / 100;
+		battery.fractionGUI = temp_battery / 100;
 		if (battery_final < 0)
 		{
 			battery_final = 0;
-			fraction = 0;
+			battery.fractionGUI = 0;
 		}
 		else if(battery_final > 100){
 			battery_final = 100;
-			fraction = 1;
+			battery.fractionGUI = 1;
 		}
-		gtk_progress_bar_set_fraction (widg.pb[0], fraction);
-		sprintf(guiText, "%d%%", battery_final);
-		gtk_progress_bar_set_text (widg.pb[0], guiText);
-
-		sprintf(guiText, "%0.3f V", battery);
-		gtk_label_set_label(widg.l[5], guiText);
+		battery.batteryPercentageGUI = battery_final;
 		
+}
+
+//@Author Georgios Giannakaras
+void printBatteryStatusGUI(){
+	char guiText[30];
+
+	gtk_progress_bar_set_fraction (widg.pb[0], battery.fractionGUI);
+	sprintf(guiText, "%d%%", battery.batteryPercentageGUI);
+	gtk_progress_bar_set_text (widg.pb[0], guiText);
+
+	sprintf(guiText, "%0.3f V", battery.batteryVolt);
+	gtk_label_set_label(widg.l[5], guiText);
 }
 
 //@Author Georgios Giannakaras
@@ -523,39 +529,42 @@ void printMotorStatusGUI(SRPacket *rPacket){
 }
 
 //@Author Georgios Giannakaras
-void printModeGUI(SRPacket *rPacket){
-	char guiText[30];
-
+void caluclateDroneMode(SRPacket *rPacket){
 	switch(rPacket->payload[1]){
 		case 0:
-			sprintf(guiText, "Safe");
+			sprintf(droneModeGUI, "Safe");
 			break;
 		case 1:
-			sprintf(guiText, "Panic");
+			sprintf(droneModeGUI, "Panic");
 			break;
 		case 2:
-			sprintf(guiText, "Manual");
+			sprintf(droneModeGUI, "Manual");
 			break;
 		case 3:
-			sprintf(guiText, "Calibration");
+			sprintf(droneModeGUI, "Calibration");
 			break;
 		case 4:
-			sprintf(guiText, "Yaw");
+			sprintf(droneModeGUI, "Yaw");
 			break;
 		case 5:
-			sprintf(guiText, "Full Control");
+			sprintf(droneModeGUI, "Full Control");
 			break;
 		case 6:
-			sprintf(guiText, "Raw");
+			sprintf(droneModeGUI, "Raw");
 			break;
 		case 7:
-			sprintf(guiText, "Height");
+			sprintf(droneModeGUI, "Height");
 			break;
 		case 8:
-			sprintf(guiText, "Wireless");
+			sprintf(droneModeGUI, "Wireless");
 			break;
 	}
-	gtk_label_set_label(widg.l[4], guiText);
+}
+
+//@Author Georgios Giannakaras
+void printModeGUI(SRPacket *rPacket){
+
+	gtk_label_set_label(widg.l[4], droneModeGUI);
 }
 
 //@Author Georgios Giannakaras

@@ -102,6 +102,14 @@ GtkBuilder *builder;
 GtkWidget  *window;
 Widgets widg;
 
+// @Author: Georgios Giannakaras
+typedef struct{
+	float batteryVolt;
+	float fractionGUI;
+	int batteryPercentageGUI;
+} Battery;
+
+Battery battery;
 // @Author: Alex Lyrakis
 typedef struct{
 	uint16_t fcs;
@@ -117,6 +125,7 @@ FILE *Sfile;
 SRPacket sPacketBuffer[65535];
 bool receivedACK[65535];
 uint16_t motor[4];
+char droneModeGUI[20];
 
 int	term_getchar_nb();
 void initializations(struct pcState *pcState);
@@ -143,7 +152,8 @@ void initReceivedACK();
 //void initPcState(struct pcState *pcState);
 //void resetPcState(struct pcState *pcState);
 //void updatePcState(struct pcState *pcState);
-void calculateBatteryStatus(float battery);
+void calculateBatteryStatus();
+void caluclateDroneMode(SRPacket *rPacket);
 void *guiThread(void *vargp);
 void on_button_safe_clicked(GtkButton *button, Widgets *widg);
 void on_button_panic_clicked(GtkButton *button, Widgets *widg);
@@ -161,6 +171,7 @@ void printPcStatusGUI(SRPacket *sPacket);
 void printMotorStatusGUI(SRPacket *rPacket);
 void printDroneStatusGUI(SRPacket *rPacket);
 void printModeGUI(SRPacket *rPacket);
+void printBatteryStatusGUI();
 void writePing();
 uint64_t getMicrotime();
 
