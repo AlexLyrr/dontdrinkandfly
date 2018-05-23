@@ -39,7 +39,7 @@ void yawControl() {
 }
 
 void pitchControl(){
-	int32_t eps = (((int32_t) state.controlPitchUser - 90) >> 3) - ((theta - state.calibrateThetaOffset) >> 11); 
+	int32_t eps = (((int32_t) state.controlPitchUser - 90) >> 3) - ((theta - state.calibrateThetaOffset) >> 13); 
 	int32_t pitchValue = (state.p1 * eps);
 	int32_t eps2 = pitchValue - ((sq - state.calibrateSqOffset) >> 8);
 	pitchValue = (state.p2 * eps2) + 90;
@@ -51,7 +51,7 @@ void pitchControl(){
 }
 
 void rollControl(){
-	int32_t eps = (((int32_t) state.controlRollUser - 90) >> 3) - ((phi - state.calibratePhiOffset) >> 11);
+	int32_t eps = (((int32_t) state.controlRollUser - 90) >> 3) + ((phi - state.calibratePhiOffset) >> 13);
 	int32_t rollValue = (state.p1 * eps);
 	int32_t eps2 = rollValue - ((sp - state.calibrateSpOffset) >> 8);
 	rollValue = (state.p2 * eps2) + 90;

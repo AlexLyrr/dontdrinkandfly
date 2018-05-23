@@ -102,6 +102,14 @@ GtkBuilder *builder;
 GtkWidget  *window;
 Widgets widg;
 
+// @Author: Georgios Giannakaras
+typedef struct{
+	float batteryVolt;
+	float fractionGUI;
+	int batteryPercentageGUI;
+} Battery;
+
+Battery battery;
 // @Author: Alex Lyrakis
 typedef struct{
 	uint16_t fcs;
@@ -143,7 +151,7 @@ void initReceivedACK();
 //void initPcState(struct pcState *pcState);
 //void resetPcState(struct pcState *pcState);
 //void updatePcState(struct pcState *pcState);
-void calculateBatteryStatus(float battery);
+void calculateBatteryStatus();
 void *guiThread(void *vargp);
 void on_button_safe_clicked(GtkButton *button, Widgets *widg);
 void on_button_panic_clicked(GtkButton *button, Widgets *widg);
@@ -161,6 +169,7 @@ void printPcStatusGUI(SRPacket *sPacket);
 void printMotorStatusGUI(SRPacket *rPacket);
 void printDroneStatusGUI(SRPacket *rPacket);
 void printModeGUI(SRPacket *rPacket);
+void printBatteryStatusGUI();
 void writePing();
 uint64_t getMicrotime();
 
