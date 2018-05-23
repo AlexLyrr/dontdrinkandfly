@@ -14,7 +14,7 @@ void packetComponentLoop() {
 				parsePacketSetControl();
 				break;
 			case 0x05:
-				if (state.currentMode == 0 && (state.controlLift != 0 || state.controlRoll != 0 || state.controlPitch != 0 || state.controlYaw != 0)){
+				if (state.currentMode == 0 && (state.controlLift != 0 || state.controlRoll != 90 || state.controlPitch != 90 || state.controlYaw != 90)){
 					break;
 				}
 				else{

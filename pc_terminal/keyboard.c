@@ -162,7 +162,7 @@ void checkInput(char c, struct pcState *pcState)
 			break;
 		case '9':
 			pcState->n9Pressed = true;
-			pcState->mode = 8;
+			pcState->mode = 9;
 			break;
 		case 'a':
 			if (pcState->liftValue < 1000 && (pcState->mode == 2  || pcState->mode == 4 || pcState->mode == 5)){
