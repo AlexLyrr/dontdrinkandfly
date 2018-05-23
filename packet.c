@@ -207,3 +207,18 @@ void writePing(uint32_t clock) {
 void writePong(uint32_t clock) {
 	writePacket(13, 0,0,0,0, (clock >> 24) & 0xFF, (clock >> 16) & 0xFF, (clock >> 8) & 0xFF, clock & 0xFF, 0);
 }
+
+void writeRawValues() {
+	writePacket(15,
+		(phi >> 8) & 0xFF, phi & 0xFF,
+		(theta >> 8) & 0xFF, theta & 0xFF,
+		(psi >> 8) & 0xFF, psi & 0xFF,
+		0, 0, 0
+	);
+	writePacket(16,
+		(sp >> 8) & 0xFF, sp & 0xFF,
+		(sq >> 8) & 0xFF, sq & 0xFF,
+		(sr >> 8) & 0xFF, sr & 0xFF,
+		0, 0, 0
+	);
+}

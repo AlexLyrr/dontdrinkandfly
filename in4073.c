@@ -219,6 +219,12 @@ int main(void)
 				adc_request_sample();
 				read_baro();
 			}
+			if (state.currentMode == 0 && appClock%20 == 0) {
+				if (check_sensor_int_flag()) {
+					get_dmp_data();
+				}
+				writeRawValues();
+			}
 			if (state.nextMode != state.currentMode) {
 				switch(state.currentMode) {
 					case 1:

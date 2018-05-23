@@ -188,6 +188,8 @@ void receivePacket(SRPacket rPacket){
 					case 12:
 					case 13:
 					case 14:
+					case 15:
+					case 16:
 						logReceivePacket(rPacket);
 						break;
 					case 11:
@@ -304,6 +306,20 @@ void logReceivePacket(SRPacket rPacket){
 					printf("Sensor Loop time=%u, last=%u\n", val, val2);
 					break;
 			}
+			break;
+		case 15:
+			printf("[RAW]phi=%u, theta=%u, psi= %u\n",
+				(((uint16_t) rPacket.payload[1]) << 8) | ((uint16_t) rPacket.payload[2]),
+				(((uint16_t) rPacket.payload[3]) << 8) | ((uint16_t) rPacket.payload[4]),
+				(((uint16_t) rPacket.payload[5]) << 8) | ((uint16_t) rPacket.payload[6])
+			);
+			break;
+		case 16:
+			printf("[RAW]sp=%u, sq=%u, sr= %u\n",
+				(((uint16_t) rPacket.payload[1]) << 8) | ((uint16_t) rPacket.payload[2]),
+				(((uint16_t) rPacket.payload[3]) << 8) | ((uint16_t) rPacket.payload[4]),
+				(((uint16_t) rPacket.payload[5]) << 8) | ((uint16_t) rPacket.payload[6])
+			);
 			break;
 	}
 }
@@ -601,7 +617,9 @@ void initializations(struct pcState *pcState){
 	term_puts("Initialized termios...\n");
 	rs232_open();
 	term_puts("Initialized rs232...\n");
-	//openJoystick();
+	#ifdef JOYSTICK_ENABLE
+	openJoystick();
+	#endif
 	term_puts("Initialized joystick...\n");
 
 	term_puts("Type ^C to exit\n");
@@ -653,9 +671,10 @@ int main(int argc, char **argv)
 		}
 
 		// Read from joystic and update pcState
-   	 	#ifdef JOYSTICK_ENABLE
-		//checkJoystick(pcState);
-    	#endif
+   	 	
+		#ifdef JOYSTICK_ENABLE
+		checkJoystick(pcState);
+		#endif
 
 		// Read from fd_RS232
 		if ((c = rs232_getchar_nb()) != -1){
@@ -676,6 +695,7 @@ int main(int argc, char **argv)
 				writePing();
 			} else if (sthPressed(pcState) || pcState->jChanged){
 				updatePcState(pcState);
+				
 				setPacket(pcState, &sPacket);
 				sendPacket(sPacket);
 				sPacketGUI = sPacket;

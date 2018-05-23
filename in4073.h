@@ -216,6 +216,7 @@ void writeMotorStatus();
 void writeAck(uint16_t packetNumber);
 void writeTimings();
 void writePing();
+void writeRawValues();
 
 int root(int a, int n);
 int iPow(int a, int e);
