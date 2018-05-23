@@ -4,11 +4,11 @@ CFLAGS = -g -Wall -lm
 EXEC = ./pc-terminal
 
 all:
-	$(CC) $(CFLAGS) -D GUIACTIVATED pc_terminal.c pcqueue.c keyboard.c rs232.c eslgui.c communication.c -o $(EXEC) `pkg-config --cflags --libs gtk+-3.0 gthread-2.0 gmodule-2.0` -pthread
+	$(CC) $(CFLAGS) -D GUIACTIVATED pc_terminal.c pcqueue.c keyboard.c rs232.c eslgui.c -o $(EXEC) `pkg-config --cflags --libs gtk+-3.0 gthread-2.0 gmodule-2.0` -pthread
 	#$(CC) $(CFLAGS) pc_terminal.c pcqueue.c joystick.c -lm eslgui.c -o $(EXEC) `pkg-config --cflags --libs gtk+-3.0 gmodule-2.0` -pthread
 
 joystick:
-	$(CC) $(CFLAGS) -D GUIACTIVATED -D JOYSTICK_ENABLE pc_terminal.c pcqueue.c joystick.c eslgui.c communication.c -o $(EXEC) `pkg-config --cflags --libs gtk+-3.0 gmodule-2.0` -pthread
+	$(CC) $(CFLAGS) -D GUIACTIVATED -D JOYSTICK_ENABLE pc_terminal.c pcqueue.c joystick.c eslgui.c -o $(EXEC) `pkg-config --cflags --libs gtk+-3.0 gmodule-2.0` -pthread
 
 computer: all
 

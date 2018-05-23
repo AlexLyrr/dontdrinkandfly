@@ -630,6 +630,8 @@ void initializations(struct pcState *pcState){
  * main -- execute terminal
  *----------------------------------------------------------------
  */
+#define COMMUNICATION_MIN_DELAY_US (11 * 1000) 
+#define COMMUNICATION_PING_INTERVAL_US (1000 * 1000) 
 int main(int argc, char **argv)
 {
 	pcState = (struct pcState*) calloc(1, sizeof(struct pcState));
@@ -637,19 +639,20 @@ int main(int argc, char **argv)
 	SRPacket rPacket;
 	bool bufferCleared = false;
 	int c;
-	long timeLastPacket = getMicrotime();
+	
+	long timeLastPacket = 0;
+	long timeLastPing = getMicrotime();
+	
 	initializations(pcState);
 	pcStateGui = pcState;
+	
 	#ifdef GUIACTIVATED
 	pthread_t guithread;
 	pthread_create(&guithread, NULL, guiThread, NULL);
 	#endif
+
 	//send & receive
 	while(1) {
-
-		//beginLoop = clock();
-		//clock_gettime(CLOCK_MONOTONIC_RAW, &start);
-
 		if ((c = term_getchar_nb()) != -1)	// Read from keyboard and store in fd_RS232
 		{
 			checkInput(c, pcState);
@@ -673,17 +676,20 @@ int main(int argc, char **argv)
 			}
 		}
 
-		if ((getMicrotime() - timeLastPacket) > 5){
-			if (sthPressed(pcState) || pcState->jChanged){
-					updatePcState(pcState);
-					setPacket(pcState, &sPacket);
-					sendPacket(sPacket);
-					sPacketGUI = sPacket;
-					logSendPacket(sPacket);
-					//if (pcState->escPressed)
-					//	break;
-					resetPcState(pcState);
-					sPacketBuffer[sPacket.fcs] = sPacket;
+		if ((getMicrotime() - timeLastPacket) >= COMMUNICATION_MIN_DELAY_US){
+			if ((getMicrotime() - timeLastPing) >= COMMUNICATION_PING_INTERVAL_US) {
+				timeLastPing = getMicrotime();
+				writePing();
+			} else if (sthPressed(pcState) || pcState->jChanged){
+				updatePcState(pcState);
+				setPacket(pcState, &sPacket);
+				sendPacket(sPacket);
+				sPacketGUI = sPacket;
+				logSendPacket(sPacket);
+				//if (pcState->escPressed)
+				//	break;
+				resetPcState(pcState);
+				sPacketBuffer[sPacket.fcs] = sPacket;
 			}
 
 			//TBD: Based on our pcState and protocol we have to put a sequence of bytes using rs232_putchar(c);
