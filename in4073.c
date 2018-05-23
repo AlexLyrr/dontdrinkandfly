@@ -159,7 +159,7 @@ int main(void)
 				break;	
 			case 9:
 				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
-					rollControl();
+					//rollControl();
 					pitchControl();
 					run_filters_and_control();
 					#ifdef DEBUGGING

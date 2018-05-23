@@ -34,6 +34,7 @@ struct pcState{
 	bool n6Pressed;
 	bool n7Pressed;
 	bool n8Pressed;
+	bool n9Pressed;
 
 	bool aPressed;	//lift up
 	bool zPressed;	//lift down

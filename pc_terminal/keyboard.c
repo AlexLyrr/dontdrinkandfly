@@ -20,6 +20,7 @@ void resetPcState(struct pcState *pcState){
 	pcState->n6Pressed = false;
 	pcState->n7Pressed = false;
 	pcState->n8Pressed = false;
+	pcState->n9Pressed = false;
 
 	pcState->upPressed = false;
 	pcState->downPressed = false;
@@ -159,6 +160,10 @@ void checkInput(char c, struct pcState *pcState)
 			pcState->n8Pressed = true;
 			pcState->mode = 8;
 			break;
+		case '9':
+			pcState->n9Pressed = true;
+			pcState->mode = 8;
+			break;
 		case 'a':
 			if (pcState->liftValue < 1000 && (pcState->mode == 2  || pcState->mode == 4)){
 				pcState->liftValue +=10;
@@ -226,7 +231,7 @@ void checkInput(char c, struct pcState *pcState)
 // @Author Alex Lyrakis
 bool setModeAttempt(struct pcState *pcState){
 	return (pcState->n0Pressed || pcState->n1Pressed || pcState->n2Pressed || pcState->n3Pressed || pcState->n4Pressed || pcState->n5Pressed
-		|| pcState->n6Pressed || pcState->n7Pressed || pcState->n8Pressed);
+		|| pcState->n6Pressed || pcState->n7Pressed || pcState->n8Pressed || pcState->n9Pressed);
 }
 
 bool setControlAttempt(struct pcState *pcState){
@@ -240,7 +245,7 @@ bool setPAttempt(struct pcState *pcState){
 
 bool sthPressed(struct pcState *pcState){
 	return (pcState->n0Pressed || pcState->n1Pressed || pcState->n2Pressed || pcState->n3Pressed || pcState->n4Pressed || pcState->n5Pressed
-				|| pcState->n6Pressed || pcState->n7Pressed || pcState->n8Pressed || pcState->aPressed || pcState->zPressed || pcState->qPressed ||
+				|| pcState->n6Pressed || pcState->n7Pressed || pcState->n8Pressed || pcState->n9Pressed || pcState->aPressed || pcState->zPressed || pcState->qPressed ||
 				 pcState->wPressed || pcState->uPressed || pcState->jPressed || pcState->iPressed || pcState->kkPressed || pcState->oPressed ||
 				 pcState->lPressed || pcState->leftPressed || pcState->rightPressed || pcState->upPressed || pcState->downPressed || pcState->escPressed ||
 				 pcState->jThrottleUp || pcState->jThrottleDown || pcState->jLeft || pcState->jRight || pcState->jForward || pcState->jBackward ||

@@ -29,7 +29,7 @@ map range 90-180 to 0-15 or the other way around.
 */
 
 void yawControl() {
-	int32_t eps = ((int32_t) state.controlYawUser - 90) - (((int32_t) sr - state.calibrateSrOffset) >> 7);
+	int32_t eps = (((int32_t) state.controlYawUser - 90) >> 3) - (((int32_t) sr - state.calibrateSrOffset) >> 7);
 	int32_t yawValue = (state.pYaw * eps) + 90;
 	if (yawValue > 180)
 		yawValue = 180;
@@ -39,7 +39,7 @@ void yawControl() {
 }
 
 void pitchControl(){
-	int32_t eps = ((int32_t) state.controlPitchUser - 90) - ((theta - state.calibrateThetaOffset) >> 8); 
+	int32_t eps = (((int32_t) state.controlPitchUser - 90) >> 3) - ((theta - state.calibrateThetaOffset) >> 8); 
 	int32_t pitchValue = (state.p1 * eps);
 	int32_t eps2 = pitchValue - ((sq - state.calibrateSqOffset) >> 7);
 	pitchValue = (state.p2 * eps2) + 90;
@@ -51,7 +51,7 @@ void pitchControl(){
 }
 
 void rollControl(){
-	int32_t eps = ((int32_t) state.controlRollUser - 90) - ((phi - state.calibratePhiOffset) >> 8);
+	int32_t eps = (((int32_t) state.controlRollUser - 90) >> 3) - ((phi - state.calibratePhiOffset) >> 8);
 	int32_t rollValue = (state.p1 * eps);
 	int32_t eps2 = rollValue - ((sp - state.calibrateSpOffset) >> 7);
 	rollValue = (state.p2 * eps2) + 90;
