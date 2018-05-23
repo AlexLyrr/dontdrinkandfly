@@ -3,8 +3,6 @@
 //*@Author Georgios Giannakaras
 //*
 //*****************************
-#ifdef GUIACTIVATED
-
 #include <glib.h>
 #include <gtk/gtk.h>
 #include "pc_terminal.h"
@@ -148,4 +146,3 @@ void *guiThread(void *vargp){
 
     return NULL;
 }
-#endif
