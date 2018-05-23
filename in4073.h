@@ -127,8 +127,6 @@ void ble_send(void);
 
 typedef struct {
 	uint8_t nextMode;
-
-
 	uint8_t currentMode;
 
 	bool hasPacket;
@@ -139,6 +137,7 @@ typedef struct {
 	uint16_t packetAck;
 	bool sendAck;
 	bool sendPing;
+	uint32_t lastPacketReceived;
 
 	uint16_t packetNumber;
 	uint8_t currentPacket[PACKET_LENGTH];

@@ -66,6 +66,7 @@ void communicationComponentLoop() {
 					state.hasPacket = true;
 					state.packetAck = state.currentPacket[2] << 8 | state.currentPacket[3];
 					state.sendAck = true;
+					state.lastPacketReceived = get_time_us();
 					// printf("read packet");
 				} else {
 					// printf("Invalid crc %d", crc);
