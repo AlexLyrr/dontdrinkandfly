@@ -246,6 +246,8 @@ void logReceivePacket(SRPacket rPacket){
 				g_idle_add ((GSourceFunc) printBatteryStatusGUI, NULL);				
 				g_idle_add ((GSourceFunc) printDroneStatusGUI, &rPacket);
 				//printDroneStatusGUI(&rPacket);
+				caluclateDroneMode(&rPacket);
+				g_idle_add ((GSourceFunc) printModeGUI, &rPacket);
 				//printModeGUI(&rPacket);
 			#endif
 			break;
@@ -511,39 +513,42 @@ void printMotorStatusGUI(SRPacket *rPacket){
 }
 
 //@Author Georgios Giannakaras
-void printModeGUI(SRPacket *rPacket){
-	char guiText[30];
-
+void caluclateDroneMode(SRPacket *rPacket){
 	switch(rPacket->payload[1]){
 		case 0:
-			sprintf(guiText, "Safe");
+			sprintf(droneModeGUI, "Safe");
 			break;
 		case 1:
-			sprintf(guiText, "Panic");
+			sprintf(droneModeGUI, "Panic");
 			break;
 		case 2:
-			sprintf(guiText, "Manual");
+			sprintf(droneModeGUI, "Manual");
 			break;
 		case 3:
-			sprintf(guiText, "Calibration");
+			sprintf(droneModeGUI, "Calibration");
 			break;
 		case 4:
-			sprintf(guiText, "Yaw");
+			sprintf(droneModeGUI, "Yaw");
 			break;
 		case 5:
-			sprintf(guiText, "Full Control");
+			sprintf(droneModeGUI, "Full Control");
 			break;
 		case 6:
-			sprintf(guiText, "Raw");
+			sprintf(droneModeGUI, "Raw");
 			break;
 		case 7:
-			sprintf(guiText, "Height");
+			sprintf(droneModeGUI, "Height");
 			break;
 		case 8:
-			sprintf(guiText, "Wireless");
+			sprintf(droneModeGUI, "Wireless");
 			break;
 	}
-	gtk_label_set_label(widg.l[4], guiText);
+}
+
+//@Author Georgios Giannakaras
+void printModeGUI(SRPacket *rPacket){
+
+	gtk_label_set_label(widg.l[4], droneModeGUI);
 }
 
 //@Author Georgios Giannakaras

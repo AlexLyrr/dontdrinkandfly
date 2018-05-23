@@ -125,6 +125,7 @@ FILE *Sfile;
 SRPacket sPacketBuffer[65535];
 bool receivedACK[65535];
 uint16_t motor[4];
+char droneModeGUI[20];
 
 int	term_getchar_nb();
 void initializations(struct pcState *pcState);
@@ -152,6 +153,7 @@ void initReceivedACK();
 //void resetPcState(struct pcState *pcState);
 //void updatePcState(struct pcState *pcState);
 void calculateBatteryStatus();
+void caluclateDroneMode(SRPacket *rPacket);
 void *guiThread(void *vargp);
 void on_button_safe_clicked(GtkButton *button, Widgets *widg);
 void on_button_panic_clicked(GtkButton *button, Widgets *widg);
