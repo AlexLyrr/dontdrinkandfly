@@ -115,6 +115,7 @@ FILE *Sfile;
 
 SRPacket sPacketBuffer[65535];
 bool receivedACK[65535];
+uint16_t motor[4];
 
 int	term_getchar_nb();
 void initializations(struct pcState *pcState);

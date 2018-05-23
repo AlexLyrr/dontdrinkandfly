@@ -84,6 +84,7 @@ G_MODULE_EXPORT void on_button_down_clicked(GtkButton *button, Widgets *widg)
 	}
 }
 
+
 //@Author Georgios Giannakaras
 void *guiThread(void *vargp){
 	char guiText[20];
@@ -142,6 +143,7 @@ void *guiThread(void *vargp){
 	gtk_label_set_label(widg.l[4], guiText);
 	sprintf(guiText, "%hhu", 0);
 	gtk_label_set_label(widg.l[8], guiText);
+
     gtk_main();
 
     return NULL;

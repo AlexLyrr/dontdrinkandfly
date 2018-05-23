@@ -228,7 +228,7 @@ void initLogFiles(){
 
 //@Author George Giannakaras
 void logReceivePacket(SRPacket rPacket){
-	uint16_t motor[4];
+	
 	float battery;
 	uint32_t val, val2;
 	uint64_t val3;
@@ -245,8 +245,8 @@ void logReceivePacket(SRPacket rPacket){
 				rPacket.payload[6], rPacket.fcs, rPacket.payload[0], rPacket.payload[1], rPacket.payload[2], rPacket.payload[3],
 				rPacket.payload[4], rPacket.payload[5]);
 			#ifdef GUIACTIVATED
-				g_idle_add ((GSourceFunc) calculateBatteryStatus, &battery);
-				//calculateBatteryStatus(battery);
+				//g_idle_add ((GSourceFunc) calculateBatteryStatus, &battery);
+				calculateBatteryStatus(battery);
 				g_idle_add ((GSourceFunc) printDroneStatusGUI, &rPacket);
 				//printDroneStatusGUI(&rPacket);
 				printModeGUI(&rPacket);
@@ -262,7 +262,7 @@ void logReceivePacket(SRPacket rPacket){
 			motor[2] = (uint16_t)rPacket.payload[5] << 8 | (uint16_t)rPacket.payload[6];
 			motor[3] = (uint16_t)rPacket.payload[7] << 8 | (uint16_t)rPacket.payload[8];
 			#ifdef GUIACTIVATED
-				g_idle_add ((GSourceFunc) printMotorStatusGUI, &rPacketGUI);
+				g_idle_add ((GSourceFunc) printMotorStatusGUI, &rPacket);
 				//printMotorStatusGUI(&rPacket);
 			#endif
 			printf("Packet number: %hu | Type: %hhu | Motor1: %hu | Motor2: %hu | Motor3: %hu | Motor4: %hu\n",
@@ -498,12 +498,7 @@ void calculateBatteryStatus(float battery)
 //@Author Georgios Giannakaras
 void printMotorStatusGUI(SRPacket *rPacket){
 	char guiText[30];
-	uint16_t motor[4];
 
-	motor[0] = rPacketGUI.payload[1] << 8 | rPacketGUI.payload[2];
-	motor[1] = rPacketGUI.payload[3] << 8 | rPacketGUI.payload[4];
-	motor[2] = rPacketGUI.payload[5] << 8 | rPacketGUI.payload[6];
-	motor[3] = rPacketGUI.payload[7] << 8 | rPacketGUI.payload[8];
 	for (int i = 0; i < 4; ++i)
 	{
 		sprintf(guiText, "%hu RPM", motor[i]);
