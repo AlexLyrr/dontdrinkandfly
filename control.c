@@ -129,8 +129,8 @@ void controlComponentLoop() {
 void update_motors(void)
 {
 	for (int i = 0; i<4 ; i++){
-		if (ae[i] > 550){
-			ae[i] = 550;
+		if (ae[i] > 700){
+			ae[i] = 700;
 		}
 	}
 	motor[0] = ae[0];

@@ -116,21 +116,32 @@ int main(void)
 				if (state.controlChanged) {
 					run_filters_and_control(); // TODO: rename function
 					state.controlChanged = false;
-					// state.sendMotorStatus = true;
-					writeMotorStatus(); // TODO: move to the end of the control loop
+					state.sendMotorStatus = true;
+					// writeMotorStatus(); // TODO: move to the end of the control loop
 				}
 				break;
 			case 3: // Calibration
-				if (state.calibrated) {
+				if (check_sensor_int_flag()) {
+					get_dmp_data();
+					state.calibratePhiOffset = phi;
+					state.calibrateThetaOffset = theta;
+					state.calibratePsiOffset = psi;
+					state.calibrateSpOffset = sp;
+					state.calibrateSqOffset = sq;
+					state.calibrateSrOffset = sr;
+					state.calibrated = true;
 					state.nextMode = 0;
 				}
 				break;
 			case 4: // Manual Yaw
 				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
+					if (check_sensor_int_flag()) {
+						get_dmp_data();
+					}
 					yawControl();
 					run_filters_and_control();
 					#ifdef DEBUGGING
-					writeMotorStatus();
+					state.sendMotorStatus = true;
 					#endif
 				}
 				if (state.controlChanged) { // We don't need to do anything extra yet when this happens
@@ -142,12 +153,15 @@ int main(void)
 				break;
 			case 5:
 				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
+					if (check_sensor_int_flag()) {
+						get_dmp_data();
+					}
 					yawControl();
 					rollControl();
 					pitchControl();
 					run_filters_and_control();
 					#ifdef DEBUGGING
-					writeMotorStatus();
+					state.sendMotorStatus = true;
 					#endif
 				}
 				if (state.controlChanged) { // We don't need to do anything extra yet when this happens
@@ -159,11 +173,14 @@ int main(void)
 				break;	
 			case 9:
 				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
+					if (check_sensor_int_flag()) {
+						get_dmp_data();
+					}
 					//rollControl();
 					pitchControl();
 					run_filters_and_control();
 					#ifdef DEBUGGING
-					writeMotorStatus();
+					state.sendMotorStatus = true;
 					#endif
 				}
 				if (state.controlChanged) { // We don't need to do anything extra yet when this happens
@@ -245,7 +262,28 @@ int main(void)
 			clear_timer_flag();
 			appClock++;
 
-			
+			if (state.packetError != 0) {
+				writeError(state.packetError);
+				state.packetError = 0;
+			} else if (state.sendAck) {
+				state.sendAck = false;
+				writeAck(state.packetAck);
+				state.packetAck = 0;
+			} else if (state.sendStatus) {
+				state.sendStatus = false;
+				writeDroneStatus();
+			} else if (state.sendMotorStatus) {
+				state.sendMotorStatus = false;
+				writeMotorStatus();
+			} else if (state.sendTimings) {
+				state.sendTimings = false;
+				#ifdef APPLICATION_TIMINGS
+				writeTimings();
+				#endif
+			} else if (state.sendPing) {
+				state.sendPing = false;
+				writePing(get_time_us());
+			}
 		}
 
 		#ifdef APPLICATION_TIMINGS
@@ -255,48 +293,13 @@ int main(void)
 		}
 		#endif
 
-		if (check_sensor_int_flag()) {
-			
-			get_dmp_data();
-			if (state.currentMode == 3 && !state.calibrated) { // Calibrate mode
-				state.calibratePhiOffset = phi;
-				state.calibrateThetaOffset = theta;
-				state.calibratePsiOffset = psi;
-				state.calibrateSpOffset = sp;
-				state.calibrateSqOffset = sq;
-				state.calibrateSrOffset = sr;
-				state.calibrated = true;
-			}
-			controlComponentLoop();
-		}
 		#ifdef APPLICATION_TIMINGS
 		state.timeLoopSensor = get_time_us() - start - state.timeLoopPacket - state.timeLoopControl - state.timeLoopApp;
 		if (state.timeLoopSensor > state.timeLoopSensorMax) {
 			state.timeLoopSensorMax = state.timeLoopSensor;
 		}
 		#endif
-		if (state.packetError != 0) {
-			writeError(state.packetError);
-			state.packetError = 0;
-		} else if (state.sendAck) {
-			state.sendAck = false;
-			writeAck(state.packetAck);
-			state.packetAck = 0;
-		} else if (state.sendStatus) {
-			state.sendStatus = false;
-			writeDroneStatus();
-		} else if (state.sendMotorStatus) {
-			state.sendMotorStatus = false;
-			writeMotorStatus();
-		} else if (state.sendTimings) {
-			state.sendTimings = false;
-			#ifdef APPLICATION_TIMINGS
-			writeTimings();
-			#endif
-		} else if (state.sendPing) {
-			state.sendPing = false;
-			writePing(get_time_us());
-		}
+		
 		#ifdef APPLICATION_TIMINGS
 		state.timeLoop = get_time_us() - start;
 		if (state.timeLoop > state.timeLoopMax) {
