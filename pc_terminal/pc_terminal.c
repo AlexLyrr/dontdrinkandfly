@@ -238,7 +238,7 @@ void logReceivePacket(SRPacket rPacket){
 	switch(rPacket.payload[0]){
 		case 2:
 			emptiedBuffer = true;
-      		battery.batteryVolt = (((float) rPacket.payload[2]) * 7 / 100) + 1.2;
+      		battery.batteryVolt = (((float) rPacket.payload[2]) * 7 / 100);
 			printf("System time: %hhu | Packet number: %hu | Type: %hhu | Mode: %hhu | Battery: %f | Roll: %hhu | Pitch: %hhu | Height: %hhu\n",
 				rPacket.payload[6], rPacket.fcs, rPacket.payload[0], rPacket.payload[1], battery.batteryVolt, rPacket.payload[3], rPacket.payload[4], rPacket.payload[5]);
 			fprintf(Rfile, "System time: %hu | Packet number: %hu | Type: %hhu | Mode: %hu | Battery: %hu | Roll: %hu | Pitch: %hu | Height: %hu\n",
