@@ -61,7 +61,7 @@ void initPcState(struct pcState *pcState){
   pcState->yawValue = 90;
   pcState->PValue = 50;
   pcState->P1Value = 6;
-  pcState->P2Value = 5;
+  pcState->P2Value = 50;
 
   //JOYSTIC
   pcState->jThrottleValue = 0;
@@ -162,7 +162,7 @@ void checkInput(char c, struct pcState *pcState)
 			break;
 		case '9':
 			pcState->n9Pressed = true;
-			pcState->mode = 8;
+			pcState->mode = 9;
 			break;
 		case 'a':
 			if (pcState->liftValue < 1000 && (pcState->mode == 2  || pcState->mode == 4 || pcState->mode == 5)){

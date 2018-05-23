@@ -25,6 +25,7 @@ struct pcState{
 	bool escPressed; //abort / exit
 
 	uint8_t mode;
+	
 	bool n0Pressed;
 	bool n1Pressed;
 	bool n2Pressed;

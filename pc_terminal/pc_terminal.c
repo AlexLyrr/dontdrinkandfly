@@ -648,6 +648,7 @@ void initializations(struct pcState *pcState){
 	init_queuepc(&pcReQueue);
 }
 
+
 /*----------------------------------------------------------------
  * main -- execute terminal
  *----------------------------------------------------------------
@@ -705,7 +706,6 @@ int main(int argc, char **argv)
 				writePing();
 			} else if (sthPressed(pcState) || pcState->jChanged){
 				updatePcState(pcState);
-				
 				setPacket(pcState, &sPacket);
 				sendPacket(sPacket);
 				sPacketGUI = sPacket;

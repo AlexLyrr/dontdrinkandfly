@@ -38,6 +38,32 @@ void yawControl() {
 	state.controlYaw = (uint8_t) yawValue;
 }
 
+
+void pitchControl(){
+	int32_t eps = (((int32_t) state.controlPitchUser - 90)) - ((theta - state.calibrateThetaOffset) >> 4); 
+	int32_t pitchValue = (state.p1 * eps);
+	int32_t eps2 = (state.p2 *((sq - state.calibrateSqOffset) >> 4)) + pitchValue;
+	pitchValue = (eps2 >> 6) + 90;
+	if (pitchValue > 180)
+		pitchValue = 180;
+	if (pitchValue < 0)
+		pitchValue = 0;
+	state.controlPitch = (uint8_t) pitchValue;
+}
+
+void rollControl(){
+	int32_t eps = (((int32_t) state.controlRollUser - 90)) + ((phi - state.calibratePhiOffset) >> 4);
+	int32_t rollValue = (state.p1 * eps);
+	int32_t eps2 = (state.p2 * ((sp - state.calibrateSpOffset) >> 4)) + rollValue;
+	rollValue = (eps2 >> 6) + 90;
+	if (rollValue > 180)
+		rollValue = 180;
+	if (rollValue < 0)
+		rollValue = 0;
+	state.controlRoll = (uint8_t) rollValue;
+}
+
+/* These modes were tested, work but oscillate
 void pitchControl(){
 	int32_t eps = (((int32_t) state.controlPitchUser - 90)) - ((theta - state.calibrateThetaOffset) >> 4); 
 	int32_t pitchValue = (state.p1 * eps);
@@ -61,44 +87,7 @@ void rollControl(){
 		rollValue = 0;
 	state.controlRoll = (uint8_t) rollValue;
 }
-
-/*
-void rollControl() {
-	int32_t eps = ((int32_t) state.controlRollUser - 90) - (sp / 100);
-	int32_t rollValue = (state.pRoll * eps) + 90;
-	if (rollValue > 180)
-		rollValue = 180;
-	if (rollValue < 0)
-		rollValue = 0;
-	state.controlRoll = (uint8_t) rollValue;
-}
 */
-
-
-/*
-void rollControl(){
-	int32_t eps = ((int32_t) state.controlRollUser - 90) - ((phi - state.calibratePhiOffset) >> 8);
-	int32_t rollValue = (state.pRoll * eps) + 90;
-	if (rollValue > 180)
-		rollValue = 180;
-	if (rollValue < 0)
-		rollValue = 0;
-	state.controlRoll = (uint8_t) rollValue;
-}
-*/
-
-/*
-void pitchControl() {
-	int32_t eps = ((int32_t) state.controlPitchUser - 90) - (sq / 100);
-	int32_t pitchValue = (state.pPitch * eps) + 90;
-	if (pitchValue > 180)
-		pitchValue = 180;
-	if (pitchValue < 0)
-		pitchValue = 0;
-	state.controlPitch = (uint8_t) pitchValue;
-}
-*/
-
 /*
 void pitchControl() {
 	int32_t eps = ((int32_t) state.controlPitch - 90) * 100 - sp;
