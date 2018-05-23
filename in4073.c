@@ -34,6 +34,24 @@ void onAbort() {
 	state.sendStatus = true;
 }
 
+/**
+ *	@author Roy Blokker
+ */
+#define MIN_PACKET_INTERVAL_US (2 * 1000 * 1000)
+void checkSafety() {
+	uint32_t currentTime = get_time_us();
+	if (state.currentMode != 0 && (currentTime - state.lastPacketReceived) > MIN_PACKET_INTERVAL_US) {
+	// 	nrf_gpio_pin_toggle(GREEN);
+	// 	timeLastPacket = get_time_us();
+	// } else {
+		state.nextMode = 1;
+	}
+	//if (bat_volt < 133){ // with drone
+	// if (bat_volt < 68) { //without drone
+	// 	state.nextMode = 1;
+	// }
+}
+
 
 /*------------------------------------------------------------------
  * main -- everything you need is here :)
@@ -78,8 +96,6 @@ int main(void)
 	int32_t panicStep = 0;
 	systemDone = false;
 	appClock = 0;
-	uint32_t timeLastPacket = get_time_us();
-	//uint32_t start = 0;
 
 	while (!systemDone) {
 		#ifdef APPLICATION_TIMINGS
@@ -292,23 +308,7 @@ int main(void)
 				writePing(get_time_us());
 			}
 
-			//safety features
-			if (state.packetReceived) {
-				nrf_gpio_pin_toggle(GREEN);
-				state.packetReceived = false;
-				timeLastPacket = get_time_us();
-			} else {
-				if (state.currentMode != 0) {
-					if ((get_time_us() - timeLastPacket) > 2000000){
-						state.nextMode = 1;
-					}
-				}
-			}
-
-			//if (bat_volt < 133){ // with drone
-			if (bat_volt < 68) { //without drone
-				state.nextMode = 1;
-			}
+			checkSafety();
 		}
 
 		#ifdef APPLICATION_TIMINGS
