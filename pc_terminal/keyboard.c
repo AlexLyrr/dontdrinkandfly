@@ -61,7 +61,7 @@ void initPcState(struct pcState *pcState){
   pcState->yawValue = 90;
   pcState->PValue = 50;
   pcState->P1Value = 6;
-  pcState->P2Value = 5;
+  pcState->P2Value = 50;
 
   //JOYSTIC
   pcState->jThrottleValue = 0;

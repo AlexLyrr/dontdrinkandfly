@@ -85,7 +85,7 @@ int main(void)
 
 	state.pChanged = false;
 	state.p1 = 6;
-	state.p2 = 5;
+	state.p2 = 50;
 	state.pYaw = 50;
 
 	state.calibrated = false;
@@ -111,7 +111,6 @@ int main(void)
 			state.timeLoopPacketMax = state.timeLoopPacket;
 		}
 		#endif
-
 		switch(state.currentMode) {
 			case 0:
 				motor[0] = 0;
