@@ -66,9 +66,9 @@ int main(void)
 	state.packetError = 0;
 
 	state.pChanged = false;
-	state.p1 = 5;
+	state.p1 = 6;
 	state.p2 = 5;
-	state.pYaw = 1;
+	state.pYaw = 50;
 
 	state.calibrated = false;
 	state.calibratePhiOffset = 0;

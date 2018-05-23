@@ -29,8 +29,8 @@ map range 90-180 to 0-15 or the other way around.
 */
 
 void yawControl() {
-	int32_t eps = (((int32_t) state.controlYawUser - 90) >> 3) - (((int32_t) sr - state.calibrateSrOffset) >> 7);
-	int32_t yawValue = (state.pYaw * eps) + 90;
+	int32_t eps = (((int32_t) state.controlYawUser - 90) << 6) - (((int32_t) sr - state.calibrateSrOffset) >> 4);
+	int32_t yawValue = ((state.pYaw * eps) >> 6) + 90;
 	if (yawValue > 180)
 		yawValue = 180;
 	if (yawValue < 0)
@@ -39,10 +39,10 @@ void yawControl() {
 }
 
 void pitchControl(){
-	int32_t eps = (((int32_t) state.controlPitchUser - 90) >> 3) - ((theta - state.calibrateThetaOffset) >> 13); 
+	int32_t eps = (((int32_t) state.controlPitchUser - 90)) - ((theta - state.calibrateThetaOffset) >> 4); 
 	int32_t pitchValue = (state.p1 * eps);
-	int32_t eps2 = pitchValue - ((sq - state.calibrateSqOffset) >> 8);
-	pitchValue = (state.p2 * eps2) + 90;
+	int32_t eps2 = ((sq - state.calibrateSqOffset) >> 4) + pitchValue;
+	pitchValue = ((state.p2 * eps2) >> 6) + 90;
 	if (pitchValue > 180)
 		pitchValue = 180;
 	if (pitchValue < 0)
@@ -51,10 +51,10 @@ void pitchControl(){
 }
 
 void rollControl(){
-	int32_t eps = (((int32_t) state.controlRollUser - 90) >> 3) + ((phi - state.calibratePhiOffset) >> 13);
+	int32_t eps = (((int32_t) state.controlRollUser - 90)) + ((phi - state.calibratePhiOffset) >> 4);
 	int32_t rollValue = (state.p1 * eps);
-	int32_t eps2 = rollValue - ((sp - state.calibrateSpOffset) >> 8);
-	rollValue = (state.p2 * eps2) + 90;
+	int32_t eps2 = ((sp - state.calibrateSpOffset) >> 4) + rollValue;
+	rollValue = ((state.p2 * eps2) >> 6) + 90;
 	if (rollValue > 180)
 		rollValue = 180;
 	if (rollValue < 0)
@@ -159,14 +159,14 @@ void run_filters_and_control()
 		if (controlPitch > 90) {
 			ae[0] += controlPitch - 90;
 			ae[2] -= controlPitch - 90;
-		}else {
+		} else {
 			ae[0] -= 90 - controlPitch;
 			ae[2] += 90 - controlPitch;
 		}
 		if (controlRoll > 90) {
 			ae[1] += controlRoll - 90;
 			ae[3] -= controlRoll - 90;
-		}else{
+		} else{
 			ae[1] -= 90 - controlRoll;
 			ae[3] += 90 - controlRoll;
 		}
