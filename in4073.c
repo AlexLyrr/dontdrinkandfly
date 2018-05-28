@@ -46,7 +46,7 @@ void checkSafety() {
 	// } else {
 		state.nextMode = 1;
 	}
-	if (bat_volt < 155 && bat_volt > 128){ // with drone
+	if (bat_volt < 155 && bat_volt > 128){
 		state.nextMode = 1;
 	}
 }
