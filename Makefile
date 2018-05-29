@@ -45,6 +45,7 @@ $(abspath ./control.c) \
 $(abspath ./maths.c) \
 $(abspath ./packet.c) \
 $(abspath ./comm.c) \
+$(abspath ./height.c) \
 $(abspath ./drivers/gpio.c) \
 $(abspath ./drivers/timers.c) \
 $(abspath ./drivers/uart.c) \

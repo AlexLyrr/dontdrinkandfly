@@ -156,6 +156,7 @@ typedef struct {
 	uint16_t p1;
 	uint16_t p2;
 	uint16_t pYaw;
+	uint16_t pLift;
 
 	bool calibrated;
 	int16_t calibratePhiOffset;
@@ -174,7 +175,10 @@ typedef struct {
 	uint8_t controlYawUser;
 	uint8_t controlPitchUser;
 	uint8_t controlRollUser;
+	uint16_t controlLiftUser;
 
+	bool heightSet;
+	int32_t initPressure;
 	Q13_20 rawSp;
 	Q13_20 rawSq;
 	Q13_20 rawSr;
@@ -204,6 +208,14 @@ void onAbort();
 void controlComponentLoop();
 void communicationComponentLoop();
 void packetComponentLoop();
+
+/*******
+	height control
+	@author Roy Blokker
+*******/
+
+void init_height();
+void heightControl();
 
 /*******
 	Protocol
