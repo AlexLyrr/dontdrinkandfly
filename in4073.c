@@ -85,12 +85,15 @@ int main(void)
 	state.pChanged = false;
 	state.p1 = 6;
 	state.p2 = 50;
-	state.pYaw = 50;
+	state.pYaw = 5;
+	state.pLift = 2;
 
 	state.calibrated = false;
 	state.calibratePhiOffset = 0;
 	state.calibrateThetaOffset = 0;
 	state.calibratePsiOffset = 0;
+
+	state.heightSet = false;
 
 	int32_t panicStep = 0;
 	systemDone = false;
@@ -166,7 +169,7 @@ int main(void)
 					state.pChanged = false;
 				}
 				break;
-			case 5:
+			case 5: // Full-Control
 				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
 					if (check_sensor_int_flag()) {
 						get_dmp_data();
@@ -185,7 +188,32 @@ int main(void)
 				if (state.pChanged) { // We don't need to do anything extra yet when this happens
 					state.pChanged = false;
 				}
-				break;	
+				break;
+			case 7: //Height control
+				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
+					if (check_sensor_int_flag()) {
+						get_dmp_data();
+					}
+					if (state.heightSet == false){
+						init_height();
+						state.heightSet = true;
+					}
+					//yawControl();
+					//rollControl();
+					//pitchControl();
+					heightControl();
+					run_filters_and_control();
+					#ifdef DEBUGGING
+					state.sendMotorStatus = true;
+					#endif
+				}
+				if (state.controlChanged) { // We don't need to do anything extra yet when this happens
+					state.controlChanged = false;
+				}
+				if (state.pChanged) { // We don't need to do anything extra yet when this happens
+					state.pChanged = false;
+				}
+				break;
 			case 9:
 				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
 					if (check_sensor_int_flag()) {
@@ -247,6 +275,10 @@ int main(void)
 						break;
 					case 3:
 						state.calibrated = false; // reset flag
+						state.currentMode = state.nextMode;
+						break;
+					case 7:
+						state.heightSet = false;
 						state.currentMode = state.nextMode;
 						break;
 					case 0:

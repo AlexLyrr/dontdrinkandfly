@@ -14,6 +14,7 @@ void packetComponentLoop() {
 				parsePacketSetControl();
 				break;
 			case 0x05:
+				#ifdef JOYSTICK_ENABLE
 				if (state.currentMode == 0 && (state.controlLift != 0 || state.controlRoll != 90 || state.controlPitch != 90 || state.controlYaw != 90)){
 					break;
 				}
@@ -21,6 +22,11 @@ void packetComponentLoop() {
 					parsePacketSetMode();
 					break;
 				}
+				#endif
+				#ifndef JOYSTICK_ENABLE
+					parsePacketSetMode();
+					break;
+				#endif
 			case 0x09:
 				parsePacketSetP();
 				break;
@@ -58,6 +64,7 @@ void parsePacketSetControl() {
 	state.controlYaw = state.currentPacket[8];
 	state.controlYawUser = state.currentPacket[8];
 	state.controlLift = state.currentPacket[9] << 8 | state.currentPacket[10];
+	state.controlLiftUser = state.currentPacket[9] << 8 | state.currentPacket[10];
 	state.controlChanged = true;
 }
 
