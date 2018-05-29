@@ -106,7 +106,7 @@ int main(void)
 
 		communicationComponentLoop();
 		packetComponentLoop();
-		
+
 		#ifdef APPLICATION_TIMINGS
 		state.timeLoopPacket = get_time_us() - start;
 		if (state.timeLoopPacket > state.timeLoopPacketMax) {
@@ -198,9 +198,9 @@ int main(void)
 						init_height();
 						state.heightSet = true;
 					}
-					//yawControl();
-					//rollControl();
-					//pitchControl();
+					yawControl();
+					rollControl();
+					pitchControl();
 					heightControl();
 					run_filters_and_control();
 					#ifdef DEBUGGING
@@ -354,12 +354,12 @@ int main(void)
 			state.timeLoopSensorMax = state.timeLoopSensor;
 		}
 		#endif
-		
+
 		#ifdef APPLICATION_TIMINGS
 		state.timeLoop = get_time_us() - start;
 		if (state.timeLoop > state.timeLoopMax) {
 			state.timeLoopMax = state.timeLoop;
-		}	
+		}
 		#endif
 	}
 
