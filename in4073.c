@@ -238,7 +238,7 @@ int main(void)
 				if (check_sensor_int_flag()) {
 					get_dmp_data();
 				}
-				writeRawValues();
+				writeSensorValues();
 			}
 			if (state.nextMode != state.currentMode) {
 				switch(state.currentMode) {

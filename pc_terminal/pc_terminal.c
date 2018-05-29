@@ -191,6 +191,8 @@ void receivePacket(SRPacket rPacket){
 					case 14:
 					case 15:
 					case 16:
+					case 17:
+					case 18:
 						logReceivePacket(rPacket);
 						break;
 					case 11:
@@ -212,10 +214,12 @@ void receivePacket(SRPacket rPacket){
 
 //@Author Alex Lyrakis
 void initLogFiles(){
-	Rfile = fopen("logReceivePacket.txt", "a");
-	Sfile = fopen("logSendPackets.txt", "a");
-	system("cat /dev/null > logSendPackets.txt");
-	system("cat /dev/null > logReceivePacket.txt");
+	Rfile = fopen("logReceivePacket.txt", "w+");
+	Sfile = fopen("logSendPackets.txt", "w+");
+	CsvFile = fopen("data.csv", "w+");
+
+	// system("cat /dev/null > logSendPackets.txt");
+	// system("cat /dev/null > logReceivePacket.txt");
 	if (Rfile == NULL)
 	{
 	    printf("Error opening logReceivePacket.txt file!\n");
@@ -226,6 +230,12 @@ void initLogFiles(){
 	    printf("Error opening logSendPackets.txt file!\n");
 	    exit(1);
 	}
+	if (CsvFile == NULL)
+	{
+	    printf("Error opening logSendPackets.txt file!\n");
+	    exit(1);
+	}
+	fprintf(CsvFile, "sp,sq,sr,sax,say,saz\n");
 }
 
 //@Author George Giannakaras
@@ -317,6 +327,20 @@ void logReceivePacket(SRPacket rPacket){
 			break;
 		case 16:
 			printf("[RAW]sp=%u, sq=%u, sr= %u\n",
+				(((uint16_t) rPacket.payload[1]) << 8) | ((uint16_t) rPacket.payload[2]),
+				(((uint16_t) rPacket.payload[3]) << 8) | ((uint16_t) rPacket.payload[4]),
+				(((uint16_t) rPacket.payload[5]) << 8) | ((uint16_t) rPacket.payload[6])
+			);
+			break;
+		case 17:
+			fprintf(CsvFile, "%u, %u, %u",
+				(((uint16_t) rPacket.payload[1]) << 8) | ((uint16_t) rPacket.payload[2]),
+				(((uint16_t) rPacket.payload[3]) << 8) | ((uint16_t) rPacket.payload[4]),
+				(((uint16_t) rPacket.payload[5]) << 8) | ((uint16_t) rPacket.payload[6])
+			);
+			break;
+		case 18:
+			fprintf(CsvFile, ",%u, %u, %u\n",
 				(((uint16_t) rPacket.payload[1]) << 8) | ((uint16_t) rPacket.payload[2]),
 				(((uint16_t) rPacket.payload[3]) << 8) | ((uint16_t) rPacket.payload[4]),
 				(((uint16_t) rPacket.payload[5]) << 8) | ((uint16_t) rPacket.payload[6])

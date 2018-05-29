@@ -123,6 +123,8 @@ SRPacket sPacketGUI, rPacketGUI;
 FILE *Rfile;
 FILE *Sfile;
 
+FILE *CsvFile;
+
 SRPacket sPacketBuffer[65535];
 bool receivedACK[65535];
 uint16_t motor[4];

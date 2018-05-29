@@ -125,6 +125,8 @@ void ble_send(void);
 #define PACKET_LENGTH (PACKET_BODY_LENGTH + 5)
 //#define APPLICATION_TIMINGS 0
 
+typedef int32_t Q13_20;
+
 typedef struct {
 	uint8_t nextMode;
 	uint8_t currentMode;
@@ -173,7 +175,13 @@ typedef struct {
 	uint8_t controlPitchUser;
 	uint8_t controlRollUser;
 
-	
+	Q13_20 rawSp;
+	Q13_20 rawSq;
+	Q13_20 rawSr;
+
+	Q13_20 rawSax;
+	Q13_20 rawSay;
+	Q13_20 rawSaz;
 
 	int32_t timeLoop;
 	int32_t timeLoopMax;
@@ -215,7 +223,11 @@ void writeMotorStatus();
 void writeAck(uint16_t packetNumber);
 void writeTimings();
 void writePing();
-void writeRawValues();
+void writeSensorValues();
+void writeRawValues(uint16_t sp, uint16_t sq, uint16_t sr, uint16_t sax, uint16_t say, uint16_t saz);
+
+Q13_20 toFixedPoint(uint16_t value);
+
 
 int root(int a, int n);
 int iPow(int a, int e);
