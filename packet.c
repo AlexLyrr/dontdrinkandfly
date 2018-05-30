@@ -23,7 +23,7 @@ void packetComponentLoop() {
 					break;
 				}
 				#endif
-				#ifndef JOYSTICK_ENABLE*/
+				#ifndef JOYSTICK_ENABLE
 					parsePacketSetMode();
 					break;
 				#endif

@@ -217,3 +217,44 @@ void manualControlBackup()
 	if (setMotors == 0)
 		update_motors();
 }
+
+void full_control_motor()
+{
+	uint32_t controlPitch = state.controlPitch;
+	uint32_t controlRoll = state.controlRoll;
+	uint32_t controlYaw = state.controlYaw;
+	uint32_t controlLift = state.controlLift;
+	ae[0] = controlLift;
+	ae[1] = controlLift;
+	ae[2] = controlLift;
+	ae[3] = controlLift;
+	if (controlLift > 180) {
+		if (controlPitch > 90) {
+			ae[0] += (controlPitch - 90) << 1;
+			ae[2] -= (controlPitch - 90) << 1;
+		} else {
+			ae[0] -= (90 - controlPitch) << 1;
+			ae[2] += (90 - controlPitch) << 1;
+		}
+		if (controlRoll > 90) {
+			ae[1] += (controlRoll - 90) << 1;
+			ae[3] -= (controlRoll - 90) << 1;
+		} else{
+			ae[1] -= (90 - controlRoll) << 1;
+			ae[3] += (90 - controlRoll) << 1;
+		}
+		if (controlYaw > 90){
+			ae[0] -= (controlYaw - 90) << 1;
+			ae[1] += (controlYaw - 90) << 1;
+			ae[2] -= (controlYaw - 90) << 1;
+			ae[3] += (controlYaw - 90) << 1;
+		} else{
+			ae[0] += (90 - controlYaw) << 1;
+			ae[1] -= (90 - controlYaw) << 1;
+			ae[2] += (90 - controlYaw) << 1;
+			ae[3] -= (90 - controlYaw) << 1;
+		}
+	}
+
+	update_motors();
+}

@@ -177,7 +177,7 @@ int main(void)
 					yawControl();
 					rollControl();
 					pitchControl();
-					run_filters_and_control();
+					full_control_motor();
 					#ifdef DEBUGGING
 					state.sendMotorStatus = true;
 					#endif

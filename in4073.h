@@ -44,6 +44,7 @@ void pitchControl();
 void rollControl();
 void kalmanRoll();
 void kalmanPitch();
+void full_control_motor();
 
 
 // Timers
