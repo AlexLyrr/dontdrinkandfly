@@ -16,6 +16,9 @@
 #include "../in4073.h"
 
 
+void onAbort() {
+
+}
 /*
  * @author Joseph Verburg
  */
@@ -57,7 +60,7 @@ int main(void)
 	systemDone = false;
 
 	#define RECORD_DURATION (10 * 1000 * 1000)
-	#define MIN_PACKET_DELAY (22 * 1000)
+	#define MIN_PACKET_DELAY (2 * 1500)
 	bool recording = false;
 	bool sending = false;
 	uint32_t recording_start = 0;
@@ -137,7 +140,7 @@ int main(void)
 				}
 			}
 		}
-
+		packetComponentLoop();
 
 		// state.rawSp = toFixedPoint(sp);
 		// state.rawSq = toFixedPoint(sq);

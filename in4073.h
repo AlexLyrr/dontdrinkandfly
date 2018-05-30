@@ -121,6 +121,8 @@ void ble_send(void);
 	@author Joseph Verburg
 *******/
 #define PANIC_STEPS (5000 / TIMER_PERIOD)
+#define CALIBRATION_STEPS (10000 / TIMER_PERIOD)
+
 #define PACKET_BODY_LENGTH 10
 #define PACKET_LENGTH (PACKET_BODY_LENGTH + 5)
 //#define APPLICATION_TIMINGS 0
@@ -131,6 +133,7 @@ typedef struct {
 	uint8_t nextMode;
 	uint8_t currentMode;
 
+	// Packet component
 	bool hasPacket;
 	bool sendStatus;
 	bool sendMotorStatus;
@@ -140,33 +143,27 @@ typedef struct {
 	bool sendAck;
 	bool sendPing;
 	uint32_t lastPacketReceived;
-
 	uint16_t packetNumber;
 	uint8_t currentPacket[PACKET_LENGTH];
 
+
+	// Panic mode
 	uint16_t panicFinished; // In appClock;
 	uint32_t panicMotor[4];
+
 
 	uint8_t motor1Offset;
 	uint8_t motor2Offset;
 	uint8_t motor3Offset;
 	uint8_t motor4Offset;
 
+	// Control params
+	bool dmpEnabled;
 	bool pChanged;
 	uint16_t p1;
 	uint16_t p2;
 	uint16_t pYaw;
 	uint16_t pLift;
-
-	bool calibrated;
-	int16_t calibratePhiOffset;
-	int16_t calibrateThetaOffset;
-	int16_t calibratePsiOffset;
-	int16_t calibrateSpOffset;
-	int16_t calibrateSqOffset;
-	int16_t calibrateSrOffset;
-	
-
 	bool controlChanged;
 	uint8_t controlRoll;
 	uint8_t controlPitch;
@@ -177,8 +174,19 @@ typedef struct {
 	uint8_t controlRollUser;
 	uint16_t controlLiftUser;
 
+	// Calibration
+	bool calibrated;
+	uint32_t calibrationFinished; // In appClock
+	int16_t calibratePhiOffset;
+	int16_t calibrateThetaOffset;
+	int16_t calibratePsiOffset;
+	int16_t calibrateSpOffset;
+	int16_t calibrateSqOffset;
+	int16_t calibrateSrOffset;
+	
 	bool heightSet;
 	int32_t initPressure;
+
 	Q13_20 rawSp;
 	Q13_20 rawSq;
 	Q13_20 rawSr;
@@ -204,10 +212,14 @@ uint16_t appClock;
 
 void onAbort();
 
-
+/*******
+    Application & Components
+	@author Joseph Verburg
+*******/
 void controlComponentLoop();
 void communicationComponentLoop();
 void packetComponentLoop();
+void applicationComponentLoop();
 
 /*******
 	height control

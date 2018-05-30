@@ -345,6 +345,7 @@ void logReceivePacket(SRPacket rPacket){
 				(((uint16_t) rPacket.payload[3]) << 8) | ((uint16_t) rPacket.payload[4]),
 				(((uint16_t) rPacket.payload[5]) << 8) | ((uint16_t) rPacket.payload[6])
 			);
+			fflush(CsvFile);
 			break;
 	}
 }
@@ -677,7 +678,7 @@ void initializations(struct pcState *pcState){
  * main -- execute terminal
  *----------------------------------------------------------------
  */
-#define COMMUNICATION_MIN_DELAY_US (11 * 1000) 
+#define COMMUNICATION_MIN_DELAY_US (1 * 1500) 
 #define COMMUNICATION_PING_INTERVAL_US (1000 * 1000) 
 int main(int argc, char **argv)
 {

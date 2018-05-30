@@ -51,6 +51,132 @@ void checkSafety() {
 	}
 }
 
+/**
+ *	@author Joseph Verburg 
+ */
+void applicationComponentLoop() {
+	if (appClock%2 == 0) {
+		nrf_gpio_pin_toggle(YELLOW);
+	}
+	if (appClock%100 == 0) { // Every second
+		nrf_gpio_pin_toggle(BLUE);
+	}
+	if (appClock%200 == 0) {
+		state.sendStatus = true;
+		#ifndef DEBUGGING
+		state.sendMotorStatus = true;
+		#endif
+		#ifdef APPLICATION_TIMINGS
+		state.sendTimings = true;
+		state.sendPing = true;
+		#endif
+	}
+	if (appClock%5 == 0) {
+		adc_request_sample();
+		read_baro();
+	}
+
+	if (state.nextMode != state.currentMode) {
+		switch(state.currentMode) {
+			case 1:
+				state.nextMode = 1;
+				break;
+			case 3:
+				state.calibrated = false; // reset flag
+				state.currentMode = state.nextMode;
+				break;
+			case 7:
+				state.heightSet = false;
+				state.currentMode = state.nextMode;
+				break;
+			case 0:
+				if (state.nextMode == 1) {
+					systemDone = true;
+					break;
+				}
+			default:
+				switch(state.nextMode) {
+					case 1:
+						state.panicFinished = appClock + PANIC_STEPS;
+						for(uint8_t i = 0; i < 4; i += 1) {
+								state.panicMotor[i] = motor[i];
+						}
+						break;
+					case 2:
+						state.calibrationFinished = appClock + CALIBRATION_STEPS;
+						// FALLTHROUGH
+					case 3:
+					case 4:
+					case 5:
+						if (!state.dmpEnabled) {
+							imu_init(true, 100);
+							state.dmpEnabled = true;
+						}
+						break;
+				}
+				state.currentMode = state.nextMode;
+				break;
+		}
+		state.sendStatus = true;
+	}
+
+	switch(state.currentMode) {
+		case 0:
+			if (appClock%20 == 0) {
+				if (state.dmpEnabled && check_sensor_int_flag()) {
+					get_dmp_data();
+					writeSensorValues();
+				}
+			}
+			break;
+		case 1:
+			if (appClock%5 == 0) {
+				state.sendStatus = true;
+				state.sendMotorStatus = true;
+			}
+			if (state.panicFinished == appClock) {
+				state.currentMode = 0;
+				systemDone = true;
+				state.sendStatus = true;
+			}
+			break;
+		case 3:
+			if (state.calibrationFinished == appClock) {
+				state.currentMode = 0;
+				state.sendStatus = true;
+			}
+			break;
+	}
+
+	clear_timer_flag();
+	appClock++;
+
+	if (state.packetError != 0) {
+		writeError(state.packetError);
+		state.packetError = 0;
+	} else if (state.sendAck) {
+		state.sendAck = false;
+		writeAck(state.packetAck);
+		state.packetAck = 0;
+	} else if (state.sendStatus) {
+		state.sendStatus = false;
+		writeDroneStatus();
+	} else if (state.sendMotorStatus) {
+		state.sendMotorStatus = false;
+		writeMotorStatus();
+	} else if (state.sendTimings) {
+		state.sendTimings = false;
+		#ifdef APPLICATION_TIMINGS
+		writeTimings();
+		#endif
+	} else if (state.sendPing) {
+		state.sendPing = false;
+		writePing(get_time_us());
+	}
+
+	checkSafety();
+}
+
 
 /*------------------------------------------------------------------
  * main -- everything you need is here :)
@@ -63,7 +189,7 @@ int main(void)
 	timers_init();
 	adc_init();
 	twi_init();
-	imu_init(true, 100);
+	// imu_init(true, 100);
 	baro_init();
 	spi_flash_init();
 	// ble_init();
@@ -71,6 +197,7 @@ int main(void)
 	state.currentMode = 0;
 	state.nextMode = 0;
 
+	state.dmpEnabled = false;
 	state.controlChanged = false;
 
 	state.hasPacket = false;
@@ -100,19 +227,10 @@ int main(void)
 	appClock = 0;
 
 	while (!systemDone) {
-		#ifdef APPLICATION_TIMINGS
-		start = get_time_us();
-		#endif
 
 		communicationComponentLoop();
 		packetComponentLoop();
 
-		#ifdef APPLICATION_TIMINGS
-		state.timeLoopPacket = get_time_us() - start;
-		if (state.timeLoopPacket > state.timeLoopPacketMax) {
-			state.timeLoopPacketMax = state.timeLoopPacket;
-		}
-		#endif
 		switch(state.currentMode) {
 			case 0:
 				motor[0] = 0;
@@ -234,133 +352,10 @@ int main(void)
 				}
 				break;
 		}
-		#ifdef APPLICATION_TIMINGS
-		state.timeLoopControl = get_time_us() - start - state.timeLoopPacket;
-		if (state.timeLoopControl > state.timeLoopControlMax) {
-			state.timeLoopControlMax = state.timeLoopControl;
-		}
-		#endif
 
 		if (check_timer_flag()) {
-			if (appClock%2 == 0) {
-				nrf_gpio_pin_toggle(YELLOW);
-			}
-			if (appClock%100 == 0) { // Every second
-				nrf_gpio_pin_toggle(BLUE);
-			}
-			if (appClock%200 == 0) {
-				state.sendStatus = true;
-				#ifndef DEBUGGING
-				state.sendMotorStatus = true;
-				#endif
-				#ifdef APPLICATION_TIMINGS
-				state.sendTimings = true;
-				state.sendPing = true;
-				#endif
-			}
-			if (appClock%5 == 0) {
-				adc_request_sample();
-				read_baro();
-			}
-			if (state.currentMode == 0 && appClock%20 == 0) {
-				if (check_sensor_int_flag()) {
-					get_dmp_data();
-				}
-				writeSensorValues();
-			}
-			if (state.nextMode != state.currentMode) {
-				switch(state.currentMode) {
-					case 1:
-						state.nextMode = 1;
-						break;
-					case 3:
-						state.calibrated = false; // reset flag
-						state.currentMode = state.nextMode;
-						break;
-					case 7:
-						state.heightSet = false;
-						state.currentMode = state.nextMode;
-						break;
-					case 0:
-						if (state.nextMode == 1) {
-							systemDone = true;
-							break;
-						}
-					default:
-						switch(state.nextMode) {
-							case 1:
-								state.panicFinished = appClock + PANIC_STEPS;
-								for(uint8_t i = 0; i < 4; i += 1) {
-										state.panicMotor[i] = motor[i];
-								}
-								break;
-						}
-						state.currentMode = state.nextMode;
-						break;
-				}
-				state.sendStatus = true;
-			}
-			if (state.currentMode == 1) {
-				if (appClock%5 == 0) {
-					state.sendStatus = true;
-					state.sendMotorStatus = true;
-				}
-				if (state.panicFinished == appClock) {
-					state.currentMode = 0;
-					systemDone = true;
-					state.sendStatus = true;
-				}
-			}
-
-			clear_timer_flag();
-			appClock++;
-
-			if (state.packetError != 0) {
-				writeError(state.packetError);
-				state.packetError = 0;
-			} else if (state.sendAck) {
-				state.sendAck = false;
-				writeAck(state.packetAck);
-				state.packetAck = 0;
-			} else if (state.sendStatus) {
-				state.sendStatus = false;
-				writeDroneStatus();
-			} else if (state.sendMotorStatus) {
-				state.sendMotorStatus = false;
-				writeMotorStatus();
-			} else if (state.sendTimings) {
-				state.sendTimings = false;
-				#ifdef APPLICATION_TIMINGS
-				writeTimings();
-				#endif
-			} else if (state.sendPing) {
-				state.sendPing = false;
-				writePing(get_time_us());
-			}
-
-			checkSafety();
+			applicationComponentLoop();
 		}
-
-		#ifdef APPLICATION_TIMINGS
-		state.timeLoopApp = get_time_us() - start - state.timeLoopPacket - state.timeLoopControl;
-		if (state.timeLoopApp > state.timeLoopAppMax) {
-			state.timeLoopAppMax = state.timeLoopApp;
-		}
-		#endif
-
-		#ifdef APPLICATION_TIMINGS
-		state.timeLoopSensor = get_time_us() - start - state.timeLoopPacket - state.timeLoopControl - state.timeLoopApp;
-		if (state.timeLoopSensor > state.timeLoopSensorMax) {
-			state.timeLoopSensorMax = state.timeLoopSensor;
-		}
-		#endif
-
-		#ifdef APPLICATION_TIMINGS
-		state.timeLoop = get_time_us() - start;
-		if (state.timeLoop > state.timeLoopMax) {
-			state.timeLoopMax = state.timeLoop;
-		}
-		#endif
 	}
 
 	printf("\n\t Goodbye \n\n");
