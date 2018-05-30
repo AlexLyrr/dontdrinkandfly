@@ -6,6 +6,7 @@
 #include <math.h>
 #include "pc_terminal.h"
 #include "joystick.h"
+#include <math.h>
 
 //void getJoystick(struct pcState *pcState)
 void openJoystick()
@@ -58,7 +59,9 @@ void checkJoystick(struct pcState *pcState){
             if (jTemp > 60800) {
               pcState->jThrottleValue = 0;
             } else{
-              pcState->jThrottleValue = (60800-jTemp)/76 + 200;
+              jTemp = (sqrt((double)(60800 - jTemp)) * 4) / 2;
+              // jTemp = jTemp / 2;
+              pcState->jThrottleValue = jTemp + 200;
             }
             break;
           default:

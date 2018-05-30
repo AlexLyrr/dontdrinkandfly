@@ -172,9 +172,9 @@ typedef struct {
 	uint16_t pYaw;
 	uint16_t pLift;
 	bool controlChanged;
-	uint8_t controlRoll;
-	uint8_t controlPitch;
-	uint8_t controlYaw;
+	uint16_t controlRoll;
+	uint16_t controlPitch;
+	uint16_t controlYaw;
 	uint16_t controlLift;
 	uint8_t controlYawUser;
 	uint8_t controlPitchUser;

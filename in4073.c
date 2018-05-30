@@ -187,6 +187,7 @@ int main(void)
 	uart_init();
 	gpio_init();
 	timers_init();
+	bat_volt = 160;
 	adc_init();
 	twi_init();
 	// imu_init(true, 100);
@@ -210,9 +211,9 @@ int main(void)
 	state.packetError = 0;
 
 	state.pChanged = false;
-	state.p1 = 6;
-	state.p2 = 50;
-	state.pYaw = 5;
+	state.p1 = 10;
+	state.p2 = 10;
+	state.pYaw = 3;
 	state.pLift = 0;
 
 	state.calibrated = false;
@@ -265,8 +266,6 @@ int main(void)
 					state.calibrateSpOffset = sp;
 					state.calibrateSqOffset = sq;
 					state.calibrateSrOffset = sr;
-					state.calibrated = true;
-					state.nextMode = 0;
 				}
 				break;
 			case 4: // Manual Yaw

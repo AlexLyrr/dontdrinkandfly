@@ -29,38 +29,38 @@ map range 90-180 to 0-15 or the other way around.
 */
 
 void yawControl() {
-	int32_t eps = (((int32_t) state.controlYawUser - 90) << 6) - (((int32_t) sr - state.calibrateSrOffset) >> 4);
-	int32_t yawValue = ((state.pYaw * eps) >> 6) + 90;
-	if (yawValue > 180)
-		yawValue = 180;
+	int32_t eps = (((int32_t) state.controlYawUser - 90) << 2) + (((int32_t) sr - state.calibrateSrOffset) >> 2);
+	int32_t yawValue = ((state.pYaw * eps) >> 8) + 180;
+	if (yawValue > 360)
+		yawValue = 360;
 	if (yawValue < 0)
 		yawValue = 0;
-	state.controlYaw = (uint8_t) yawValue;
+	state.controlYaw = (uint16_t) yawValue;
 }
 
 
 void pitchControl(){
-	int32_t eps = (((int32_t) state.controlPitchUser - 90) << 5) - ((theta - state.calibrateThetaOffset) >> 4); 
+	int32_t eps = (((int32_t) state.controlPitchUser - 90) << 2) - ((theta - state.calibrateThetaOffset) >> 2); 
 	int32_t pitchValue = (state.p1 * eps);
-	int32_t eps2 = (state.p2 *((sq - state.calibrateSqOffset) >> 4)) + pitchValue;
-	pitchValue = (eps2 >> 6) + 90;
-	if (pitchValue > 180)
-		pitchValue = 180;
+	int32_t eps2 = (state.p2 *((sq - state.calibrateSqOffset) >> 2)) + pitchValue;
+	pitchValue = (eps2 >> 8) + 180;
+	if (pitchValue > 360)
+		pitchValue = 360;
 	if (pitchValue < 0)
 		pitchValue = 0;
-	state.controlPitch = (uint8_t) pitchValue;
+	state.controlPitch = (uint16_t) pitchValue;
 }
 
 void rollControl(){
-	int32_t eps = (((int32_t) state.controlRollUser - 90) << 5) + ((phi - state.calibratePhiOffset) >> 4);
+	int32_t eps = (((int32_t) state.controlRollUser - 90) << 2) + ((phi - state.calibratePhiOffset) >> 2);
 	int32_t rollValue = (state.p1 * eps);
-	int32_t eps2 = (state.p2 * ((sp - state.calibrateSpOffset) >> 4)) + rollValue;
-	rollValue = (eps2 >> 6) + 90;
-	if (rollValue > 180)
-		rollValue = 180;
+	int32_t eps2 = (state.p2 * ((sp - state.calibrateSpOffset) >> 2)) + rollValue;
+	rollValue = (eps2 >> 8) + 180;
+	if (rollValue > 360)
+		rollValue = 360;
 	if (rollValue < 0)
 		rollValue = 0;
-	state.controlRoll = (uint8_t) rollValue;
+	state.controlRoll = (uint16_t) rollValue;
 }
 
 void kalmanRoll(){
@@ -229,30 +229,30 @@ void full_control_motor()
 	ae[2] = controlLift;
 	ae[3] = controlLift;
 	if (controlLift > 180) {
-		if (controlPitch > 90) {
-			ae[0] += (controlPitch - 90) << 1;
-			ae[2] -= (controlPitch - 90) << 1;
+		if (controlPitch > 180) {
+			ae[0] += (controlPitch - 180);
+			ae[2] -= (controlPitch - 180);
 		} else {
-			ae[0] -= (90 - controlPitch) << 1;
-			ae[2] += (90 - controlPitch) << 1;
+			ae[0] -= (180 - controlPitch);
+			ae[2] += (180 - controlPitch);
 		}
-		if (controlRoll > 90) {
-			ae[1] += (controlRoll - 90) << 1;
-			ae[3] -= (controlRoll - 90) << 1;
+		if (controlRoll > 180) {
+			ae[1] += (controlRoll - 180);
+			ae[3] -= (controlRoll - 180);
 		} else{
-			ae[1] -= (90 - controlRoll) << 1;
-			ae[3] += (90 - controlRoll) << 1;
+			ae[1] -= (180 - controlRoll);
+			ae[3] += (180 - controlRoll);
 		}
-		if (controlYaw > 90){
-			ae[0] -= (controlYaw - 90) << 1;
-			ae[1] += (controlYaw - 90) << 1;
-			ae[2] -= (controlYaw - 90) << 1;
-			ae[3] += (controlYaw - 90) << 1;
+		if (controlYaw > 180){
+			ae[0] -= (controlYaw - 180);
+			ae[1] += (controlYaw - 180);
+			ae[2] -= (controlYaw - 180);
+			ae[3] += (controlYaw - 180);
 		} else{
-			ae[0] += (90 - controlYaw) << 1;
-			ae[1] -= (90 - controlYaw) << 1;
-			ae[2] += (90 - controlYaw) << 1;
-			ae[3] -= (90 - controlYaw) << 1;
+			ae[0] += (180 - controlYaw);
+			ae[1] -= (180 - controlYaw);
+			ae[2] += (180 - controlYaw);
+			ae[3] -= (180 - controlYaw);
 		}
 	}
 

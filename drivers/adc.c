@@ -22,7 +22,7 @@ void adc_request_sample(void)
 void ADC_IRQHandler(void)
 {
 	NRF_ADC->EVENTS_END = 0;
-	bat_volt = NRF_ADC -> RESULT; // Battery voltage = (result*1.2*3/255*2) = RESULT*0.007058824
+	bat_volt = (bat_volt * 7 + (NRF_ADC -> RESULT)) >> 3; // Battery voltage = (result*1.2*3/255*2) = RESULT*0.007058824
 }
 
 void adc_init(void)

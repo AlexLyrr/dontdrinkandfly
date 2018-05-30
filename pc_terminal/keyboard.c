@@ -62,9 +62,9 @@ void initPcState(struct pcState *pcState){
   pcState->rollValue = 90;
   pcState->pitchValue = 90;
   pcState->yawValue = 90;
-  pcState->PValue = 50;
-  pcState->P1Value = 6;
-  pcState->P2Value = 50;
+  pcState->PValue = 80;
+  pcState->P1Value = 25;
+  pcState->P2Value = 65;
   pcState->PheightValue = 0;
   
   //JOYSTIC
