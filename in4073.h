@@ -32,12 +32,19 @@
 #define PREAMPLE_B2 0x37
 #define DEBUGGING
 
+
 // Control
+#define P2PHI 5
+#define C1 7
+#define C2 20
 int16_t motor[4], ae[4];
 void run_filters_and_control();
 void yawControl();
 void pitchControl();
 void rollControl();
+void kalmanRoll();
+void kalmanPitch();
+void full_control_motor();
 
 
 // Timers

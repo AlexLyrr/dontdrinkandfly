@@ -213,7 +213,7 @@ int main(void)
 	state.p1 = 6;
 	state.p2 = 50;
 	state.pYaw = 5;
-	state.pLift = 2;
+	state.pLift = 0;
 
 	state.calibrated = false;
 	state.calibratePhiOffset = 0;
@@ -295,7 +295,7 @@ int main(void)
 					yawControl();
 					rollControl();
 					pitchControl();
-					run_filters_and_control();
+					full_control_motor();
 					#ifdef DEBUGGING
 					state.sendMotorStatus = true;
 					#endif
@@ -316,10 +316,13 @@ int main(void)
 						init_height();
 						state.heightSet = true;
 					}
+					/*
 					yawControl();
 					rollControl();
 					pitchControl();
+					*/
 					heightControl();
+
 					run_filters_and_control();
 					#ifdef DEBUGGING
 					state.sendMotorStatus = true;

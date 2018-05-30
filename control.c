@@ -63,6 +63,25 @@ void rollControl(){
 	state.controlRoll = (uint8_t) rollValue;
 }
 
+void kalmanRoll(){
+
+	static int32_t pKalman = 0, spPrev = 0, pBias = 0, pBiasPrev = 0, phiKalman = 0, phiKalmanPrev = 0, phiError = 0;
+
+	pKalman = spPrev - pBiasPrev;
+	phiKalman = phiKalmanPrev + (pKalman >> P2PHI); 
+	phiError = phiKalman - phi;
+	phiKalman = phiKalman - (phiError >> C1);
+	pBias = pBiasPrev + ((phiError >> P2PHI) >> C2);  
+	
+	phiKalmanPrev = phiKalman;
+	pBiasPrev = pBias;
+	spPrev = (int32_t) sp; // get the value from sensor
+}
+
+void kalmanPitch(){
+
+}
+
 /* These modes were tested, work but oscillate
 void pitchControl(){
 	int32_t eps = (((int32_t) state.controlPitchUser - 90)) - ((theta - state.calibrateThetaOffset) >> 4); 
@@ -197,4 +216,45 @@ void manualControlBackup()
 	}
 	if (setMotors == 0)
 		update_motors();
+}
+
+void full_control_motor()
+{
+	uint32_t controlPitch = state.controlPitch;
+	uint32_t controlRoll = state.controlRoll;
+	uint32_t controlYaw = state.controlYaw;
+	uint32_t controlLift = state.controlLift;
+	ae[0] = controlLift;
+	ae[1] = controlLift;
+	ae[2] = controlLift;
+	ae[3] = controlLift;
+	if (controlLift > 180) {
+		if (controlPitch > 90) {
+			ae[0] += (controlPitch - 90) << 1;
+			ae[2] -= (controlPitch - 90) << 1;
+		} else {
+			ae[0] -= (90 - controlPitch) << 1;
+			ae[2] += (90 - controlPitch) << 1;
+		}
+		if (controlRoll > 90) {
+			ae[1] += (controlRoll - 90) << 1;
+			ae[3] -= (controlRoll - 90) << 1;
+		} else{
+			ae[1] -= (90 - controlRoll) << 1;
+			ae[3] += (90 - controlRoll) << 1;
+		}
+		if (controlYaw > 90){
+			ae[0] -= (controlYaw - 90) << 1;
+			ae[1] += (controlYaw - 90) << 1;
+			ae[2] -= (controlYaw - 90) << 1;
+			ae[3] += (controlYaw - 90) << 1;
+		} else{
+			ae[0] += (90 - controlYaw) << 1;
+			ae[1] -= (90 - controlYaw) << 1;
+			ae[2] += (90 - controlYaw) << 1;
+			ae[3] -= (90 - controlYaw) << 1;
+		}
+	}
+
+	update_motors();
 }
