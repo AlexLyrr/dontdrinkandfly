@@ -37,6 +37,9 @@ void resetPcState(struct pcState *pcState){
 	pcState->kkPressed = false;
 	pcState->oPressed = false;
 	pcState->lPressed = false;
+	pcState->yPressed = false;
+	pcState->hPressed = false;
+
 
 
 	//JOYSTIC
@@ -62,7 +65,8 @@ void initPcState(struct pcState *pcState){
   pcState->PValue = 50;
   pcState->P1Value = 6;
   pcState->P2Value = 50;
-
+  pcState->PheightValue = 0;
+  
   //JOYSTIC
   pcState->jThrottleValue = 0;
   pcState->jRollValue = 90;
@@ -225,6 +229,19 @@ void checkInput(char c, struct pcState *pcState)
 				pcState->P2Value -= 1;
 			}
 			break;
+		case 'y':
+			if (pcState->PheightValue < 100 && (pcState->mode == 5 || pcState->mode == 7)){
+				pcState->yPressed = true;
+				pcState->PheightValue += 1;
+			}
+			break;
+		case 'h':
+			if (pcState->PheightValue > 0 && (pcState->mode == 5 || pcState->mode == 7)){
+				pcState->hPressed = true;
+				pcState->PheightValue -= 1;
+			}
+			break;
+			
 	}
 }
 
@@ -240,13 +257,13 @@ bool setControlAttempt(struct pcState *pcState){
 }
 
 bool setPAttempt(struct pcState *pcState){
-	return (pcState->uPressed || pcState->jPressed || pcState->iPressed || pcState->kkPressed || pcState->oPressed || pcState->lPressed);
+	return (pcState->uPressed || pcState->jPressed || pcState->iPressed || pcState->kkPressed || pcState->oPressed || pcState->lPressed || pcState->yPressed || pcState->hPressed);
 }
 
 bool sthPressed(struct pcState *pcState){
 	return (pcState->n0Pressed || pcState->n1Pressed || pcState->n2Pressed || pcState->n3Pressed || pcState->n4Pressed || pcState->n5Pressed
 				|| pcState->n6Pressed || pcState->n7Pressed || pcState->n8Pressed || pcState->n9Pressed || pcState->aPressed || pcState->zPressed || pcState->qPressed ||
-				 pcState->wPressed || pcState->uPressed || pcState->jPressed || pcState->iPressed || pcState->kkPressed || pcState->oPressed ||
+				 pcState->wPressed || pcState->uPressed || pcState->jPressed || pcState->iPressed || pcState->kkPressed || pcState->oPressed || pcState->yPressed || pcState->hPressed || 
 				 pcState->lPressed || pcState->leftPressed || pcState->rightPressed || pcState->upPressed || pcState->downPressed || pcState->escPressed ||
 				 pcState->jThrottleUp || pcState->jThrottleDown || pcState->jLeft || pcState->jRight || pcState->jForward || pcState->jBackward ||
 				 pcState->jTwistClockwise || pcState->jTwistCounterClockwise || pcState->jFire);

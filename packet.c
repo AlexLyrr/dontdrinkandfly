@@ -23,7 +23,7 @@ void packetComponentLoop() {
 					break;
 				}
 				#endif
-				#ifndef JOYSTICK_ENABLE
+				#ifndef JOYSTICK_ENABLE*/
 					parsePacketSetMode();
 					break;
 				#endif
@@ -84,7 +84,7 @@ void parsePacketSetP() {
 	state.p1 = state.currentPacket[5] << 8 | state.currentPacket[6];
 	state.p2 = state.currentPacket[7] << 8 | state.currentPacket[8];
 	state.pYaw = state.currentPacket[9] << 8 | state.currentPacket[10];
-	state.pLift = state.currentPacket[11];
+	state.pLift = state.currentPacket[12];
 	state.pChanged = true;
 }
 

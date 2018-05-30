@@ -63,6 +63,25 @@ void rollControl(){
 	state.controlRoll = (uint8_t) rollValue;
 }
 
+void kalmanRoll(){
+
+	static int32_t pKalman = 0, spPrev = 0, pBias = 0, pBiasPrev = 0, phiKalman = 0, phiKalmanPrev = 0, phiError = 0;
+
+	pKalman = spPrev - pBiasPrev;
+	phiKalman = phiKalmanPrev + (pKalman >> P2PHI); 
+	phiError = phiKalman - phi;
+	phiKalman = phiKalman - (phiError >> C1);
+	pBias = pBiasPrev + ((phiError >> P2PHI) >> C2);  
+	
+	phiKalmanPrev = phiKalman;
+	pBiasPrev = pBias;
+	spPrev = (int32_t) sp; // get the value from sensor
+}
+
+void kalmanPitch(){
+
+}
+
 /* These modes were tested, work but oscillate
 void pitchControl(){
 	int32_t eps = (((int32_t) state.controlPitchUser - 90)) - ((theta - state.calibrateThetaOffset) >> 4); 

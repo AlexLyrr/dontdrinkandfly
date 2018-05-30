@@ -111,8 +111,11 @@ void setPacket(struct pcState *pcState, SRPacket *sPacket){
 			sPacket->payload[4] = (pcState->P2Value & 0xFF);
 			sPacket->payload[5] = (pcState->PValue >> 8);
 			sPacket->payload[6] = (pcState->PValue & 0xFF);
-			printf("[P]p1=%u, p2= %u, pYaw = %u", pcState->P1Value, pcState->P2Value, pcState->PValue);
-			for (int i = 7; i < PACKET_BODY_LENGTH; i++){
+			sPacket->payload[7] = (pcState->PheightValue >> 8);
+			sPacket->payload[8] = (pcState->PheightValue & 0xFF);
+			
+			printf("[P]p1=%u, p2= %u, pYaw = %u, pHeight = %u", pcState->P1Value, pcState->P2Value, pcState->PValue, pcState->PheightValue);
+			for (int i = 9; i < PACKET_BODY_LENGTH; i++){
 				sPacket->payload[i] = 0; // null bytes
 			}
 	}
