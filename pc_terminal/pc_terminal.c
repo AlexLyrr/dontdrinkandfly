@@ -372,6 +372,9 @@ void logSendPacket(SRPacket sPacket){
 			// fprintf(Sfile, " | crc: %hhu \n", sPacket.crc);
 			break;
 		case 9:
+			#ifdef GUIACTIVATED
+				g_idle_add ((GSourceFunc) printControllersGUI, &sPacket);
+			#endif
 			// fprintf(Sfile, "Packet number: %hu | Type: %hhu | P_rollByte1: %hhu | P_rollByte0: %hhu | P_pitchByte1: %hhu | P_pitchByte0: %hhu | P_yawByte1: %hhu | P_yawByte0: %hhu",
 						// sPacket.fcs, sPacket.payload[0], sPacket.payload[1], sPacket.payload[2], sPacket.payload[3], sPacket.payload[4], sPacket.payload[5], sPacket.payload[6]);
 			// fprintf(Sfile, " | crc: %hhu \n", sPacket.crc);
@@ -643,6 +646,19 @@ void printPcStatusGUI(SRPacket *sPacket){
 	gtk_label_set_label(widg.l[20], guiText);
 }
 
+//@Author Georgios Giannakaras
+void printControllersGUI(SRPacket *sPacket){
+	char guiText[30];
+
+	sprintf(guiText, "%hhu", sPacketGUI.payload[6]);
+	gtk_label_set_label(widg.l[21], guiText);
+	sprintf(guiText, "%hhu", sPacketGUI.payload[4]);
+	gtk_label_set_label(widg.l[23], guiText);
+	sprintf(guiText, "%hhu", sPacketGUI.payload[2]);
+	gtk_label_set_label(widg.l[22], guiText);
+	sprintf(guiText, "%hhu", sPacketGUI.payload[8]);
+	gtk_label_set_label(widg.l[24], guiText);
+}
 
 
 //@Author Georgios Giannakaras

@@ -84,6 +84,87 @@ G_MODULE_EXPORT void on_button_down_clicked(GtkButton *button, Widgets *widg)
 	}
 }
 
+G_MODULE_EXPORT void on_button_up_p_clicked(GtkButton *button, Widgets *widg)
+{
+	if (pcState->PValue < 100 && (pcState->mode == 4 || pcState->mode == 5)){
+		pcState->uPressed = true;
+		pcState->PValue += 1;
+	}
+}
+
+G_MODULE_EXPORT void on_button_down_p_clicked(GtkButton *button, Widgets *widg)
+{	
+	if (pcState->PValue > 0 && (pcState->mode == 4 || pcState->mode == 5)){
+		pcState->jPressed = true;
+		pcState->PValue -= 1;
+	}
+}
+
+G_MODULE_EXPORT void on_button_up_p1_clicked(GtkButton *button, Widgets *widg)
+{
+	if (pcState->P1Value < 100 && (pcState->mode == 5 || pcState->mode == 9 )){
+		pcState->iPressed = true;
+		pcState->P1Value += 1;
+	}
+}
+
+G_MODULE_EXPORT void on_button_down_p1_clicked(GtkButton *button, Widgets *widg)
+{	
+	if (pcState->P1Value > 0 && (pcState->mode == 5 || pcState->mode == 9 )){
+		pcState->kkPressed = true;
+		pcState->P1Value -= 1;
+	}
+}
+
+G_MODULE_EXPORT void on_button_up_p2_clicked(GtkButton *button, Widgets *widg)
+{
+	if (pcState->P2Value < 100 && (pcState->mode == 5 || pcState->mode == 9)){
+		pcState->oPressed = true;
+		pcState->P2Value += 1;
+	}
+}
+
+G_MODULE_EXPORT void on_button_down_p2_clicked(GtkButton *button, Widgets *widg)
+{	
+	if (pcState->P2Value > 0 && (pcState->mode == 5  || pcState->mode == 9)){
+		pcState->lPressed = true;
+		pcState->P2Value -= 1;
+	}
+}
+
+
+G_MODULE_EXPORT void on_button_up_ph_clicked(GtkButton *button, Widgets *widg)
+{
+	if (pcState->PheightValue < 100 && (pcState->mode == 5 || pcState->mode == 7)){
+		pcState->yPressed = true;
+		pcState->PheightValue += 1;
+	}
+}
+
+G_MODULE_EXPORT void on_button_down_ph_clicked(GtkButton *button, Widgets *widg)
+{	
+	if (pcState->PheightValue > 0 && (pcState->mode == 5 || pcState->mode == 7)){
+		pcState->hPressed = true;
+		pcState->PheightValue -= 1;
+	}
+}
+
+G_MODULE_EXPORT void help_about(GtkWidget *widget, gpointer data){
+
+    builder2 = gtk_builder_new();
+        
+    gtk_builder_add_from_file( builder2, "eslgui.glade", NULL );
+
+    dialog  = GTK_WIDGET( gtk_builder_get_object( builder2, "aboutdialog1" ) );
+    gtk_window_set_transient_for (GTK_WINDOW(dialog), data);
+
+    gtk_widget_show (dialog);
+    response = gtk_dialog_run(GTK_DIALOG(dialog));
+
+    gtk_widget_destroy(dialog);
+
+    g_object_unref(G_OBJECT(builder2));
+}
 
 //@Author Georgios Giannakaras
 void *guiThread(void *vargp){
@@ -120,6 +201,10 @@ void *guiThread(void *vargp){
     widg.l[18] = GTK_LABEL( gtk_builder_get_object( builder, "label_pitch_joystick" ) );
     widg.l[19] = GTK_LABEL( gtk_builder_get_object( builder, "label_yaw_joystick" ) );
     widg.l[20] = GTK_LABEL( gtk_builder_get_object( builder, "label_lift_joystick" ) );
+    widg.l[21] = GTK_LABEL( gtk_builder_get_object( builder, "label_p" ) );
+    widg.l[22] = GTK_LABEL( gtk_builder_get_object( builder, "label_p1" ) );
+    widg.l[23] = GTK_LABEL( gtk_builder_get_object( builder, "label_p2" ) );
+    widg.l[24] = GTK_LABEL( gtk_builder_get_object( builder, "label_ph" ) );
     widg.lb[0] = GTK_LEVEL_BAR( gtk_builder_get_object( builder, "levelbar_motor1" ) );
     widg.lb[1] = GTK_LEVEL_BAR( gtk_builder_get_object( builder, "levelbar_motor2" ) );
     widg.lb[2] = GTK_LEVEL_BAR( gtk_builder_get_object( builder, "levelbar_motor3" ) );
@@ -143,6 +228,14 @@ void *guiThread(void *vargp){
 	gtk_label_set_label(widg.l[4], guiText);
 	sprintf(guiText, "%hhu", 0);
 	gtk_label_set_label(widg.l[8], guiText);
+	sprintf(guiText, "%hhu", pcStateGui->PValue);
+	gtk_label_set_label(widg.l[21], guiText);
+	sprintf(guiText, "%hhu", pcStateGui->P1Value);
+	gtk_label_set_label(widg.l[22], guiText);
+	sprintf(guiText, "%hhu", pcStateGui->P2Value);
+	gtk_label_set_label(widg.l[23], guiText);
+	sprintf(guiText, "%hhu", pcStateGui->PheightValue);
+	gtk_label_set_label(widg.l[24], guiText);
 
     gtk_main();
 

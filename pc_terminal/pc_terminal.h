@@ -98,14 +98,15 @@ struct pcState *pcState;
 typedef struct _Widgets Widgets;
 struct _Widgets
 {
-	GtkLabel *l[21];
+	GtkLabel *l[25];
 	GtkLevelBar *lb[4];
 	GtkProgressBar *pb[1];
 };
 
-GtkBuilder *builder;
-GtkWidget  *window;
+GtkBuilder *builder, *builder2;
+GtkWidget  *window, *dialog;
 Widgets widg;
+int response;
 
 // @Author: Georgios Giannakaras
 typedef struct{
@@ -179,6 +180,7 @@ void printMotorStatusGUI(SRPacket *rPacket);
 void printDroneStatusGUI(SRPacket *rPacket);
 void printModeGUI(SRPacket *rPacket);
 void printBatteryStatusGUI();
+void printControllersGUI(SRPacket *sPacket);
 void writePing();
 uint64_t getMicrotime();
 
