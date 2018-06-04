@@ -322,31 +322,31 @@ void logReceivePacket(SRPacket rPacket){
 			}
 			break;
 		case 15:
-			printf("[RAW]phi=%u, theta=%u, psi= %u\n",
-				(((uint16_t) rPacket.payload[1]) << 8) | ((uint16_t) rPacket.payload[2]),
-				(((uint16_t) rPacket.payload[3]) << 8) | ((uint16_t) rPacket.payload[4]),
-				(((uint16_t) rPacket.payload[5]) << 8) | ((uint16_t) rPacket.payload[6])
+			printf("[RAW]phi=%hd, theta=%hd, psi= %hd\n",
+				(((int16_t) rPacket.payload[1]) << 8) | ((int16_t) rPacket.payload[2]),
+				(((int16_t) rPacket.payload[3]) << 8) | ((int16_t) rPacket.payload[4]),
+				(((int16_t) rPacket.payload[5]) << 8) | ((int16_t) rPacket.payload[6])
 			);
 			break;
 		case 16:
-			printf("[RAW]sp=%u, sq=%u, sr= %u\n",
-				(((uint16_t) rPacket.payload[1]) << 8) | ((uint16_t) rPacket.payload[2]),
-				(((uint16_t) rPacket.payload[3]) << 8) | ((uint16_t) rPacket.payload[4]),
-				(((uint16_t) rPacket.payload[5]) << 8) | ((uint16_t) rPacket.payload[6])
+			printf("[RAW]sp=%hd, sq=%hd, sr= %hd\n",
+				(((int16_t) rPacket.payload[1]) << 8) | ((int16_t) rPacket.payload[2]),
+				(((int16_t) rPacket.payload[3]) << 8) | ((int16_t) rPacket.payload[4]),
+				(((int16_t) rPacket.payload[5]) << 8) | ((int16_t) rPacket.payload[6])
 			);
 			break;
 		case 17:
-			fprintf(CsvFile, "%u, %u, %u",
-				(((uint16_t) rPacket.payload[1]) << 8) | ((uint16_t) rPacket.payload[2]),
-				(((uint16_t) rPacket.payload[3]) << 8) | ((uint16_t) rPacket.payload[4]),
-				(((uint16_t) rPacket.payload[5]) << 8) | ((uint16_t) rPacket.payload[6])
+			fprintf(CsvFile, ",%hd, %hd, %hd\n",
+				(((int16_t) rPacket.payload[1]) << 8) | ((int16_t) rPacket.payload[2]),
+				(((int16_t) rPacket.payload[3]) << 8) | ((int16_t) rPacket.payload[4]),
+				(((int16_t) rPacket.payload[5]) << 8) | ((int16_t) rPacket.payload[6])
 			);
 			break;
 		case 18:
-			fprintf(CsvFile, ",%u, %u, %u\n",
-				(((uint16_t) rPacket.payload[1]) << 8) | ((uint16_t) rPacket.payload[2]),
-				(((uint16_t) rPacket.payload[3]) << 8) | ((uint16_t) rPacket.payload[4]),
-				(((uint16_t) rPacket.payload[5]) << 8) | ((uint16_t) rPacket.payload[6])
+			fprintf(CsvFile, "%hd, %hd, %hd",
+				(((int16_t) rPacket.payload[1]) << 8) | ((int16_t) rPacket.payload[2]),
+				(((int16_t) rPacket.payload[3]) << 8) | ((int16_t) rPacket.payload[4]),
+				(((int16_t) rPacket.payload[5]) << 8) | ((int16_t) rPacket.payload[6])
 			);
 			fflush(CsvFile);
 			break;
