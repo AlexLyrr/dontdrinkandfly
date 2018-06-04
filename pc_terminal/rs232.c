@@ -1,15 +1,19 @@
 #include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
 #include <termios.h>
+#include <fcntl.h>
+
 #include <unistd.h>
 #include <string.h>
 #include <inttypes.h>
 #include <time.h>
-#include <stdbool.h>
-#include <stdlib.h>
 #include <ctype.h>
-#include <fcntl.h>
-#include <stdio.h>
 #include <assert.h>
+
+#include <linux/serial.h>
+#include <sys/ioctl.h>
 
 #include "pc_terminal.h"
 
@@ -22,8 +26,9 @@ void rs232_open(void)
   	struct termios	tty;
 
     fd_RS232 = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY);  // Hardcode your serial port here, or request it as an argument at runtime
-
 	assert(fd_RS232>=0);
+
+	fcntl(fd_RS232, F_SETFL, FNDELAY);
 
   	result = isatty(fd_RS232);
   	assert(result == 1);
@@ -34,20 +39,29 @@ void rs232_open(void)
   	result = tcgetattr(fd_RS232, &tty);
 	assert(result == 0);
 
+
 	tty.c_iflag = IGNBRK; /* ignore break condition */
+	tty.c_iflag &= ~(IXON|IXOFF|IXANY);
+
 	tty.c_oflag = 0;
+	
 	tty.c_lflag = 0;
+	// tty.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
 
 	tty.c_cflag = (tty.c_cflag & ~CSIZE) | CS8; /* 8 bits-per-character */
 	tty.c_cflag |= CLOCAL | CREAD; /* Ignore model status + read input */
-
-	cfsetospeed(&tty, B115200);
-	cfsetispeed(&tty, B115200);
+	tty.c_cflag &=  ~CRTSCTS;
 
 	tty.c_cc[VMIN]  = 0;
 	tty.c_cc[VTIME] = 0;
 
-	tty.c_iflag &= ~(IXON|IXOFF|IXANY);
+	cfsetospeed(&tty, B115200);
+	cfsetispeed(&tty, B115200);
+
+	struct serial_struct serial;
+	ioctl(fd_RS232, TIOCGSERIAL, &serial);
+	serial.flags |= ASYNC_LOW_LATENCY;
+	ioctl(fd_RS232, TIOCSSERIAL, &serial);
 
 	result = tcsetattr (fd_RS232, TCSANOW, &tty); /* non-canonical */
 
