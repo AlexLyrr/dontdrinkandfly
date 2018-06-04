@@ -253,6 +253,9 @@ computer: computer-compile default upload pc-run
 
 gui: computer-compile pc-run
 
+runFilter: pc doupload 
+	cd pc_terminal/; make run
+
 joystick: joystick-compile default upload pc-run
 
 filter:
