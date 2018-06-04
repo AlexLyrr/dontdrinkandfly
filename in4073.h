@@ -37,8 +37,6 @@
 #define P2PHI 5
 #define C1 7
 #define C2 20
-#define PRECISION 14
-
 int16_t motor[4], ae[4];
 void run_filters_and_control();
 void yawControl();
@@ -48,17 +46,6 @@ void kalmanRoll();
 void kalmanPitch();
 void full_control_motor();
 
-// Filters
-int32_t lowpassFilter(int32_t x0);
-int32_t butterWorth2nd(int32_t x0);
-int32_t fixedPoint(int32_t x0);
-void yawFilter();
-
-
-
-int16_t phiFiltered, thetaFiltered, psiFiltered;
-int16_t spFiltered, sqFiltered, srFiltered;
-int16_t saxFiltered, sayFiltered, sazFiltered;
 
 // Timers
 #define TIMER_PERIOD	10 //50ms=20Hz (MAX 23bit, 4.6h)
