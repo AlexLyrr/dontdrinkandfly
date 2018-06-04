@@ -187,7 +187,7 @@ int main(void)
 	uart_init();
 	gpio_init();
 	timers_init();
-	bat_volt = 160;
+	// bat_volt = 160;
 	adc_init();
 	twi_init();
 	// imu_init(true, 100);
