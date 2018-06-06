@@ -222,16 +222,46 @@ void writePong(uint32_t clock) {
 }
 
 void writeSensorValues() {
+	if (state.calibrated) {
+		writePacket(15,
+			((phi - state.calibratePhiOffset) >> 8) & 0xFF, (phi - state.calibratePhiOffset) & 0xFF,
+			((theta - state.calibrateThetaOffset) >> 8) & 0xFF, (theta - state.calibrateThetaOffset) & 0xFF,
+			((psi - state.calibratePsiOffset) >> 8) & 0xFF, (psi - state.calibratePsiOffset) & 0xFF,
+			0, 0, 0
+		);
+		writePacket(16,
+			((sp - state.calibrateSpOffset) >> 8) & 0xFF, (sp - state.calibrateSpOffset) & 0xFF,
+			((sq - state.calibrateSqOffset) >> 8) & 0xFF, (sq - state.calibrateSqOffset) & 0xFF,
+			((sr - state.calibrateSrOffset) >> 8) & 0xFF, (sr - state.calibrateSrOffset) & 0xFF,
+			0, 0, 0
+		);
+	} else {
+		writePacket(15,
+			(phi >> 8) & 0xFF, phi & 0xFF,
+			(theta >> 8) & 0xFF, theta & 0xFF,
+			(psi >> 8) & 0xFF, psi & 0xFF,
+			0, 0, 0
+		);
+		writePacket(16,
+			(sp >> 8) & 0xFF, sp & 0xFF,
+			(sq >> 8) & 0xFF, sq & 0xFF,
+			(sr >> 8) & 0xFF, sr & 0xFF,
+			0, 0, 0
+		);
+	}
+}
+
+void writeOffsetValues() {
 	writePacket(15,
-		(phi >> 8) & 0xFF, phi & 0xFF,
-		(theta >> 8) & 0xFF, theta & 0xFF,
-		(psi >> 8) & 0xFF, psi & 0xFF,
+		(state.calibratePhiOffset >> 8) & 0xFF, state.calibratePhiOffset & 0xFF,
+		(state.calibrateThetaOffset >> 8) & 0xFF, state.calibrateThetaOffset & 0xFF,
+		(state.calibratePsiOffset >> 8) & 0xFF, state.calibratePsiOffset & 0xFF,
 		0, 0, 0
 	);
 	writePacket(16,
-		(sp >> 8) & 0xFF, sp & 0xFF,
-		(sq >> 8) & 0xFF, sq & 0xFF,
-		(sr >> 8) & 0xFF, sr & 0xFF,
+		(state.calibrateSpOffset >> 8) & 0xFF, state.calibrateSpOffset & 0xFF,
+		(state.calibrateSqOffset >> 8) & 0xFF, state.calibrateSqOffset & 0xFF,
+		(state.calibrateSrOffset >> 8) & 0xFF, state.calibrateSrOffset & 0xFF,
 		0, 0, 0
 	);
 }

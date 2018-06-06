@@ -102,14 +102,32 @@ void applicationComponentLoop() {
 								state.panicMotor[i] = motor[i];
 						}
 						break;
-					case 2:
-						state.calibrationFinished = appClock + CALIBRATION_STEPS;
-						// FALLTHROUGH
 					case 3:
+						state.calibrationFinished = appClock + CALIBRATION_STEPS;
+						if (!state.dmpEnabled) {
+							imu_init(true, 100);
+							state.dmpEnabled = true;
+						}
+						state.calibrated = false;
+						state.calibratePhiOffset = 0;
+						state.calibrateThetaOffset = 0;
+						state.calibratePsiOffset = 0;
+						state.calibrateSpOffset = 0;
+						state.calibrateSqOffset = 0;
+						state.calibrateSrOffset = 0;
+						// dmp_enable_gyro_cal(1);
+						break;
+					case 2:
 					case 4:
 					case 5:
 						if (!state.dmpEnabled) {
 							imu_init(true, 100);
+							state.dmpEnabled = true;
+						}
+						break;
+					case 6:
+						if (!state.dmpEnabled) {
+							imu_init(false, 1000);
 							state.dmpEnabled = true;
 						}
 						break;
@@ -141,7 +159,15 @@ void applicationComponentLoop() {
 			}
 			break;
 		case 3:
+			// if (appClock%20 == 0) {
+				writeSensorValues();
+			// }
 			if (state.calibrationFinished == appClock) {
+				// dmp_enable_gyro_cal(0);
+				writeOffsetValues();
+				writeMotorStatus();
+				state.calibrated = true;
+				state.nextMode = 0;
 				state.currentMode = 0;
 				state.sendStatus = true;
 			}
@@ -217,9 +243,7 @@ int main(void)
 	state.pLift = 0;
 
 	state.calibrated = false;
-	state.calibratePhiOffset = 0;
-	state.calibrateThetaOffset = 0;
-	state.calibratePsiOffset = 0;
+
 
 	state.heightSet = false;
 
@@ -260,12 +284,13 @@ int main(void)
 			case 3: // Calibration
 				if (check_sensor_int_flag()) {
 					get_dmp_data();
-					state.calibratePhiOffset = phi;
-					state.calibrateThetaOffset = theta;
-					state.calibratePsiOffset = psi;
-					state.calibrateSpOffset = sp;
-					state.calibrateSqOffset = sq;
-					state.calibrateSrOffset = sr;
+					// Low pass filtering
+					state.calibratePhiOffset = (state.calibratePhiOffset * 7 + phi) >> 3;
+					state.calibrateThetaOffset = (state.calibrateThetaOffset * 7 + theta) >> 3;
+					state.calibratePsiOffset = (state.calibratePsiOffset * 7 + psi) >> 3;
+					state.calibrateSpOffset = (state.calibrateSpOffset * 7  + sp) >> 3;
+					state.calibrateSqOffset = (state.calibrateSqOffset * 7 + sq) >> 3;
+					state.calibrateSrOffset = (state.calibrateSrOffset * 7 + sr) >> 3;
 				}
 				break;
 			case 4: // Manual Yaw

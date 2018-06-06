@@ -128,7 +128,7 @@ void ble_send(void);
 	@author Joseph Verburg
 *******/
 #define PANIC_STEPS (5000 / TIMER_PERIOD)
-#define CALIBRATION_STEPS (10000 / TIMER_PERIOD)
+#define CALIBRATION_STEPS (2000 / TIMER_PERIOD)
 
 #define PACKET_BODY_LENGTH 10
 #define PACKET_LENGTH (PACKET_BODY_LENGTH + 5)
@@ -184,12 +184,12 @@ typedef struct {
 	// Calibration
 	bool calibrated;
 	uint32_t calibrationFinished; // In appClock
-	int16_t calibratePhiOffset;
-	int16_t calibrateThetaOffset;
-	int16_t calibratePsiOffset;
-	int16_t calibrateSpOffset;
-	int16_t calibrateSqOffset;
-	int16_t calibrateSrOffset;
+	int32_t calibratePhiOffset;
+	int32_t calibrateThetaOffset;
+	int32_t calibratePsiOffset;
+	int32_t calibrateSpOffset;
+	int32_t calibrateSqOffset;
+	int32_t calibrateSrOffset;
 	
 	bool heightSet;
 	int32_t initPressure;
@@ -255,6 +255,7 @@ void writeAck(uint16_t packetNumber);
 void writeTimings();
 void writePing();
 void writeSensorValues();
+void writeOffsetValues();
 void writeRawValues(uint16_t sp, uint16_t sq, uint16_t sr, uint16_t sax, uint16_t say, uint16_t saz);
 
 Q13_20 toFixedPoint(uint16_t value);
