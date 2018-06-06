@@ -68,7 +68,7 @@ G_MODULE_EXPORT void on_button_abort_clicked(GtkButton *button, Widgets *widg)
 	pcStateGui->escPressed = true;
 }
 
-G_MODULE_EXPORT void on_button_up_clicked(GtkButton *button, Widgets *widg)
+G_MODULE_EXPORT void on_button_up_rpm_clicked(GtkButton *button, Widgets *widg)
 {
 	if (pcStateGui->liftValue < 1000){
 		pcStateGui->liftValue +=10;
@@ -76,7 +76,7 @@ G_MODULE_EXPORT void on_button_up_clicked(GtkButton *button, Widgets *widg)
  	}
 }
 
-G_MODULE_EXPORT void on_button_down_clicked(GtkButton *button, Widgets *widg)
+G_MODULE_EXPORT void on_button_down_rpm_clicked(GtkButton *button, Widgets *widg)
 {	
 	if (pcStateGui->liftValue >= 10){
 		pcStateGui->zPressed = true;
@@ -146,6 +146,54 @@ G_MODULE_EXPORT void on_button_down_ph_clicked(GtkButton *button, Widgets *widg)
 	if (pcState->PheightValue > 0 && (pcState->mode == 5 || pcState->mode == 7)){
 		pcState->hPressed = true;
 		pcState->PheightValue -= 1;
+	}
+}
+
+G_MODULE_EXPORT void on_button_left_roll_clicked(GtkButton *button, Widgets *widg)
+{	
+	if (pcState->rollValue < 180 && (pcState->mode == 2 || pcState->mode == 5 || pcState->mode == 9)){
+		pcState->leftPressed = true;
+		pcState->rollValue += 1;
+	}
+}
+
+G_MODULE_EXPORT void on_button_right_roll_clicked(GtkButton *button, Widgets *widg)
+{	
+	if (pcState->rollValue > 0 && (pcState->mode == 2 || pcState->mode == 5 || pcState->mode == 9)){
+		pcState->rightPressed = true;
+		pcState->rollValue -= 1;
+	}
+}
+
+G_MODULE_EXPORT void on_button_left_yaw_clicked(GtkButton *button, Widgets *widg)
+{	
+	if (pcState->yawValue >= 10 && (pcState->mode == 2 || pcState->mode == 4 || pcState->mode == 5)){
+		pcState->qPressed = true;
+		pcState->yawValue -= 1;
+	}
+}
+
+G_MODULE_EXPORT void on_button_right_yaw_clicked(GtkButton *button, Widgets *widg)
+{	
+	if (pcState->yawValue < 180 && (pcState->mode == 2 || pcState->mode == 4 || pcState->mode == 5)){
+		pcState->wPressed = true;
+		pcState->yawValue += 1;
+	}
+}
+
+G_MODULE_EXPORT void on_button_down_pitch_clicked(GtkButton *button, Widgets *widg)
+{	
+	if (pcState->pitchValue < 180 && (pcState->mode == 2 || pcState->mode == 5 || pcState->mode == 9)){
+		pcState->downPressed = true;
+		pcState->pitchValue += 1;
+	}
+}
+
+G_MODULE_EXPORT void on_button_up_pitch_clicked(GtkButton *button, Widgets *widg)
+{	
+	if (pcState->pitchValue > 0 && (pcState->mode == 2 || pcState->mode == 5 || pcState->mode == 9)){
+		pcState->upPressed = true;
+		pcState->pitchValue -= 1;
 	}
 }
 
