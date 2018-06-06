@@ -28,6 +28,8 @@ TBD:
 map range 90-180 to 0-15 or the other way around.
 */
 
+
+//@Author Alex Lyrakis
 void yawControl() {
 	int32_t eps = (((int32_t) state.controlYawUser - 90) << 2) + (((int32_t) sr - state.calibrateSrOffset) >> 2);
 	int32_t yawValue = ((state.pYaw * eps) >> 8) + 180;
@@ -38,7 +40,7 @@ void yawControl() {
 	state.controlYaw = (uint16_t) yawValue;
 }
 
-
+//@Author Alex Lyrakis
 void pitchControl(){
 	int32_t eps = (((int32_t) state.controlPitchUser - 90) << 2) - ((theta - state.calibrateThetaOffset) >> 2); 
 	int32_t pitchValue = (state.p1 * eps);
@@ -51,6 +53,7 @@ void pitchControl(){
 	state.controlPitch = (uint16_t) pitchValue;
 }
 
+//@Author Alex Lyrakis
 void rollControl(){
 	int32_t eps = (((int32_t) state.controlRollUser - 90) << 2) + ((phi - state.calibratePhiOffset) >> 2);
 	int32_t rollValue = (state.p1 * eps);
@@ -63,6 +66,46 @@ void rollControl(){
 	state.controlRoll = (uint16_t) rollValue;
 }
 
+
+//@Author Alex Lyrakis
+void yawControlRaw() {
+	int32_t eps = (((int32_t) state.controlYawUser - 90) << 2) + (srFiltered);
+	int32_t yawValue = ((state.pYaw * eps) >> 8) + 180;
+	if (yawValue > 360)
+		yawValue = 360;
+	if (yawValue < 0)
+		yawValue = 0;
+	state.controlYaw = (uint16_t) yawValue;
+}
+
+//@Author Alex Lyrakis
+void pitchControlRaw(){
+	int32_t eps = (((int32_t) state.controlPitchUser - 90) << 2) - (thetaFiltered >> 2); 
+	int32_t pitchValue = (state.p1 * eps);
+	int32_t eps2 = (state.p2 *(sqFiltered >> 2)) + pitchValue;
+	pitchValue = (eps2 >> 8) + 180;
+	if (pitchValue > 360)
+		pitchValue = 360;
+	if (pitchValue < 0)
+		pitchValue = 0;
+	state.controlPitch = (uint16_t) pitchValue;
+}
+
+//@Author Alex Lyrakis
+void rollControlRaw(){
+	int32_t eps = (((int32_t) state.controlRollUser - 90) << 2) + (phiFiltered >> 2);
+	int32_t rollValue = (state.p1 * eps);
+	int32_t eps2 = (state.p2 * (spFiltered >> 2)) + rollValue;
+	rollValue = (eps2 >> 8) + 180;
+	if (rollValue > 360)
+		rollValue = 360;
+	if (rollValue < 0)
+		rollValue = 0;
+	state.controlRoll = (uint16_t) rollValue;
+}
+
+
+//@Author Alex Lyrakis
 void kalmanRoll(){
 
 	static int32_t pKalman = 0, spPrev = 0, pBias = 0, pBiasPrev = 0, phiKalman = 0, phiKalmanPrev = 0, phiError = 0;
@@ -82,96 +125,60 @@ void kalmanPitch(){
 
 }
 
-/* These modes were tested, work but oscillate
-void pitchControl(){
-	int32_t eps = (((int32_t) state.controlPitchUser - 90)) - ((theta - state.calibrateThetaOffset) >> 4); 
-	int32_t pitchValue = (state.p1 * eps);
-	int32_t eps2 = ((sq - state.calibrateSqOffset) >> 4) + pitchValue;
-	pitchValue = ((state.p2 * eps2) >> 6) + 90;
-	if (pitchValue > 180)
-		pitchValue = 180;
-	if (pitchValue < 0)
-		pitchValue = 0;
-	state.controlPitch = (uint8_t) pitchValue;
-}
-
-void rollControl(){
-	int32_t eps = (((int32_t) state.controlRollUser - 90)) + ((phi - state.calibratePhiOffset) >> 4);
-	int32_t rollValue = (state.p1 * eps);
-	int32_t eps2 = ((sp - state.calibrateSpOffset) >> 4) + rollValue;
-	rollValue = ((state.p2 * eps2) >> 6) + 90;
-	if (rollValue > 180)
-		rollValue = 180;
-	if (rollValue < 0)
-		rollValue = 0;
-	state.controlRoll = (uint8_t) rollValue;
-}
-*/
-/*
-void pitchControl() {
-	int32_t eps = ((int32_t) state.controlPitch - 90) * 100 - sp;
-	state.controlPitch = (100 * eps)/100 + 90;
-}
-
-void pitchControl() {
-
-	int32_t error = 0;
-	int32_t spNew = sp + 10000;
-	if (spNew < 0)
-		spNew = 0;
-	int32_t spFinal = 0;
-	while ((spNew - 111) > 0) {
-		spFinal += 1;
-		spNew -= 111;
-	}
-	int32_t error = ((int32_t) state.controlPitch - spFinal;
-	state.controlPitch = (100 * eps)/100 + 90;
-
-}
-*/
-
 void controlComponentLoop() {
 	// TODO: implement
 }
 
 //@Author Georgios Giannakaras
 //fc = 1HZ fs = 1000
-int16_t lowpassFilter(int16_t x0){
-	static int16_t x1 = 0, x2 = 0, y0, y1 = 0, y2 = 0;
-	 
-	y0 = (x0 >> 17) + (x0 >> 19) + (x1 >> 16) + (x1 >> 18) + (x1 >> 20) + (x2 >> 17) + (x2 >> 19)
-	 + ((y1 << 1) + (y1 >> 7) + (y1 >> 10) + (y1 >> 14) + (y1 >> 15) + (y1 >> 18) + (y1 >> 20))
-	 - ((y2 >> 1) + (y2 >> 2) + (y2 >> 3) + (y2 >> 4) + (y2 >> 5) + (y2 >> 6) + (y2 >> 8) + (y2 >> 9)
-	  + (y2 >> 11) + (y2 >> 12) + (y2 >> 13) + (y2 >> 14) + (y2 >> 18));
+int32_t lowpassFilter(int32_t x0){
+    static int32_t x1 = 0, x2 = 0, y0, y1 = 0, y2 = 0;
+    
+    y0 = (x0 >> 17) + (x0 >> 19) + (x1 >> 16) + (x1 >> 18) + (x1 >> 20)
+     + (x2 >> 17) + (x2 >> 19)
+      + ((y1) + (y1 >> 1) + (y1 >> 2) + (y1 >> 3) + (y1 >> 4) + (y1 >> 5) + (y1 >> 6) + (y1 >> 8) + (y1 >> 9) 
+        + (y1 >> 11) + (y1 >> 12) + (y1 >> 13) + (y1 >> 16) + (y1 >> 17) + (y1 >> 19) + (y1 >> 20)) 
+      - ((y2 >> 1) + (y2 >> 2) + (y2 >> 3) + (y2 >> 4) + (y2 >> 5) + (y2 >> 6) + (y2 >> 8) + (y2 >> 9)
+       + (y2 >> 11) + (y2 >> 12) + (y2 >> 13) + (y2 >> 14) + (y2 >> 18));
+    x2 = x1;
+    x1 = x0;
+    y2 = y1;
+    y1 = y0;
 
-	x2 = x1;
-	x1 = x0;
-	y2 = y1;
-	y1 = y0;
-
-	return y0;
+    return y0;
 }
+
 
 //@Author Georgios Giannakaras
 //fc = 20HZ fs = 1000
-int16_t butterWorth2nd(int16_t x0){
-	static int16_t x1 = 0, x2 = 0, y0, y1 = 0, y2 = 0;
-	 
-	y0 = (x0 >> 9) + (x0 >> 10) + (x0 >> 11) + (x0 >> 13) + (x0 >> 14) + (x0 >> 16) + (x0 >> 18) + (x0 >> 19)
-	 + (x1 >> 8) + (x1 >> 9) + (x1 >> 10) + (x1 >> 12) + (x1 >> 13) + (x1 >> 15) + (x1 >> 17) + (x1 >> 19) + (x1 >> 20)
-	  + (x2 >> 9) + (x2 >> 10) + (x2 >> 11) + (x2 >> 13) + (x2 >> 14) + (x2 >> 16) + (x2 >> 18) + (x2 >> 19)
-	   + ((y1 << 1) + (y1 >> 3) + (y1 >> 5) + (y1 >> 6) + (y1 >> 8) + (y1 >> 10) + (y1 >> 11) + (y1 >> 15) + (y1 >> 16) + (y1 >> 17) + (y1 >> 18) + (y1 >> 19))
-	    - ((y2 >> 1) + (y2 >> 2) + (y2 >> 4) + (y2 >> 6) + (y2 >> 7) + (y2 >> 10) + (y2 >> 12) + (y2 >> 16) + (y2 >> 17) + (y2 >> 20));
+int32_t butterWorth2nd(int32_t x0){
+    static int32_t x1 = 0, x2 = 0, y0, y1 = 0, y2 = 0;
 
-	x2 = x1;
-	x1 = x0;
-	y2 = y1;
-	y1 = y0;
+    y0 = (x0 >> 9) + (x0 >> 10) + (x0 >> 11) + (x0 >> 13) + (x0 >> 14) + (x0 >> 16) + (x0 >> 18) + (x0 >> 19) + (x1 >> 8) + (x1 >> 9) +
+     (x1 >> 10) + (x1 >> 12) + (x1 >> 13) + (x1 >> 15) + (x1 >> 17) + (x1 >> 19) + (x1 >> 20) + (x2 >> 9) + (x2 >> 10) + (x2 >> 11) + 
+     (x2 >> 13) + (x2 >> 14) + (x2 >> 16) + (x2 >> 18) + (x2 >> 19) + ((y1) + (y1 >> 1) + (y1 >> 2) + (y1 >> 4) + (y1 >> 7) + (y1 >> 9) + 
+      (y1 >> 12) + (y1 >> 13) + (y1 >> 14) + (y1 >> 19)) - ((y2 >> 1) + (y2 >> 2) + (y2 >> 4) + (y2 >> 6) + (y2 >> 7) + (y2 >> 10) + (y2 >> 12) + 
+      (y2 >> 16) + (y2 >> 17) + (y2 >> 20));
 
-	return y0;
+    x2 = x1;
+    x1 = x0;
+    y2 = y1;
+    y1 = y0;
+
+    return y0;
 }
 
+int32_t fixedPoint(int32_t x0){
+  return (x0 << PRECISION);
+}
 
+void yawFilter(){
+	int32_t x0, y0calibrated, y0Butter;
+	x0 = fixedPoint(sr);
+    y0calibrated = x0 - lowpassFilter(x0);
+    y0Butter = butterWorth2nd(y0calibrated);  
+    srFiltered = (int16_t) (y0Butter >> PRECISION);
+}
 
 void update_motors(void)
 {
