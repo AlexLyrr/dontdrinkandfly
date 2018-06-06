@@ -169,62 +169,62 @@ void checkInput(char c, struct pcState *pcState)
 			pcState->mode = 9;
 			break;
 		case 'a':
-			if (pcState->liftValue < 1000 && (pcState->mode == 2  || pcState->mode == 4 || pcState->mode == 5)){
+			if (pcState->liftValue < 1000 && (pcState->mode == 2  || pcState->mode == 4 || pcState->mode == 5 || pcState->mode == 6)){
 				pcState->liftValue +=10;
 				pcState->aPressed = true;
      		 }
 			break;
 		case 'z':
-			if (pcState->liftValue > 0 && (pcState->mode == 2 || pcState->mode == 4 || pcState->mode == 5)){
+			if (pcState->liftValue > 0 && (pcState->mode == 2 || pcState->mode == 4 || pcState->mode == 5 || pcState->mode == 6)){
 				pcState->zPressed = true;
 				pcState->liftValue -=10;
 			}
 			break;
 		case 'q':
-			if (pcState->yawValue >= 10 && (pcState->mode == 2 || pcState->mode == 4 || pcState->mode == 5)){
+			if (pcState->yawValue >= 10 && (pcState->mode == 2 || pcState->mode == 4 || pcState->mode == 5 || pcState->mode == 6)){
 				pcState->qPressed = true;
 				pcState->yawValue -= 1;
 			}
 			break;
 		case 'w':
-			if (pcState->yawValue < 180 && (pcState->mode == 2 || pcState->mode == 4 || pcState->mode == 5)){
+			if (pcState->yawValue < 180 && (pcState->mode == 2 || pcState->mode == 4 || pcState->mode == 5 || pcState->mode == 6)){
 				pcState->wPressed = true;
 				pcState->yawValue += 1;
 			}
 			break;
 		case 'u':
-			if (pcState->PValue < 100 && (pcState->mode == 4 || pcState->mode == 5)){
+			if (pcState->PValue < 100 && (pcState->mode == 4 || pcState->mode == 5 || pcState->mode == 6)){
 				pcState->uPressed = true;
 				pcState->PValue += 1;
 			}
 
 			break;
 		case 'j':
-			if (pcState->PValue > 0 && (pcState->mode == 4 || pcState->mode == 5)){
+			if (pcState->PValue > 0 && (pcState->mode == 4 || pcState->mode == 5 || pcState->mode == 6)){
 				pcState->jPressed = true;
 				pcState->PValue -= 1;
 			}
 			break;
 		case 'i':
-			if (pcState->P1Value < 100 && (pcState->mode == 5 || pcState->mode == 9 )){
+			if (pcState->P1Value < 100 && (pcState->mode == 5 || pcState->mode == 6 || pcState->mode == 9 )){
 				pcState->iPressed = true;
 				pcState->P1Value += 1;
 			}
 			break;
 		case 'k':
-			if (pcState->P1Value > 0 && (pcState->mode == 5 || pcState->mode == 9 )){
+			if (pcState->P1Value > 0 && (pcState->mode == 5 || pcState->mode == 6 || pcState->mode == 9 )){
 				pcState->kkPressed = true;
 				pcState->P1Value -= 1;
 			}
 			break;
 		case 'o':
-			if (pcState->P2Value < 100 && (pcState->mode == 5 || pcState->mode == 9)){
+			if (pcState->P2Value < 100 && (pcState->mode == 5 || pcState->mode == 6 || pcState->mode == 9)){
 				pcState->oPressed = true;
 				pcState->P2Value += 1;
 			}
 			break;
 		case 'l':
-			if (pcState->P2Value > 0 && (pcState->mode == 5  || pcState->mode == 9)){
+			if (pcState->P2Value > 0 && (pcState->mode == 5 || pcState->mode == 6 || pcState->mode == 9)){
 				pcState->lPressed = true;
 				pcState->P2Value -= 1;
 			}
@@ -241,7 +241,6 @@ void checkInput(char c, struct pcState *pcState)
 				pcState->PheightValue -= 1;
 			}
 			break;
-			
 	}
 }
 

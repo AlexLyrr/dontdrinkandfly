@@ -248,6 +248,8 @@ int main(void)
 	state.heightSet = false;
 
 	int32_t panicStep = 0;
+	uint32_t recording_last = 0;
+
 	systemDone = false;
 	appClock = 0;
 
@@ -320,6 +322,30 @@ int main(void)
 					rollControl();
 					pitchControl();
 					full_control_motor();
+					#ifdef DEBUGGING
+					state.sendMotorStatus = true;
+					#endif
+				}
+				if (state.controlChanged) { // We don't need to do anything extra yet when this happens
+					state.controlChanged = false;
+				}
+				if (state.pChanged) { // We don't need to do anything extra yet when this happens
+					state.pChanged = false;
+				}
+				break;
+			case 6: // Raw-control
+				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
+						get_raw_sensor_data();
+					if ((get_time_us() - recording_last) > MIN_RECORD_TIME){
+						yawFilter();
+						rollFilter();
+						pitchFilter();
+						yawControlRaw();
+						rollControlRaw();
+						pitchControlRaw();
+						full_control_motor();
+						recording_last = get_time_us();
+					}
 					#ifdef DEBUGGING
 					state.sendMotorStatus = true;
 					#endif

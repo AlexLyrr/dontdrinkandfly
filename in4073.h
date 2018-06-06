@@ -34,6 +34,7 @@
 
 
 // Control
+#define MIN_RECORD_TIME 1000
 #define P2PHI 5
 #define C1 7
 #define C2 20
@@ -44,21 +45,34 @@ void run_filters_and_control();
 void yawControl();
 void pitchControl();
 void rollControl();
+void yawControlRaw();
+void pitchControlRaw();
+void rollControlRaw();
+
 void kalmanRoll();
 void kalmanPitch();
 void full_control_motor();
 
 // Filters
-int32_t lowpassFilter(int32_t x0);
+int32_t lowpassFilterYaw(int32_t x0);
+int32_t lowpassFilterRoll(int32_t x0);
+int32_t lowpassFilterPitch(int32_t x0);
+
 int32_t butterWorth2nd(int32_t x0);
 int32_t fixedPoint(int32_t x0);
-void yawFilter();
+int32_t notFixedPoint(int32_t x0);
 
+void yawFilter();
+void rollFilter();
+void pitchFilter();
+void kalmanRoll();
+void kalmanPitch();
 
 
 int16_t phiFiltered, thetaFiltered, psiFiltered;
 int16_t spFiltered, sqFiltered, srFiltered;
 int16_t saxFiltered, sayFiltered, sazFiltered;
+int16_t pAfterKalman, phiAfterKalman, qAfterKalman, thetaAfterKalman;
 
 // Timers
 #define TIMER_PERIOD	10 //50ms=20Hz (MAX 23bit, 4.6h)

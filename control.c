@@ -80,9 +80,9 @@ void yawControlRaw() {
 
 //@Author Alex Lyrakis
 void pitchControlRaw(){
-	int32_t eps = (((int32_t) state.controlPitchUser - 90) << 2) - (thetaFiltered >> 2); 
+	int32_t eps = (((int32_t) state.controlPitchUser - 90) << 2) - (thetaAfterKalman >> 2); 
 	int32_t pitchValue = (state.p1 * eps);
-	int32_t eps2 = (state.p2 *(sqFiltered >> 2)) + pitchValue;
+	int32_t eps2 = (state.p2 *(qAfterKalman >> 2)) + pitchValue;
 	pitchValue = (eps2 >> 8) + 180;
 	if (pitchValue > 360)
 		pitchValue = 360;
@@ -93,9 +93,9 @@ void pitchControlRaw(){
 
 //@Author Alex Lyrakis
 void rollControlRaw(){
-	int32_t eps = (((int32_t) state.controlRollUser - 90) << 2) + (phiFiltered >> 2);
+	int32_t eps = (((int32_t) state.controlRollUser - 90) << 2) + (phiAfterKalman >> 2);
 	int32_t rollValue = (state.p1 * eps);
-	int32_t eps2 = (state.p2 * (spFiltered >> 2)) + rollValue;
+	int32_t eps2 = (state.p2 * (pAfterKalman >> 2)) + rollValue;
 	rollValue = (eps2 >> 8) + 180;
 	if (rollValue > 360)
 		rollValue = 360;
@@ -108,20 +108,63 @@ void rollControlRaw(){
 //@Author Alex Lyrakis
 void kalmanRoll(){
 
-	static int32_t pKalman = 0, spPrev = 0, pBias = 0, pBiasPrev = 0, phiKalman = 0, phiKalmanPrev = 0, phiError = 0;
+  static int32_t pKalman = 0, pBias = 0, pBiasPrev = 0, phiKalman = 0, phiKalmanPrev = 0, phiError = 0;
 
-	pKalman = spPrev - pBiasPrev;
-	phiKalman = phiKalmanPrev + (pKalman >> P2PHI); 
-	phiError = phiKalman - phi;
-	phiKalman = phiKalman - (phiError >> C1);
-	pBias = pBiasPrev + ((phiError >> P2PHI) >> C2);  
-	
-	phiKalmanPrev = phiKalman;
-	pBiasPrev = pBias;
-	spPrev = (int32_t) sp; // get the value from sensor
+  pKalman = spFiltered - pBiasPrev;
+  phiKalman = phiKalmanPrev + (pKalman >> P2PHI); 
+  phiError = phiKalman - phiFiltered;
+  phiKalman = phiKalman - (phiError >> C1);
+  pBias = pBiasPrev + (phiError >> C2);  
+  
+  phiKalmanPrev = phiKalman;
+  pBiasPrev = pBias;
+  //spPrev = (int32_t) spFiltered; // get the value from sensor
+  pAfterKalman = pKalman;
+  phiAfterKalman = phiKalman;
+}
+
+void rollFilter(){
+	sp = fixedPoint(sp);
+    phi = fixedPoint(phi);
+
+    phiFiltered = phi - lowpassFilterRoll(phi);
+    spFiltered = sp;
+    
+    kalmanRoll();
+
+    pAfterKalman = notFixedPoint(pAfterKalman);
+    phiAfterKalman = notFixedPoint(phiAfterKalman);
+
+}
+
+void pitchFilter(){
+	sq = fixedPoint(sq);
+    theta = fixedPoint(theta);
+
+    thetaFiltered = theta - lowpassFilterPitch(theta);
+    sqFiltered = sq;
+    
+    kalmanPitch();
+
+    qAfterKalman = notFixedPoint(qAfterKalman);
+    thetaAfterKalman = notFixedPoint(thetaAfterKalman);
+
 }
 
 void kalmanPitch(){
+  static int32_t qKalman = 0, qBias = 0, qBiasPrev = 0, thetaKalman = 0, thetaKalmanPrev = 0, thetaError = 0;
+
+  qKalman = sqFiltered - qBiasPrev;
+  thetaKalman = thetaKalmanPrev + (qKalman >> P2PHI); 
+  thetaError = thetaKalman - thetaFiltered;
+  thetaKalman = thetaKalman - (thetaError >> C1);
+  qBias = qBiasPrev + (thetaError >> C2);  
+  
+  thetaKalmanPrev = thetaKalman;
+  qBiasPrev = qBias;
+  //sqPrev = (int32_t) sqFiltered; // get the value from sensor
+  qAfterKalman = qKalman;
+  thetaAfterKalman = thetaKalman;
 
 }
 
@@ -131,7 +174,7 @@ void controlComponentLoop() {
 
 //@Author Georgios Giannakaras
 //fc = 1HZ fs = 1000
-int32_t lowpassFilter(int32_t x0){
+int32_t lowpassFilterYaw(int32_t x0){
     static int32_t x1 = 0, x2 = 0, y0, y1 = 0, y2 = 0;
     
     y0 = (x0 >> 17) + (x0 >> 19) + (x1 >> 16) + (x1 >> 18) + (x1 >> 20)
@@ -148,6 +191,42 @@ int32_t lowpassFilter(int32_t x0){
 
     return y0;
 }
+
+int32_t lowpassFilterRoll(int32_t x0){
+    static int32_t x1 = 0, x2 = 0, y0, y1 = 0, y2 = 0;
+    
+    y0 = (x0 >> 17) + (x0 >> 19) + (x1 >> 16) + (x1 >> 18) + (x1 >> 20)
+    + (x2 >> 17) + (x2 >> 19)
+    + ((y1) + (y1 >> 1) + (y1 >> 2) + (y1 >> 3) + (y1 >> 4) + (y1 >> 5) + (y1 >> 6) + (y1 >> 8) + (y1 >> 9) 
+    + (y1 >> 11) + (y1 >> 12) + (y1 >> 13) + (y1 >> 16) + (y1 >> 17) + (y1 >> 19) + (y1 >> 20)) 
+    - ((y2 >> 1) + (y2 >> 2) + (y2 >> 3) + (y2 >> 4) + (y2 >> 5) + (y2 >> 6) + (y2 >> 8) + (y2 >> 9)
+    + (y2 >> 11) + (y2 >> 12) + (y2 >> 13) + (y2 >> 14) + (y2 >> 18));
+
+    x2 = x1;
+    x1 = x0;
+    y2 = y1;
+    y1 = y0;
+
+    return y0;
+}
+int32_t lowpassFilterPitch(int32_t x0){
+    static int32_t x1 = 0, x2 = 0, y0, y1 = 0, y2 = 0;
+    
+    y0 = (x0 >> 17) + (x0 >> 19) + (x1 >> 16) + (x1 >> 18) + (x1 >> 20)
+    + (x2 >> 17) + (x2 >> 19)
+    + ((y1) + (y1 >> 1) + (y1 >> 2) + (y1 >> 3) + (y1 >> 4) + (y1 >> 5) + (y1 >> 6) + (y1 >> 8) + (y1 >> 9) 
+    + (y1 >> 11) + (y1 >> 12) + (y1 >> 13) + (y1 >> 16) + (y1 >> 17) + (y1 >> 19) + (y1 >> 20)) 
+    - ((y2 >> 1) + (y2 >> 2) + (y2 >> 3) + (y2 >> 4) + (y2 >> 5) + (y2 >> 6) + (y2 >> 8) + (y2 >> 9)
+    + (y2 >> 11) + (y2 >> 12) + (y2 >> 13) + (y2 >> 14) + (y2 >> 18));
+
+    x2 = x1;
+    x1 = x0;
+    y2 = y1;
+    y1 = y0;
+
+    return y0;
+}
+
 
 
 //@Author Georgios Giannakaras
@@ -173,10 +252,15 @@ int32_t fixedPoint(int32_t x0){
   return (x0 << PRECISION);
 }
 
+int32_t notFixedPoint(int32_t x0){
+  return x0 >> PRECISION;
+}
+
+
 void yawFilter(){
 	int32_t x0, y0calibrated, y0Butter;
 	x0 = fixedPoint(sr);
-    y0calibrated = x0 - lowpassFilter(x0);
+    y0calibrated = x0 - lowpassFilterYaw(x0);
     y0Butter = butterWorth2nd(y0calibrated);  
     srFiltered = (int16_t) (y0Butter >> PRECISION);
 }
