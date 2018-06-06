@@ -96,7 +96,7 @@ void checkInput(char c, struct pcState *pcState)
 				{
 					case 'A':
 						pcState->escPressed = false;
-						if (pcState->pitchValue > 0 && (pcState->mode == 2 || pcState->mode == 5 || pcState->mode == 9)){
+						if (pcState->pitchValue > 0 && (pcState->mode == 2 || pcState->mode == 5 || pcState->mode == 6  || pcState->mode == 9)){
 							pcState->upPressed = true;
 							pcState->pitchValue -= 1;
 						}
@@ -104,7 +104,7 @@ void checkInput(char c, struct pcState *pcState)
 						break;
 					case 'B':
 						pcState->escPressed = false;
-						if (pcState->pitchValue < 180 && (pcState->mode == 2 || pcState->mode == 5 || pcState->mode == 9)){
+						if (pcState->pitchValue < 180 && (pcState->mode == 2 || pcState->mode == 5 || pcState->mode == 6  || pcState->mode == 9)){
 							pcState->downPressed = true;
 							pcState->pitchValue += 1;
 						}
@@ -112,7 +112,7 @@ void checkInput(char c, struct pcState *pcState)
 						break;
 					case 'C':
 						pcState->escPressed = false;
-						if (pcState->rollValue > 0 && (pcState->mode == 2 || pcState->mode == 5 || pcState->mode == 9)){
+						if (pcState->rollValue > 0 && (pcState->mode == 2 || pcState->mode == 5 || pcState->mode == 6  || pcState->mode == 9)){
 							pcState->rightPressed = true;
 							pcState->rollValue -= 1;
 						}
@@ -120,7 +120,7 @@ void checkInput(char c, struct pcState *pcState)
 						break;
 					case 'D':
 						pcState->escPressed = false;
-						if (pcState->rollValue < 180 && (pcState->mode == 2 || pcState->mode == 5 || pcState->mode == 9)){
+						if (pcState->rollValue < 180 && (pcState->mode == 2 || pcState->mode == 5 || pcState->mode == 6  || pcState->mode == 9)){
 							pcState->leftPressed = true;
 							pcState->rollValue += 1;
 						}
