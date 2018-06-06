@@ -120,6 +120,7 @@ void applicationComponentLoop() {
 					case 2:
 					case 4:
 					case 5:
+					case 7:
 						if (!state.dmpEnabled) {
 							imu_init(true, 100);
 							state.dmpEnabled = true;
@@ -127,7 +128,7 @@ void applicationComponentLoop() {
 						break;
 					case 6:
 						if (!state.dmpEnabled) {
-							imu_init(false, 1000);
+							imu_init(false, 200);
 							state.dmpEnabled = true;
 						}
 						break;
@@ -166,6 +167,8 @@ void applicationComponentLoop() {
 				// dmp_enable_gyro_cal(0);
 				writeOffsetValues();
 				writeMotorStatus();
+				init_height();
+				state.heightSet = true;
 				state.calibrated = true;
 				state.nextMode = 0;
 				state.currentMode = 0;
@@ -237,9 +240,9 @@ int main(void)
 	state.packetError = 0;
 
 	state.pChanged = false;
-	state.p1 = 10;
-	state.p2 = 10;
-	state.pYaw = 3;
+	state.p1 = 25;
+	state.p2 = 25;
+	state.pYaw = 80;
 	state.pLift = 0;
 
 	state.calibrated = false;
