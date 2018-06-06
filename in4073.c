@@ -46,7 +46,7 @@ void checkSafety() {
 	// } else {
 		state.nextMode = 1;
 	}
-	if (bat_volt < 155 && bat_volt > 128){
+	if (bat_volt < 143 && bat_volt > 128){
 		state.nextMode = 1;
 	}
 }
@@ -128,7 +128,7 @@ void applicationComponentLoop() {
 						break;
 					case 6:
 						if (!state.dmpEnabled) {
-							imu_init(false, 1000);
+							imu_init(false, 500);
 							state.dmpEnabled = true;
 						}
 						break;

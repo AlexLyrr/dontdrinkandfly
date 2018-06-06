@@ -80,9 +80,9 @@ void yawControlRaw() {
 
 //@Author Alex Lyrakis
 void pitchControlRaw(){
-	int32_t eps = (((int32_t) state.controlPitchUser - 90) << 2) - (thetaAfterKalman << 2); 
+	int32_t eps = (((int32_t) state.controlPitchUser - 90) << 2) - (thetaAfterKalman >> 2); 
 	int32_t pitchValue = (state.p1 * eps);
-	int32_t eps2 = (state.p2 *(qAfterKalman << 3)) + pitchValue;
+	int32_t eps2 = (state.p2 *(qAfterKalman >> 2)) + pitchValue;
 	pitchValue = (eps2 >> 8) + 180;
 	if (pitchValue > 360)
 		pitchValue = 360;
@@ -93,9 +93,9 @@ void pitchControlRaw(){
 
 //@Author Alex Lyrakis
 void rollControlRaw(){
-	int32_t eps = (((int32_t) state.controlRollUser - 90) << 2) + (phiAfterKalman << 2);
+	int32_t eps = (((int32_t) state.controlRollUser - 90) << 2) + (phiAfterKalman >> 2);
 	int32_t rollValue = (state.p1 * eps);
-	int32_t eps2 = (state.p2 * (pAfterKalman << 3)) + rollValue;
+	int32_t eps2 = (state.p2 * (pAfterKalman >> 2)) + rollValue;
 	rollValue = (eps2 >> 8) + 180;
 	if (rollValue > 360)
 		rollValue = 360;
@@ -124,11 +124,11 @@ void kalmanRoll(){
 }
 
 void rollFilter(){
-	sp = fixedPoint(sp);
-    phi = fixedPoint(phi);
+	sp_fp = fixedPoint(sp);
+    phi_fp = fixedPoint(phi);
 
-    phiFiltered = phi;// - lowpassFilterRoll(phi);
-    spFiltered = sp;
+    phiFiltered = phi_fp - lowpassFilterRoll(phi_fp);
+    spFiltered = sp_fp;
     
     kalmanRoll();
 
@@ -138,11 +138,11 @@ void rollFilter(){
 }
 
 void pitchFilter(){
-	sq = fixedPoint(sq);
-    theta = fixedPoint(theta);
+	sq_fp = fixedPoint(sq);
+    theta_fp = fixedPoint(theta);
 
-    thetaFiltered = theta - lowpassFilterPitch(theta);
-    sqFiltered = sq;
+    thetaFiltered = theta_fp - lowpassFilterPitch(theta_fp);
+    sqFiltered = sq_fp;
     
     kalmanPitch();
 
@@ -379,7 +379,8 @@ void full_control_motor()
 			ae[1] += (controlYaw - 180);
 			ae[2] -= (controlYaw - 180);
 			ae[3] += (controlYaw - 180);
-		} else{	ae[0] += (180 - controlYaw);
+		} else{
+			ae[0] += (180 - controlYaw);
 			ae[1] -= (180 - controlYaw);
 			ae[2] += (180 - controlYaw);
 			ae[3] -= (180 - controlYaw);

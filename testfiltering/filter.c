@@ -16,9 +16,6 @@
 #include "../in4073.h"
 
 
-void onAbort() {
-
-}
 /*
  * @author Joseph Verburg
  */
@@ -60,32 +57,36 @@ int main(void)
 	systemDone = false;
 
 	#define RECORD_DURATION (10 * 1000 * 1000)
-	#define MIN_RECORD_TIME 1000
 	#define MIN_PACKET_DELAY (2 * 1500)
+	#define MIN_RECORD_TIME 1000
 
 	bool recording = false;
 	bool sending = false;
 	uint32_t recording_start = 0, recording_last = 0;
 	uint32_t last_packet_sent = get_time_us();
+
 	uint32_t address = 0, dataSent = 0;
 	uint8_t buffer[12]; 
 
+	nrf_delay_ms(1000);
+	
 	nrf_gpio_pin_set(YELLOW);
 	nrf_gpio_pin_set(RED);
 	nrf_gpio_pin_set(GREEN);
-	nrf_gpio_pin_clear(BLUE);
+	nrf_gpio_pin_set(BLUE);
 	
+	nrf_delay_ms(1000);
+
 	while (!systemDone) {
 		if (!check_sensor_int_flag()) { 
 	    	continue;
     	}
-    	communicationComponentLoop();
     	get_raw_sensor_data();
+    	communicationComponentLoop();
 		if (!recording) {
 			if (state.hasPacket) {
 				state.hasPacket = false;
 				if (state.currentPacket[4] == 3) {
-					nrf_gpio_pin_set(BLUE);
 					recording = true;
 					recording_start = get_time_us();
 					nrf_gpio_pin_clear(GREEN);
@@ -132,20 +133,25 @@ int main(void)
 					((uint16_t) buffer[10]) << 8 | ((uint16_t) buffer[11])
 				);		
 				last_packet_sent = get_time_us();
-				if (address >= dataSent) {
+				if (address == dataSent) {
 					nrf_gpio_pin_clear(BLUE);					
-					break;
+					while(1){
+
+					}
 				}
 			}
 		}
 		if (((get_time_us() - recording_start) > RECORD_DURATION) || (address >= 127000)){
 			sending = true;
 		}
-		packetComponentLoop();
-
 	}
 
 	//printf("\n\t Goodbye \n\n");
 	nrf_delay_ms(1000);
+	//nrf_gpio_pin_clear(YELLOW);
+	//nrf_gpio_pin_clear(GREEN);
+	//nrf_gpio_pin_clear(BLUE);
+	//nrf_gpio_pin_clear(RED);
+	//nrf_delay_ms(1000);
 	NVIC_SystemReset();
 }
