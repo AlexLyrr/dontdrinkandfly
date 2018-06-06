@@ -128,7 +128,7 @@ void applicationComponentLoop() {
 						break;
 					case 6:
 						if (!state.dmpEnabled) {
-							imu_init(false, 200);
+							imu_init(false, 1000);
 							state.dmpEnabled = true;
 						}
 						break;
@@ -251,7 +251,7 @@ int main(void)
 	state.heightSet = false;
 
 	int32_t panicStep = 0;
-	uint32_t recording_last = 0;
+	//uint32_t recording_last = 0;
 
 	systemDone = false;
 	appClock = 0;
@@ -339,7 +339,7 @@ int main(void)
 			case 6: // Raw-control
 				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
 						get_raw_sensor_data();
-					if ((get_time_us() - recording_last) > MIN_RECORD_TIME){
+					// if ((get_time_us() - recording_last) > MIN_RECORD_TIME){
 						yawFilter();
 						rollFilter();
 						pitchFilter();
@@ -347,8 +347,8 @@ int main(void)
 						rollControlRaw();
 						pitchControlRaw();
 						full_control_motor();
-						recording_last = get_time_us();
-					}
+						// recording_last = get_time_us();
+					// }
 					#ifdef DEBUGGING
 					state.sendMotorStatus = true;
 					#endif

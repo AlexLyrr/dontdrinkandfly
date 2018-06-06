@@ -86,7 +86,7 @@ G_MODULE_EXPORT void on_button_down_rpm_clicked(GtkButton *button, Widgets *widg
 
 G_MODULE_EXPORT void on_button_up_p_clicked(GtkButton *button, Widgets *widg)
 {
-	if (pcState->PValue < 100 && (pcState->mode == 4 || pcState->mode == 5 || pcState->mode == 6)){
+	if (pcState->PValue < 1000 && (pcState->mode == 4 || pcState->mode == 5 || pcState->mode == 6)){
 		pcState->uPressed = true;
 		pcState->PValue += 1;
 	}
@@ -102,7 +102,7 @@ G_MODULE_EXPORT void on_button_down_p_clicked(GtkButton *button, Widgets *widg)
 
 G_MODULE_EXPORT void on_button_up_p1_clicked(GtkButton *button, Widgets *widg)
 {
-	if (pcState->P1Value < 100 && (pcState->mode == 5 || pcState->mode == 6 || pcState->mode == 9 )){
+	if (pcState->P1Value < 1000 && (pcState->mode == 5 || pcState->mode == 6 || pcState->mode == 9 )){
 		pcState->iPressed = true;
 		pcState->P1Value += 1;
 	}
@@ -118,7 +118,7 @@ G_MODULE_EXPORT void on_button_down_p1_clicked(GtkButton *button, Widgets *widg)
 
 G_MODULE_EXPORT void on_button_up_p2_clicked(GtkButton *button, Widgets *widg)
 {
-	if (pcState->P2Value < 100 && (pcState->mode == 5 || pcState->mode == 6 || pcState->mode == 9)){
+	if (pcState->P2Value < 1000 && (pcState->mode == 5 || pcState->mode == 6 || pcState->mode == 9)){
 		pcState->oPressed = true;
 		pcState->P2Value += 1;
 	}
@@ -135,7 +135,7 @@ G_MODULE_EXPORT void on_button_down_p2_clicked(GtkButton *button, Widgets *widg)
 
 G_MODULE_EXPORT void on_button_up_ph_clicked(GtkButton *button, Widgets *widg)
 {
-	if (pcState->PheightValue < 100 && (pcState->mode == 5 || pcState->mode == 7)){
+	if (pcState->PheightValue < 1000 && (pcState->mode == 5 || pcState->mode == 7)){
 		pcState->yPressed = true;
 		pcState->PheightValue += 1;
 	}

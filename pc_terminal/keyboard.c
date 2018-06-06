@@ -64,7 +64,7 @@ void initPcState(struct pcState *pcState){
   pcState->yawValue = 90;
   pcState->PValue = 80;
   pcState->P1Value = 25;
-  pcState->P2Value = 65;
+  pcState->P2Value = 25; //
   pcState->PheightValue = 0;
   
   //JOYSTIC
@@ -193,7 +193,7 @@ void checkInput(char c, struct pcState *pcState)
 			}
 			break;
 		case 'u':
-			if (pcState->PValue < 100 && (pcState->mode == 4 || pcState->mode == 5 || pcState->mode == 6)){
+			if (pcState->PValue < 1000 && (pcState->mode == 4 || pcState->mode == 5 || pcState->mode == 6)){
 				pcState->uPressed = true;
 				pcState->PValue += 1;
 			}
@@ -206,7 +206,7 @@ void checkInput(char c, struct pcState *pcState)
 			}
 			break;
 		case 'i':
-			if (pcState->P1Value < 100 && (pcState->mode == 5 || pcState->mode == 6 || pcState->mode == 9 )){
+			if (pcState->P1Value < 1000 && (pcState->mode == 5 || pcState->mode == 6 || pcState->mode == 9 )){
 				pcState->iPressed = true;
 				pcState->P1Value += 1;
 			}
@@ -218,7 +218,7 @@ void checkInput(char c, struct pcState *pcState)
 			}
 			break;
 		case 'o':
-			if (pcState->P2Value < 100 && (pcState->mode == 5 || pcState->mode == 6 || pcState->mode == 9)){
+			if (pcState->P2Value < 1000 && (pcState->mode == 5 || pcState->mode == 6 || pcState->mode == 9)){
 				pcState->oPressed = true;
 				pcState->P2Value += 1;
 			}
@@ -230,7 +230,7 @@ void checkInput(char c, struct pcState *pcState)
 			}
 			break;
 		case 'y':
-			if (pcState->PheightValue < 100 && (pcState->mode == 5 || pcState->mode == 7)){
+			if (pcState->PheightValue < 1000 && (pcState->mode == 5 || pcState->mode == 7)){
 				pcState->yPressed = true;
 				pcState->PheightValue += 1;
 			}

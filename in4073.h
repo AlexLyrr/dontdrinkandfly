@@ -35,8 +35,8 @@
 
 // Control
 #define MIN_RECORD_TIME 5000
-#define P2PHI 5
-#define C1 7
+#define P2PHI 9
+#define C1 8
 #define C2 20
 #define PRECISION 14
 
