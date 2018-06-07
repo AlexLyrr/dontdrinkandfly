@@ -35,9 +35,9 @@
 
 // Control
 #define MIN_RECORD_TIME 5000
-#define P2PHI 9
-#define C1 8
-#define C2 20
+#define P2PHI 10
+#define C1 8	// 6
+#define C2 20	//14
 #define PRECISION 14
 
 int16_t motor[4], ae[4];

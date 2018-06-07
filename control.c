@@ -15,20 +15,6 @@ uint32_t prevTime = 0;
 int16_t prevDisp = 0;
 int16_t displacement;
 
-
-/* 
-
-Notes: 
-
-Multipliers P1, P2 around 5, Roll/Pitch work for values between 0-15
-Multiplier P around 4, Yaw work for values between 0-15
-
-TBD: 
-
-map range 90-180 to 0-15 or the other way around.
-*/
-
-
 //@Author Alex Lyrakis
 void yawControl() {
 	int32_t eps = (((int32_t) state.controlYawUser - 90) << 2) + (((int32_t) sr - state.calibrateSrOffset) >> 2);
@@ -42,7 +28,7 @@ void yawControl() {
 
 //@Author Alex Lyrakis
 void pitchControl(){
-	int32_t eps = (((int32_t) state.controlPitchUser - 90) << 2) - ((theta - state.calibrateThetaOffset) >> 2); 
+	int32_t eps = (((int32_t) state.controlPitchUser - 90) << 4) - ((theta - state.calibrateThetaOffset) >> 2); 
 	int32_t pitchValue = (state.p1 * eps);
 	int32_t eps2 = (state.p2 *((sq - state.calibrateSqOffset) >> 2)) + pitchValue;
 	pitchValue = (eps2 >> 8) + 180;
@@ -55,7 +41,7 @@ void pitchControl(){
 
 //@Author Alex Lyrakis
 void rollControl(){
-	int32_t eps = (((int32_t) state.controlRollUser - 90) << 2) + ((phi - state.calibratePhiOffset) >> 2);
+	int32_t eps = (((int32_t) state.controlRollUser - 90) << 4) + ((phi - state.calibratePhiOffset) >> 2);
 	int32_t rollValue = (state.p1 * eps);
 	int32_t eps2 = (state.p2 * ((sp - state.calibrateSpOffset) >> 2)) + rollValue;
 	rollValue = (eps2 >> 8) + 180;
@@ -107,7 +93,6 @@ void rollControlRaw(){
 
 //@Author Alex Lyrakis
 void kalmanRoll(){
-
   static int32_t pKalman = 0, pBias = 0, pBiasPrev = 0, phiKalman = 0, phiKalmanPrev = 0, phiError = 0;
 
   pKalman = spFiltered - pBiasPrev;
@@ -118,16 +103,17 @@ void kalmanRoll(){
   
   phiKalmanPrev = phiKalman;
   pBiasPrev = pBias;
-  //spPrev = (int32_t) spFiltered; // get the value from sensor
   pAfterKalman = pKalman;
   phiAfterKalman = phiKalman;
 }
 
+//@Author Alex Lyrakis
 void rollFilter(){
+	phi = say;
 	sp_fp = fixedPoint(sp);
     phi_fp = fixedPoint(phi);
 
-    phiFiltered = phi_fp - lowpassFilterRoll(phi_fp);
+    phiFiltered = phi_fp; //- lowpassFilterRoll(phi_fp);
     spFiltered = sp_fp;
     
     kalmanRoll();
@@ -137,11 +123,13 @@ void rollFilter(){
 
 }
 
+//@Author Alex Lyrakis
 void pitchFilter(){
+	theta = sax;
 	sq_fp = fixedPoint(sq);
     theta_fp = fixedPoint(theta);
 
-    thetaFiltered = theta_fp - lowpassFilterPitch(theta_fp);
+    thetaFiltered = theta_fp; //- lowpassFilterPitch(theta_fp);
     sqFiltered = sq_fp;
     
     kalmanPitch();
@@ -151,6 +139,7 @@ void pitchFilter(){
 
 }
 
+//@Author Alex Lyrakis
 void kalmanPitch(){
   static int32_t qKalman = 0, qBias = 0, qBiasPrev = 0, thetaKalman = 0, thetaKalmanPrev = 0, thetaError = 0;
 
@@ -191,7 +180,6 @@ int32_t lowpassFilterYaw(int32_t x0){
 
     return y0;
 }
-
 int32_t lowpassFilterRoll(int32_t x0){
     static int32_t x1 = 0, x2 = 0, y0, y1 = 0, y2 = 0;
     
@@ -248,15 +236,15 @@ int32_t butterWorth2nd(int32_t x0){
     return y0;
 }
 
+//@Author Alex Lyrakis
 int32_t fixedPoint(int32_t x0){
   return (x0 << PRECISION);
 }
-
 int32_t notFixedPoint(int32_t x0){
   return x0 >> PRECISION;
 }
 
-
+//@Author Georgios Giannakaras
 void yawFilter(){
 	int32_t x0, y0calibrated, y0Butter;
 	x0 = fixedPoint(sr);
