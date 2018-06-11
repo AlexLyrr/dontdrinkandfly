@@ -117,7 +117,7 @@ struct pcState *pcState;
 typedef struct _Widgets Widgets;
 struct _Widgets
 {
-	GtkLabel *l[25];
+	GtkLabel *l[26];
 	GtkLevelBar *lb[4];
 	GtkProgressBar *pb[1];
 };

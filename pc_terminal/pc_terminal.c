@@ -661,6 +661,8 @@ void printControllersGUI(SRPacket *sPacket){
 	gtk_label_set_label(widg.l[22], guiText);
 	sprintf(guiText, "%hhu", sPacketGUI.payload[8]);
 	gtk_label_set_label(widg.l[24], guiText);
+	sprintf(guiText, "%hhu", sPacketGUI.payload[9]);
+	gtk_label_set_label(widg.l[25], guiText);
 }
 
 
