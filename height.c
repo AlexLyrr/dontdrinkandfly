@@ -18,3 +18,22 @@ void heightControl(){
 
   state.controlLift = liftValue;
 }
+
+
+void heightControl2(){
+  // TODO: Built in P controller. To stay at level with set pressure (initPressure). Maybe taking into account saz.
+  //int32_t error = 0;
+  int32_t errorsaz = 0;
+  int32_t liftValue = 0;
+  //error = state.initPressure - pressure;
+  errorsaz = 0 - (saz >> 9);
+  //liftValue = state.controlLiftUser + state.pLift * error + state.psaz * errorsaz;
+  liftValue = state.controlLiftUser + state.pLift * errorsaz;
+  if (liftValue > 1000){
+    liftValue = 1000;
+  }else if (liftValue < 0){
+    liftValue = 0;
+  }
+
+  state.controlLift = liftValue;
+}

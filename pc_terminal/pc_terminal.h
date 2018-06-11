@@ -105,6 +105,7 @@ struct pcState{
 	int16_t tYawValue;
 };
 
+uint8_t DroneStatusMode;
 struct pcState *pcStateGui;
 struct pcState *pcState;
 

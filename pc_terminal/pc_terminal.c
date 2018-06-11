@@ -80,6 +80,11 @@ void setPacket(struct pcState *pcState, SRPacket *sPacket){
 	if (setPAttempt(pcState))
 		sPacket->payload[0] = 9;
 
+	//check if we changed lift values when we are in height mode and go back to full control
+	if(DroneStatusMode == 7 && (pcState->aPressed || pcState->zPressed || pcState->jThrottleUp || pcState->jThrottleDown)){
+		sPacket->payload[0] = 5;
+		pcState->mode = 5;
+	}
 	// Set payload
 	switch (sPacket->payload[0]) {
 		case 5:
@@ -181,6 +186,7 @@ void receivePacket(SRPacket rPacket){
 				rPacketGUI = rPacket;
 				switch(rPacket.payload[0]) {
 					case 2:
+						DroneStatusMode = rPacket.payload[1];
 						logReceivePacket(rPacket);
 						break;
 					case 7:

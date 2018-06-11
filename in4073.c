@@ -310,6 +310,7 @@ int main(void)
 					state.calibrateSpOffset = (state.calibrateSpOffset * 7  + sp) >> 3;
 					state.calibrateSqOffset = (state.calibrateSqOffset * 7 + sq) >> 3;
 					state.calibrateSrOffset = (state.calibrateSrOffset * 7 + sr) >> 3;
+					state.calibrateSazOffset = (state.calibrateSazOffset * 7 + saz) >> 3;
 				}
 				break;
 			case 4: // Manual Yaw
@@ -378,8 +379,7 @@ int main(void)
 					yawControl();
 					rollControl();
 					pitchControl();
-					heightControl();
-
+					heightControl2();
 					full_control_motor();
 				}
 				if (state.controlChanged) { // We don't need to do anything extra yet when this happens
