@@ -205,6 +205,7 @@ typedef struct {
 	uint16_t p2;
 	uint16_t pYaw;
 	uint16_t pLift;
+	uint8_t psaz;
 	bool controlChanged;
 	uint16_t controlRoll;
 	uint16_t controlPitch;

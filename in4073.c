@@ -256,6 +256,7 @@ int main(void)
 	state.p2 = 25;
 	state.pYaw = 80;
 	state.pLift = 0;
+	state.psaz = 0;
 
 	state.calibrated = false;
 	state.heightSet = false;

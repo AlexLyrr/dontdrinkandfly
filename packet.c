@@ -85,6 +85,7 @@ void parsePacketSetP() {
 	state.p2 = state.currentPacket[7] << 8 | state.currentPacket[8];
 	state.pYaw = state.currentPacket[9] << 8 | state.currentPacket[10];
 	state.pLift = state.currentPacket[12];
+	state.psaz = state.currentPacket[13];
 	state.pChanged = true;
 }
 
