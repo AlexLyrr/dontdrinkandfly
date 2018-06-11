@@ -296,6 +296,7 @@ int main(void)
 					state.calibrateSpOffset = (state.calibrateSpOffset * 7  + sp) >> 3;
 					state.calibrateSqOffset = (state.calibrateSqOffset * 7 + sq) >> 3;
 					state.calibrateSrOffset = (state.calibrateSrOffset * 7 + sr) >> 3;
+					state.calibrateSazOffset = (state.calibrateSazOffset * 7 + saz) >> 3;
 				}
 				break;
 			case 4: // Manual Yaw
@@ -374,9 +375,11 @@ int main(void)
 					rollControl();
 					pitchControl();
 					*/
-					heightControl();
-
-					run_filters_and_control();
+					heightControl2();
+					yawControl();
+					rollControl();
+					pitchControl();
+					full_control_motor();
 					#ifdef DEBUGGING
 					state.sendMotorStatus = true;
 					#endif

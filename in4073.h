@@ -222,6 +222,7 @@ typedef struct {
 	int32_t calibrateSpOffset;
 	int32_t calibrateSqOffset;
 	int32_t calibrateSrOffset;
+	int32_t calibrateSazOffset;
 	
 	bool heightSet;
 	int32_t initPressure;
@@ -267,6 +268,7 @@ void applicationComponentLoop();
 
 void init_height();
 void heightControl();
+void heightControl2();
 
 /*******
 	Protocol

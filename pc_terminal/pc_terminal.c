@@ -80,6 +80,7 @@ void setPacket(struct pcState *pcState, SRPacket *sPacket){
 	if (setPAttempt(pcState))
 		sPacket->payload[0] = 9;
 
+	//if(rPacketGUI.payload[1] == 7)
 	// Set payload
 	switch (sPacket->payload[0]) {
 		case 5:
