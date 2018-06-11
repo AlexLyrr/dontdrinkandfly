@@ -11,7 +11,21 @@
 #define PACKET_LENGTH (PACKET_BODY_LENGTH + 5)
 #define BATTERY_MAX 12.6
 #define BATTERY_MIN 10.8
-// #define JOYSTICK_ENABLE 1
+// #define JOYSTICK_ENABLE
+// #define BLE_ENABLE
+
+#ifdef BLE_ENABLE
+#include "gattlib.h"
+
+#define NUS_CHARACTERISTIC_TX_UUID	"6e400002-b5a3-f393-e0a9-e50e24dcca9e"
+#define NUS_CHARACTERISTIC_RX_UUID	"6e400003-b5a3-f393-e0a9-e50e24dcca9e"
+
+gatt_connection_t* m_connection;
+
+uint16_t ble_tx_handle;
+uint16_t ble_rx_handle;
+
+#endif
 
 
 extern const uint8_t crc8_table[];

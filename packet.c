@@ -179,38 +179,19 @@ void writeAck(uint16_t packetNumber) {
 }
 
 void writeTimings() {
-	// writePacket(14, 1, 255, 255, 255, 251, 250, 249, 248, 247);
+	#ifdef APPLICATION_TIMINGS
+	uint32_t avg = 0;
+	if (state.timeLoopCount > 0) { // No div0
+		avg = state.timeLoopTotal / state.timeLoopCount;
+	}
 	writePacket(14, 1,
 		(state.timeLoopMax >> 24) & 0xFF, (state.timeLoopMax >> 16) & 0xFF, (state.timeLoopMax >> 8) & 0xFF, state.timeLoopMax & 0xFF,
-		(state.timeLoop >> 24) & 0xFF, (state.timeLoop >> 16) & 0xFF, (state.timeLoop >> 8) & 0xFF, state.timeLoop & 0xFF);
+		(avg >> 24) & 0xFF, (avg >> 16) & 0xFF, (avg >> 8) & 0xFF, avg & 0xFF);
 
-	writePacket(14, 2,
-		(state.timeLoopPacketMax >> 24) & 0xFF, (state.timeLoopPacketMax >> 16) & 0xFF, (state.timeLoopPacketMax >> 8) & 0xFF, state.timeLoopPacketMax & 0xFF,
-		(state.timeLoopPacket >> 24) & 0xFF, (state.timeLoopPacket >> 16) & 0xFF, (state.timeLoopPacket >> 8) & 0xFF, state.timeLoopPacket & 0xFF);
-
-	writePacket(14, 3,
-		(state.timeLoopAppMax >> 24) & 0xFF, (state.timeLoopAppMax >> 16) & 0xFF, (state.timeLoopAppMax >> 8) & 0xFF, state.timeLoopAppMax & 0xFF,
-		(state.timeLoopApp >> 24) & 0xFF, (state.timeLoopApp >> 16) & 0xFF, (state.timeLoopApp >> 8) & 0xFF, state.timeLoopApp & 0xFF);
-
-	writePacket(14, 4,
-		(state.timeLoopControlMax >> 24) & 0xFF, (state.timeLoopControlMax >> 16) & 0xFF, (state.timeLoopControlMax >> 8) & 0xFF, state.timeLoopControlMax & 0xFF,
-		(state.timeLoopControl >> 24) & 0xFF, (state.timeLoopControl >> 16) & 0xFF, (state.timeLoopControl >> 8) & 0xFF, state.timeLoopControl & 0xFF);
-
-	writePacket(14, 5,
-		(state.timeLoopSensorMax >> 24) & 0xFF, (state.timeLoopSensorMax >> 16) & 0xFF, (state.timeLoopSensorMax >> 8) & 0xFF, state.timeLoopSensorMax & 0xFF,
-		(state.timeLoopSensor >> 24) & 0xFF, (state.timeLoopSensor >> 16) & 0xFF, (state.timeLoopSensor >> 8) & 0xFF, state.timeLoopSensor & 0xFF);
-
-
-	state.timeLoop = 0;
+	state.timeLoopTotal = 0;
+	state.timeLoopCount = 0;
 	state.timeLoopMax = 0;
-	state.timeLoopPacket = 0;
-	state.timeLoopPacketMax = 0;
-	state.timeLoopApp = 0;
-	state.timeLoopAppMax = 0;
-	state.timeLoopControl = 0;
-	state.timeLoopControlMax = 0;
-	state.timeLoopSensor = 0;
-	state.timeLoopSensorMax = 0;
+	#endif
 }
 
 void writePing(uint32_t clock) {

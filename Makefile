@@ -246,10 +246,16 @@ upload-run: default pc doupload
 computer-compile:
 	cd pc_terminal; make computer
 
+computer-ble-compile:
+	cd pc_terminal; make ble
+
 joystick-compile:
 	cd pc_terminal; make joystick
 
 computer: computer-compile default upload pc-run
+
+computer-ble: computer-ble-compile default upload pc-run
+
 
 gui: computer-compile pc-run
 

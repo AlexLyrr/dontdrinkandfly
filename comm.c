@@ -40,6 +40,12 @@ static uint8_t const crc8_table[] = {
 
 
 void writeByte(uint8_t b) {
+	#ifdef BLE_ENABLED
+	if (state.currentMode == 8) {
+		enqueue(&ble_tx_queue, b);
+		return;
+	}
+	#endif
 	uart_put(b);
 }
 
@@ -49,7 +55,6 @@ void writeByte(uint8_t b) {
  */
 void communicationComponentLoop() {
 	if (rx_queue.count >= PACKET_LENGTH) {
-		// state.hasPacket = true;
 		uint8_t i = 0, crc = 0x00;
 		while((i + PACKET_LENGTH) <= rx_queue.count && i < MAX_PACKET_SCAN) {
 			if (queuePeek(&rx_queue, 0) == PREAMPLE_B1 && queuePeek(&rx_queue, 1) == PREAMPLE_B2) {
@@ -67,9 +72,7 @@ void communicationComponentLoop() {
 					state.packetAck = state.currentPacket[2] << 8 | state.currentPacket[3];
 					state.sendAck = true;
 					state.lastPacketReceived = get_time_us();
-					// printf("read packet");
 				} else {
-					// printf("Invalid crc %d", crc);
 					state.packetError = 2;
 				}
 				return;
@@ -80,6 +83,33 @@ void communicationComponentLoop() {
 			i++;
 		}
 	}
+	#ifdef BLE_ENABLED
+	if (!state.hasPacket && ble_rx_queue.count >= PACKET_LENGTH) {
+		uint8_t i = 0, crc = 0x00;
+		while((i + PACKET_LENGTH) <= ble_rx_queue.count && i < MAX_PACKET_SCAN) {
+			if (queuePeek(&ble_rx_queue, 0) == PREAMPLE_B1 && queuePeek(&ble_rx_queue, 1) == PREAMPLE_B2) {
+				// Skip preamble in crc calculation
+				for (uint8_t o = 2; o < (PACKET_LENGTH - 1); o += 1) {
+					crc = crc8_table[crc ^ queuePeek(&ble_rx_queue, o)];
+				}
+				if (crc == queuePeek(&ble_rx_queue, PACKET_LENGTH - 1)) {
+					for(uint8_t o = 0; o < PACKET_LENGTH; o += 1) {
+						state.currentPacket[o] = dequeue(&ble_rx_queue);
+					}
+					state.hasPacket = true;
+					state.packetAck = state.currentPacket[2] << 8 | state.currentPacket[3];
+					state.sendAck = true;
+					state.lastPacketReceived = get_time_us();
+				} else {
+					state.packetError = 2;
+				}
+				return;
+			}
+			dequeue(&ble_rx_queue);
+			i++;
+		}
+	}
+	#endif
 }
 
 
@@ -121,4 +151,10 @@ void writePacket(uint8_t b0, uint8_t b1, uint8_t b2, uint8_t b3, uint8_t b4, uin
 	writeByte(b9);
 
 	writeByte(crc);
+
+	#ifdef BLE_ENABLED
+	if (state.currentMode == 8) {
+		ble_send();
+	}
+	#endif
 }

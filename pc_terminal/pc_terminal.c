@@ -305,19 +305,19 @@ void logReceivePacket(SRPacket rPacket){
 			val2 = (uint32_t)rPacket.payload[6] << 24 | (uint32_t)rPacket.payload[7] << 16 | (uint32_t)rPacket.payload[8] << 8 | (uint32_t)rPacket.payload[9];
 			switch(rPacket.payload[1]) {
 				case 1:
-					printf("Loop time=%u, last=%u\n", val, val2);
+					printf("Loop time=%u, avg=%u\n", val, val2);
 					break;
 				case 2:
-					printf("Packet Loop time=%u, last=%u\n", val, val2);
+					printf("Packet Loop time=%u, avg=%u\n", val, val2);
 					break;
 				case 3:
-					printf("Control Loop time=%u, last=%u\n", val, val2);
+					printf("Control Loop time=%u, avg=%u\n", val, val2);
 					break;
 				case 4:
-					printf("Application Loop time=%u, last=%u\n", val, val2);
+					printf("Application Loop time=%u, avg=%u\n", val, val2);
 					break;
 				case 5:
-					printf("Sensor Loop time=%u, last=%u\n", val, val2);
+					printf("Sensor Loop time=%u, avg=%u\n", val, val2);
 					break;
 			}
 			break;
@@ -691,6 +691,94 @@ void initializations(struct pcState *pcState){
 	resetPcState(pcState); // Reset values and State of PC side.
 	init_queuepc(&pcReQueue);
 }
+
+
+#ifdef BLE_ENABLE
+#include "gattlib.h"
+void ble_notification_cb(const uuid_t* uuid, const uint8_t* data, size_t data_length, void* user_data) {
+	int i;
+	for(i = 0; i < data_length; i++) {
+		enqueuepc(&pcReQueue, data[i]);
+	}
+}
+
+void ble_write() {
+	if (ble_tx_queue.count > 0) {
+		int dataLength = ble_tx_queue.count > 20 ? 20: ble_tx_queue.count;
+		uint8_t data[dataLength];
+		for (int i = 0; i < dataLength; i += 1) {
+			data[i] = dequeuepc(&ble_tx_queue);
+		}
+		int ret = gattlib_write_char_by_handle(m_connection, ble_tx_handle, data, dataLength);
+		if (ret) {
+			fprintf(stderr, "Fail to send data to NUS TX characteristic.\n");
+		}
+	}
+}
+
+void ble_disconnect() {
+	gattlib_disconnect(m_connection);
+}
+
+void ble_connect() {
+	uuid_t nus_characteristic_tx_uuid;
+	uuid_t nus_characteristic_rx_uuid;
+	int i, ret;
+
+	m_connection = gattlib_connect(NULL, "Quatrippel", BDADDR_LE_RANDOM, BT_SEC_LOW, 0, 0);
+	if (m_connection == NULL) {
+		fprintf(stderr, "Fail to connect to the bluetooth device.\n");
+		return;
+	}
+
+	// Convert characteristics to their respective UUIDs
+	ret = gattlib_string_to_uuid(NUS_CHARACTERISTIC_TX_UUID, strlen(NUS_CHARACTERISTIC_TX_UUID) + 1, &nus_characteristic_tx_uuid);
+	if (ret) {
+		fprintf(stderr, "Fail to convert characteristic TX to UUID.\n");
+		return;
+	}
+	ret = gattlib_string_to_uuid(NUS_CHARACTERISTIC_RX_UUID, strlen(NUS_CHARACTERISTIC_RX_UUID) + 1, &nus_characteristic_rx_uuid);
+	if (ret) {
+		fprintf(stderr, "Fail to convert characteristic RX to UUID.\n");
+		return;
+	}
+
+	// Look for handle for NUS_CHARACTERISTIC_TX_UUID
+	gattlib_characteristic_t* characteristics;
+	int characteristic_count;
+	ret = gattlib_discover_char(m_connection, &characteristics, &characteristic_count);
+	if (ret) {
+		fprintf(stderr, "Fail to discover characteristic.\n");
+		return;
+	}
+
+	ble_tx_handle = 0;
+	ble_rx_handle = 0;
+	for (i = 0; i < characteristic_count; i++) {
+		if (gattlib_uuid_cmp(&characteristics[i].uuid, &nus_characteristic_tx_uuid) == 0) {
+			ble_tx_handle = characteristics[i].value_handle;
+		} else if (gattlib_uuid_cmp(&characteristics[i].uuid, &nus_characteristic_rx_uuid) == 0) {
+			ble_rx_handle = characteristics[i].value_handle;
+		}
+	}
+	if (ble_tx_handle == 0) {
+		fprintf(stderr, "Fail to find NUS TX characteristic.\n");
+		return;
+	} else if (ble_rx_handle == 0) {
+		fprintf(stderr, "Fail to find NUS RX characteristic.\n");
+		return;
+	}
+	free(characteristics);
+
+	// Enable Status Notification
+	uint16_t enable_notification = 0x0001;
+	gattlib_write_char_by_handle(m_connection, ble_rx_handle + 1, &enable_notification, sizeof(enable_notification));
+
+	// Register notification handler
+	gattlib_register_notification(m_connection, ble_notification_cb, NULL);
+}
+#endif
+
 
 
 /*----------------------------------------------------------------

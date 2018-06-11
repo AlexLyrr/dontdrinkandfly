@@ -33,6 +33,7 @@
 #define DEBUGGING
 
 
+
 // Control
 #define MIN_RECORD_TIME 5000
 #define P2PHI 10
@@ -158,12 +159,13 @@ void ble_send(void);
 	State
 	@author Joseph Verburg
 *******/
-#define PANIC_STEPS (5000 / TIMER_PERIOD)
-#define CALIBRATION_STEPS (2000 / TIMER_PERIOD)
+#define PANIC_STEPS (5000 / TIMER_PERIOD) // 5 seconds
+#define CALIBRATION_STEPS (20000 / TIMER_PERIOD) // 20 seconds
 
 #define PACKET_BODY_LENGTH 10
 #define PACKET_LENGTH (PACKET_BODY_LENGTH + 5)
-//#define APPLICATION_TIMINGS 0
+#define APPLICATION_TIMINGS
+#define BLE_ENABLED
 
 typedef int32_t Q13_20;
 typedef int32_t Q17_14;
@@ -234,16 +236,9 @@ typedef struct {
 	Q13_20 rawSay;
 	Q13_20 rawSaz;
 
-	int32_t timeLoop;
-	int32_t timeLoopMax;
-	int32_t timeLoopPacket;
-	int32_t timeLoopPacketMax;
-	int32_t timeLoopApp;
-	int32_t timeLoopAppMax;
-	int32_t timeLoopControl;
-	int32_t timeLoopControlMax;
-	int32_t timeLoopSensor;
-	int32_t timeLoopSensorMax;
+	uint32_t timeLoopTotal;
+	uint32_t timeLoopCount;
+	uint32_t timeLoopMax;
 } State;
 State state;
 bool systemDone;

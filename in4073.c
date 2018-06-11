@@ -68,7 +68,6 @@ void applicationComponentLoop() {
 		#endif
 		#ifdef APPLICATION_TIMINGS
 		state.sendTimings = true;
-		state.sendPing = true;
 		#endif
 	}
 	if (appClock%5 == 0) {
@@ -121,6 +120,7 @@ void applicationComponentLoop() {
 					case 4:
 					case 5:
 					case 7:
+					case 8:
 						if (!state.dmpEnabled) {
 							imu_init(true, 100);
 							state.dmpEnabled = true;
@@ -175,6 +175,17 @@ void applicationComponentLoop() {
 				state.sendStatus = true;
 			}
 			break;
+		case 4:
+		case 5:
+		case 6:
+		case 7:
+		case 8:
+			#ifdef DEBUGGING
+			if (appClock % 4 == 0) { // 25 FPS
+				state.sendMotorStatus = true;
+			}
+			#endif
+			break;
 	}
 
 	clear_timer_flag();
@@ -216,13 +227,14 @@ int main(void)
 	uart_init();
 	gpio_init();
 	timers_init();
-	// bat_volt = 160;
 	adc_init();
 	twi_init();
-	// imu_init(true, 100);
 	baro_init();
 	spi_flash_init();
-	// ble_init();
+	
+	#ifdef BLE_ENABLED
+	ble_init();
+	#endif
 
 	state.currentMode = 0;
 	state.nextMode = 0;
@@ -246,17 +258,19 @@ int main(void)
 	state.pLift = 0;
 
 	state.calibrated = false;
-
-
 	state.heightSet = false;
 
 	int32_t panicStep = 0;
-	//uint32_t recording_last = 0;
-
 	systemDone = false;
 	appClock = 0;
+	#ifdef APPLICATION_TIMINGS
+	int32_t loopStart = 0, loopLength = 0;
+	#endif
 
 	while (!systemDone) {
+		#ifdef APPLICATION_TIMINGS
+		loopStart = get_time_us();
+		#endif
 
 		communicationComponentLoop();
 		packetComponentLoop();
@@ -305,9 +319,6 @@ int main(void)
 					}
 					yawControl();
 					run_filters_and_control();
-					#ifdef DEBUGGING
-					state.sendMotorStatus = true;
-					#endif
 				}
 				if (state.controlChanged) { // We don't need to do anything extra yet when this happens
 					state.controlChanged = false;
@@ -325,9 +336,6 @@ int main(void)
 					rollControl();
 					pitchControl();
 					full_control_motor();
-					#ifdef DEBUGGING
-					state.sendMotorStatus = true;
-					#endif
 				}
 				if (state.controlChanged) { // We don't need to do anything extra yet when this happens
 					state.controlChanged = false;
@@ -349,9 +357,7 @@ int main(void)
 						full_control_motor();
 						// recording_last = get_time_us();
 					// }
-					#ifdef DEBUGGING
-					state.sendMotorStatus = true;
-					#endif
+					
 				}
 				if (state.controlChanged) { // We don't need to do anything extra yet when this happens
 					state.controlChanged = false;
@@ -369,17 +375,29 @@ int main(void)
 						init_height();
 						state.heightSet = true;
 					}
-					/*
 					yawControl();
 					rollControl();
 					pitchControl();
-					*/
 					heightControl();
 
-					run_filters_and_control();
-					#ifdef DEBUGGING
-					state.sendMotorStatus = true;
-					#endif
+					full_control_motor();
+				}
+				if (state.controlChanged) { // We don't need to do anything extra yet when this happens
+					state.controlChanged = false;
+				}
+				if (state.pChanged) { // We don't need to do anything extra yet when this happens
+					state.pChanged = false;
+				}
+				break;
+			case 8:
+				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
+					if (check_sensor_int_flag()) {
+						get_dmp_data();
+					}
+					yawControl();
+					rollControl();
+					pitchControl();
+					full_control_motor();
 				}
 				if (state.controlChanged) { // We don't need to do anything extra yet when this happens
 					state.controlChanged = false;
@@ -412,6 +430,16 @@ int main(void)
 		if (check_timer_flag()) {
 			applicationComponentLoop();
 		}
+		#ifdef APPLICATION_TIMINGS
+		loopLength = get_time_us() - loopStart;
+		if (loopLength > 0) {
+			if (state.timeLoopMax < loopLength) {
+				state.timeLoopMax = loopLength;
+			}
+			state.timeLoopTotal += loopLength;
+			state.timeLoopCount++;
+		}
+		#endif
 	}
 
 	printf("\n\t Goodbye \n\n");
