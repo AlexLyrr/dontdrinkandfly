@@ -82,6 +82,10 @@ struct pcState{
 	bool hPressed;	//height control Pheight down
 	uint16_t PheightValue;
 
+	bool tPressed;	//height control Pheight up
+	bool gPressed;	//height control Pheight down	
+	uint8_t PheightValue2;
+
 	//JOYSTICK
 	bool jChanged;
 	bool jThrottleUp;	//lift up

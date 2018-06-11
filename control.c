@@ -66,7 +66,7 @@ void yawControlRaw() {
 
 //@Author Alex Lyrakis
 void pitchControlRaw(){
-	int32_t eps = (((int32_t) state.controlPitchUser - 90) << 2) - (thetaAfterKalman >> 2); 
+	int32_t eps = (((int32_t) state.controlPitchUser - 90) << 2) - (thetaAfterKalman >> 4); 
 	int32_t pitchValue = (state.p1 * eps);
 	int32_t eps2 = (state.p2 *(qAfterKalman >> 2)) + pitchValue;
 	pitchValue = (eps2 >> 8) + 180;
@@ -75,11 +75,12 @@ void pitchControlRaw(){
 	if (pitchValue < 0)
 		pitchValue = 0;
 	state.controlPitch = (uint16_t) pitchValue;
+	//state.controlPitch = 90;
 }
 
 //@Author Alex Lyrakis
 void rollControlRaw(){
-	int32_t eps = (((int32_t) state.controlRollUser - 90) << 2) + (phiAfterKalman >> 2);
+	int32_t eps = (((int32_t) state.controlRollUser - 90) << 2) + (phiAfterKalman >> 4);
 	int32_t rollValue = (state.p1 * eps);
 	int32_t eps2 = (state.p2 * (pAfterKalman >> 2)) + rollValue;
 	rollValue = (eps2 >> 8) + 180;
@@ -88,6 +89,8 @@ void rollControlRaw(){
 	if (rollValue < 0)
 		rollValue = 0;
 	state.controlRoll = (uint16_t) rollValue;
+	//state.controlRoll = 90;
+	//state.controlLift = 300;
 }
 
 
@@ -108,6 +111,22 @@ void kalmanRoll(){
 }
 
 //@Author Alex Lyrakis
+void kalmanPitch(){
+  static int32_t qKalman = 0, qBias = 0, qBiasPrev = 0, thetaKalman = 0, thetaKalmanPrev = 0, thetaError = 0;
+
+  qKalman = sqFiltered - qBiasPrev;
+  thetaKalman = thetaKalmanPrev + (qKalman >> P2PHI); 
+  thetaError = thetaKalman - thetaFiltered;
+  thetaKalman = thetaKalman - (thetaError >> C1);
+  qBias = qBiasPrev + (thetaError >> C2);  
+  
+  thetaKalmanPrev = thetaKalman;
+  qBiasPrev = qBias;
+  qAfterKalman = qKalman;
+  thetaAfterKalman = thetaKalman;
+}
+
+//@Author Alex Lyrakis
 void rollFilter(){
 	phi = say;
 	sp_fp = fixedPoint(sp);
@@ -117,6 +136,7 @@ void rollFilter(){
     spFiltered = sp_fp;
     
     kalmanRoll();
+    
 
     pAfterKalman = notFixedPoint(pAfterKalman);
     phiAfterKalman = notFixedPoint(phiAfterKalman);
@@ -137,29 +157,24 @@ void pitchFilter(){
     qAfterKalman = notFixedPoint(qAfterKalman);
     thetaAfterKalman = notFixedPoint(thetaAfterKalman);
 
-}
-
-//@Author Alex Lyrakis
-void kalmanPitch(){
-  static int32_t qKalman = 0, qBias = 0, qBiasPrev = 0, thetaKalman = 0, thetaKalmanPrev = 0, thetaError = 0;
-
-  qKalman = sqFiltered - qBiasPrev;
-  thetaKalman = thetaKalmanPrev + (qKalman >> P2PHI); 
-  thetaError = thetaKalman - thetaFiltered;
-  thetaKalman = thetaKalman - (thetaError >> C1);
-  qBias = qBiasPrev + (thetaError >> C2);  
-  
-  thetaKalmanPrev = thetaKalman;
-  qBiasPrev = qBias;
-  //sqPrev = (int32_t) sqFiltered; // get the value from sensor
-  qAfterKalman = qKalman;
-  thetaAfterKalman = thetaKalman;
 
 }
+
+
 
 void controlComponentLoop() {
 	// TODO: implement
 }
+
+int32_t maPressureFilter(){
+	static int32_t x0 = 0, x1 = 0, x2 = 0, x3 = 0;
+	int32_t y0;
+	x3 = x2; x2 = x1; x1 = x0; x0 = pressure;
+	y0 = (x0 + x1 + x2 + x3) >> 2;
+	return y0;
+}
+
+
 
 //@Author Georgios Giannakaras
 //fc = 1HZ fs = 1000
@@ -377,3 +392,4 @@ void full_control_motor()
 
 	update_motors();
 }
+

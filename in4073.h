@@ -69,6 +69,7 @@ void pitchFilter();
 void kalmanRoll();
 void kalmanPitch();
 
+int32_t maPressureFilter();
 
 int32_t phiFiltered, thetaFiltered, psiFiltered;
 int32_t spFiltered, sqFiltered, srFiltered;
