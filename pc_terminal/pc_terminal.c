@@ -760,6 +760,12 @@ void ble_connect() {
 	uuid_t nus_characteristic_rx_uuid;
 	int i, ret;
 
+	ret = gattlib_adapter_open(NULL, &ble_adapter);
+	if (ret) {
+		fprintf(stderr, "ERROR: Failed to open adapter.\n");
+		return 1;
+	}
+
 	m_connection = gattlib_connect(NULL, "Quatrippel", BDADDR_LE_RANDOM, BT_SEC_LOW, 0, 0);
 	if (m_connection == NULL) {
 		fprintf(stderr, "Fail to connect to the bluetooth device.\n");

@@ -29,6 +29,8 @@ void ble_send();
 void ble_connect();
 void ble_disconnect();
 
+void* ble_adapter;
+
 #endif
 
 
