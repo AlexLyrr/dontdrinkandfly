@@ -11,10 +11,10 @@ joystick:
 	$(CC) $(CFLAGS) -D GUIACTIVATED -D JOYSTICK_ENABLE pc_terminal.c pcqueue.c keyboard.c rs232.c joystick.c -lm eslgui.c -o $(EXEC) `pkg-config --cflags --libs gtk+-3.0 gmodule-2.0` -pthread
 
 ble:
-	$(CC) $(CFLAGS) -D GUIACTIVATED -D BLE_ENABLED pc_terminal.c pcqueue.c keyboard.c rs232.c eslgui.c -o $(EXEC) `pkg-config --cflags --libs gtk+-3.0 gthread-2.0 gmodule-2.0 gattlib` -pthread
+	$(CC) $(CFLAGS) -D GUIACTIVATED -D BLE_ENABLE pc_terminal.c pcqueue.c keyboard.c rs232.c eslgui.c -o $(EXEC) `pkg-config --cflags --libs gtk+-3.0 gthread-2.0 gmodule-2.0 gattlib` -pthread
 	
 ble-joystick:
-	$(CC) $(CFLAGS) -D GUIACTIVATED -D BLE_ENABLED -D JOYSTICK_ENABLE pc_terminal.c pcqueue.c keyboard.c rs232.c joystick.c -lm eslgui.c -o $(EXEC) `pkg-config --cflags --libs gtk+-3.0 gmodule-2.0 gattlib` -pthread
+	$(CC) $(CFLAGS) -D GUIACTIVATED -D BLE_ENABLE -D JOYSTICK_ENABLE pc_terminal.c pcqueue.c keyboard.c rs232.c joystick.c -lm eslgui.c -o $(EXEC) `pkg-config --cflags --libs gtk+-3.0 gmodule-2.0 gattlib` -pthread
 
 
 computer: all

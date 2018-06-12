@@ -137,20 +137,42 @@ void setPacket(struct pcState *pcState, SRPacket *sPacket){
 
 //@Author Alex Lyrakis
 void sendPacket(SRPacket sPacket){
-	rs232_putchar(0x13);
-	rs232_putchar(0x37);
-	rs232_putchar(sPacket.fcs >> 8);
-	rs232_putchar(sPacket.fcs & 0xFF);
-	for (int i=0; i<10; i++){
-		rs232_putchar(sPacket.payload[i]);
+	#ifdef BLE_ENABLE
+	if (DroneStatusMode == 8) {
+		enqueuepc(&ble_tx_queue, 0x13);
+		enqueuepc(&ble_tx_queue, 0x37);
+		enqueuepc(&ble_tx_queue, sPacket.fcs >> 8);
+		enqueuepc(&ble_tx_queue, sPacket.fcs & 0xFF);
+		for (int i=0; i<10; i++){
+			enqueuepc(&ble_tx_queue, sPacket.payload[i]);
+		}
+		sPacket.crc = 0x00;
+		sPacket.crc = crc8_table[sPacket.crc ^ ((uint8_t) (sPacket.fcs >> 8))];
+		sPacket.crc = crc8_table[sPacket.crc ^ ((uint8_t) (sPacket.fcs & 0xFF))];
+		for (int i=0; i<10; i++) {
+			sPacket.crc = crc8_table[sPacket.crc ^ sPacket.payload[i]];
+		}
+		enqueuepc(&ble_tx_queue, sPacket.crc);
+		ble_send();
+	} else {
+	#endif
+		rs232_putchar(0x13);
+		rs232_putchar(0x37);
+		rs232_putchar(sPacket.fcs >> 8);
+		rs232_putchar(sPacket.fcs & 0xFF);
+		for (int i=0; i<10; i++){
+			rs232_putchar(sPacket.payload[i]);
+		}
+		sPacket.crc = 0x00;
+		sPacket.crc = crc8_table[sPacket.crc ^ ((uint8_t) (sPacket.fcs >> 8))];
+		sPacket.crc = crc8_table[sPacket.crc ^ ((uint8_t) (sPacket.fcs & 0xFF))];
+		for (int i=0; i<10; i++) {
+			sPacket.crc = crc8_table[sPacket.crc ^ sPacket.payload[i]];
+		}
+		rs232_putchar(sPacket.crc);
+	#ifdef BLE_ENABLE
 	}
-	sPacket.crc = 0x00;
-	sPacket.crc = crc8_table[sPacket.crc ^ ((uint8_t) (sPacket.fcs >> 8))];
-	sPacket.crc = crc8_table[sPacket.crc ^ ((uint8_t) (sPacket.fcs & 0xFF))];
-	for (int i=0; i<10; i++) {
-		sPacket.crc = crc8_table[sPacket.crc ^ sPacket.payload[i]];
-	}
-	rs232_putchar(sPacket.crc);
+	#endif
 }
 
 //@Author George Giannakaras
@@ -715,7 +737,7 @@ void ble_notification_cb(const uuid_t* uuid, const uint8_t* data, size_t data_le
 	}
 }
 
-void ble_write() {
+void ble_send() {
 	if (ble_tx_queue.count > 0) {
 		int dataLength = ble_tx_queue.count > 20 ? 20: ble_tx_queue.count;
 		uint8_t data[dataLength];
@@ -817,6 +839,10 @@ int main(int argc, char **argv)
 	#ifdef GUIACTIVATED
 	pthread_t guithread;
 	pthread_create(&guithread, NULL, guiThread, NULL);
+	#endif
+
+	#ifdef BLE_ENABLE
+	ble_connect();
 	#endif
 
 	//send & receive
