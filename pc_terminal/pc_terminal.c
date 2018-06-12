@@ -731,6 +731,7 @@ void initializations(struct pcState *pcState){
 #ifdef BLE_ENABLE
 #include "gattlib.h"
 void ble_notification_cb(const uuid_t* uuid, const uint8_t* data, size_t data_length, void* user_data) {
+	// printf("received ble data %hu \n", data_length);
 	int i;
 	for(i = 0; i < data_length; i++) {
 		enqueuepc(&pcReQueue, data[i]);
@@ -888,9 +889,10 @@ int main(int argc, char **argv)
 			if(bufferCleared) {
 				enqueuepc(&pcReQueue, (uint8_t) c);
 			}
-			if(pcReQueue.count >= PACKET_LENGTH) {
-				receivePacket(rPacket);
-			}
+		}
+
+		if(pcReQueue.count >= PACKET_LENGTH) {
+			receivePacket(rPacket);
 		}
 
 		if ((getMicrotime() - timeLastPacket) >= COMMUNICATION_MIN_DELAY_US){

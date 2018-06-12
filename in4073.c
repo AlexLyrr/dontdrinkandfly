@@ -138,6 +138,8 @@ void applicationComponentLoop() {
 						state.calibrateSaxOffset = 0;
 						state.calibrateSayOffset = 0;
 						state.calibrateSazOffset = 0;
+						state.calibratePressureOffset = 0;
+						
 						// dmp_enable_gyro_cal(1);
 						break;
 					case 2:
@@ -352,6 +354,7 @@ int main(void)
 					state.calibrateSaxOffset = (state.calibrateSaxOffset * 7 + sax) >> 3;
 					state.calibrateSayOffset = (state.calibrateSayOffset * 7 + say) >> 3;
 					state.calibrateSazOffset = (state.calibrateSazOffset * 7 + saz) >> 3;
+					state.calibratePressureOffset = (state.calibratePressureOffset * 7 + pressure) >> 3;
 				}
 				break;
 			case 4: // Manual Yaw
@@ -414,14 +417,18 @@ int main(void)
 						get_dmp_data();
 					}
 					if (state.heightSet == false){
-						init_height();
-						state.heightSet = true;
+						for (int i = 0; i < 4; i++){
+							init_height();
+							state.heightSet = true;
+							if (check_sensor_int_flag()) {
+								get_dmp_data();
+							}
+						}
 					}
 					heightControl2();
 					yawControl();
 					rollControl();
 					pitchControl();
-					//run_filters_and_control();
 					full_control_motor();
 					#ifdef DEBUGGING
 					state.sendMotorStatus = true;
