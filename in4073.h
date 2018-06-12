@@ -259,6 +259,7 @@ void controlComponentLoop();
 void communicationComponentLoop();
 void packetComponentLoop();
 void applicationComponentLoop();
+bool hasNonZeroControl();
 
 /*******
 	height control

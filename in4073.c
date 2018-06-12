@@ -34,16 +34,23 @@ void onAbort() {
 	state.sendStatus = true;
 }
 
+bool hasNonZeroControl() {
+	return state.controlLiftUser != 0;
+}
+
 /**
  *	@author Roy Blokker
  */
 #define MIN_PACKET_INTERVAL_US (2 * 1000 * 1000)
 void checkSafety() {
+	if (state.currentMode != state.nextMode) {
+		if (state.currentMode == 0 && state.nextMode != 1 && hasNonZeroControl()) {
+			state.nextMode = state.currentMode;
+		}
+	}
+
 	uint32_t currentTime = get_time_us();
 	if (state.currentMode != 0 && (currentTime - state.lastPacketReceived) > MIN_PACKET_INTERVAL_US) {
-	// 	nrf_gpio_pin_toggle(GREEN);
-	// 	timeLastPacket = get_time_us();
-	// } else {
 		state.nextMode = 1;
 	}
 	/*
@@ -64,6 +71,8 @@ void checkSafety() {
  *	@author Joseph Verburg 
  */
 void applicationComponentLoop() {
+	checkSafety();
+
 	if (appClock%2 == 0) {
 		nrf_gpio_pin_toggle(YELLOW);
 	}
@@ -228,8 +237,6 @@ void applicationComponentLoop() {
 		state.sendPing = false;
 		writePing(get_time_us());
 	}
-
-	checkSafety();
 }
 
 
@@ -276,16 +283,23 @@ int main(void)
 	state.calibrated = false;
 	state.heightSet = false;
 
+	state.controlLiftUser = 0;
+	state.controlPitchUser = 90;
+	state.controlRollUser = 90;
+	state.controlYawUser = 90;
+
 	int32_t panicStep = 0;
 	systemDone = false;
 	appClock = 0;
 	#ifdef APPLICATION_TIMINGS
 	int32_t loopStart = 0, loopLength = 0;
+	bool workDone = false;
 	#endif
 
 	while (!systemDone) {
 		#ifdef APPLICATION_TIMINGS
 		loopStart = get_time_us();
+		workDone = false;
 		#endif
 
 		communicationComponentLoop();
@@ -299,6 +313,9 @@ int main(void)
 				motor[3] = 0;
 				break;
 			case 1: // Panic!
+				#ifdef APPLICATION_TIMINGS
+				workDone = true;
+				#endif
 				panicStep = state.panicFinished - appClock;
 				if (panicStep < 0) {
 						panicStep = 0;
@@ -310,6 +327,9 @@ int main(void)
 				break;
 			case 2: // Manual
 				if (state.controlChanged) {
+					#ifdef APPLICATION_TIMINGS
+					workDone = true;
+					#endif
 					run_filters_and_control(); // TODO: rename function
 					state.controlChanged = false;
 					state.sendMotorStatus = true;
@@ -318,6 +338,9 @@ int main(void)
 				break;
 			case 3: // Calibration
 				if (check_sensor_int_flag()) {
+					#ifdef APPLICATION_TIMINGS
+					workDone = true;
+					#endif
 					get_dmp_data();
 					// Low pass filtering
 					state.calibratePhiOffset = (state.calibratePhiOffset * 7 + phi) >> 3;
@@ -333,21 +356,23 @@ int main(void)
 				break;
 			case 4: // Manual Yaw
 				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
+					#ifdef APPLICATION_TIMINGS
+					workDone = true;
+					#endif
 					if (check_sensor_int_flag()) {
 						get_dmp_data();
 					}
 					yawControl();
 					run_filters_and_control();
-				}
-				if (state.controlChanged) { // We don't need to do anything extra yet when this happens
 					state.controlChanged = false;
-				}
-				if (state.pChanged) { // We don't need to do anything extra yet when this happens
 					state.pChanged = false;
 				}
 				break;
 			case 5: // Full-Control
 				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
+					#ifdef APPLICATION_TIMINGS
+					workDone = true;
+					#endif
 					if (check_sensor_int_flag()) {
 						get_dmp_data();
 					}
@@ -355,38 +380,36 @@ int main(void)
 					rollControl();
 					pitchControl();
 					full_control_motor();
-				}
-				if (state.controlChanged) { // We don't need to do anything extra yet when this happens
 					state.controlChanged = false;
-				}
-				if (state.pChanged) { // We don't need to do anything extra yet when this happens
 					state.pChanged = false;
 				}
 				break;
 			case 6: // Raw-control
 				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
-						get_raw_sensor_data();
+					#ifdef APPLICATION_TIMINGS
+					workDone = true;
+					#endif
+					get_raw_sensor_data();
 					// if ((get_time_us() - recording_last) > MIN_RECORD_TIME){
-						yawFilter();
-						rollFilter();
-						pitchFilter();
-						yawControlRaw();
-						rollControlRaw();
-						pitchControlRaw();
-						full_control_motor();
+					yawFilter();
+					rollFilter();
+					pitchFilter();
+					yawControlRaw();
+					rollControlRaw();
+					pitchControlRaw();
+					full_control_motor();
 						// recording_last = get_time_us();
 					// }
 					
-				}
-				if (state.controlChanged) { // We don't need to do anything extra yet when this happens
 					state.controlChanged = false;
-				}
-				if (state.pChanged) { // We don't need to do anything extra yet when this happens
 					state.pChanged = false;
 				}
 				break;
 			case 7: //Height control
 				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
+					#ifdef APPLICATION_TIMINGS
+					workDone = true;
+					#endif
 					if (check_sensor_int_flag()) {
 						get_dmp_data();
 					}
@@ -395,49 +418,50 @@ int main(void)
 						state.heightSet = true;
 					}
 					heightControl2();
-					//yawControl();
-					//rollControl();
-					//pitchControl();
+					yawControl();
+					rollControl();
+					pitchControl();
 					//run_filters_and_control();
 					full_control_motor();
 					#ifdef DEBUGGING
 					state.sendMotorStatus = true;
 					#endif
-				}
-				if (state.controlChanged) { // We don't need to do anything extra yet when this happens
 					state.controlChanged = false;
-				}
-				if (state.pChanged) { // We don't need to do anything extra yet when this happens
 					state.pChanged = false;
 				}
+				break;
+			case 8:
+				// TODO: do full control ?
 				break;
 			case 9:
 				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
 					if (check_sensor_int_flag()) {
 						get_dmp_data();
 					}
+					#ifdef APPLICATION_TIMINGS
+					workDone = true;
+					#endif
 					//rollControl();
 					pitchControl();
 					run_filters_and_control();
 					#ifdef DEBUGGING
 					state.sendMotorStatus = true;
 					#endif
-				}
-				if (state.controlChanged) { // We don't need to do anything extra yet when this happens
 					state.controlChanged = false;
-				}
-				if (state.pChanged) { // We don't need to do anything extra yet when this happens
 					state.pChanged = false;
 				}
 				break;
 		}
 
 		if (check_timer_flag()) {
+			#ifdef APPLICATION_TIMINGS
+			workDone = true;
+			#endif
 			applicationComponentLoop();
 		}
 		#ifdef APPLICATION_TIMINGS
 		loopLength = get_time_us() - loopStart;
-		if (loopLength > 0) {
+		if (loopLength > 0 && workDone) {
 			if (state.timeLoopMax < loopLength) {
 				state.timeLoopMax = loopLength;
 			}

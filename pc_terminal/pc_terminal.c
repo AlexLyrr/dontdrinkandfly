@@ -876,7 +876,6 @@ int main(int argc, char **argv)
 		}
 
 		// Read from joystic and update pcState
-   	 	
 		#ifdef JOYSTICK_ENABLE
 		checkJoystick(pcState);
 		#endif
@@ -904,26 +903,12 @@ int main(int argc, char **argv)
 				sendPacket(sPacket);
 				sPacketGUI = sPacket;
 				logSendPacket(sPacket);
-				//if (pcState->escPressed)
-				//	break;
 				resetPcState(pcState);
 				sPacketBuffer[sPacket.fcs] = sPacket;
 			}
 
-			//TBD: Based on our pcState and protocol we have to put a sequence of bytes using rs232_putchar(c);
-			//		After we have to reset the pcState.
-			
 			timeLastPacket = getMicrotime();
 		}
-
-		/*
-		endLoop = clock();
-		clock_gettime(CLOCK_MONOTONIC_RAW, &end);
-		uint64_t delta_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
-		loopTime = (endLoop - beginLoop))/CLOCKS_PER_SEC;
-		printf("%" PRIu64 "\n", delta_us);
-		printf("Time of loop is : %Lf \n", loopTime);
-		*/
 	}
 
 	free(pcState);
