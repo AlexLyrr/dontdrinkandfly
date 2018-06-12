@@ -26,7 +26,7 @@ void heightControl2(){
   int32_t errorsaz = 0;
   int32_t liftValue = 0;
   errorPr = (currentPressure - state.initPressure);
-  errorsaz = 0 - (saz >> 9);
+  errorsaz = 0 - ((saz - state.calibrateSazOffset) >> 7);
   liftValue = state.controlLiftUser + state.pLift * errorPr + state.psaz * errorsaz;
   if (liftValue > 1000){
     liftValue = 1000;
