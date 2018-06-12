@@ -137,20 +137,42 @@ void setPacket(struct pcState *pcState, SRPacket *sPacket){
 
 //@Author Alex Lyrakis
 void sendPacket(SRPacket sPacket){
-	rs232_putchar(0x13);
-	rs232_putchar(0x37);
-	rs232_putchar(sPacket.fcs >> 8);
-	rs232_putchar(sPacket.fcs & 0xFF);
-	for (int i=0; i<10; i++){
-		rs232_putchar(sPacket.payload[i]);
+	#ifdef BLE_ENABLE
+	if (DroneStatusMode == 8) {
+		enqueuepc(&ble_tx_queue, 0x13);
+		enqueuepc(&ble_tx_queue, 0x37);
+		enqueuepc(&ble_tx_queue, sPacket.fcs >> 8);
+		enqueuepc(&ble_tx_queue, sPacket.fcs & 0xFF);
+		for (int i=0; i<10; i++){
+			enqueuepc(&ble_tx_queue, sPacket.payload[i]);
+		}
+		sPacket.crc = 0x00;
+		sPacket.crc = crc8_table[sPacket.crc ^ ((uint8_t) (sPacket.fcs >> 8))];
+		sPacket.crc = crc8_table[sPacket.crc ^ ((uint8_t) (sPacket.fcs & 0xFF))];
+		for (int i=0; i<10; i++) {
+			sPacket.crc = crc8_table[sPacket.crc ^ sPacket.payload[i]];
+		}
+		enqueuepc(&ble_tx_queue, sPacket.crc);
+		ble_send();
+	} else {
+	#endif
+		rs232_putchar(0x13);
+		rs232_putchar(0x37);
+		rs232_putchar(sPacket.fcs >> 8);
+		rs232_putchar(sPacket.fcs & 0xFF);
+		for (int i=0; i<10; i++){
+			rs232_putchar(sPacket.payload[i]);
+		}
+		sPacket.crc = 0x00;
+		sPacket.crc = crc8_table[sPacket.crc ^ ((uint8_t) (sPacket.fcs >> 8))];
+		sPacket.crc = crc8_table[sPacket.crc ^ ((uint8_t) (sPacket.fcs & 0xFF))];
+		for (int i=0; i<10; i++) {
+			sPacket.crc = crc8_table[sPacket.crc ^ sPacket.payload[i]];
+		}
+		rs232_putchar(sPacket.crc);
+	#ifdef BLE_ENABLE
 	}
-	sPacket.crc = 0x00;
-	sPacket.crc = crc8_table[sPacket.crc ^ ((uint8_t) (sPacket.fcs >> 8))];
-	sPacket.crc = crc8_table[sPacket.crc ^ ((uint8_t) (sPacket.fcs & 0xFF))];
-	for (int i=0; i<10; i++) {
-		sPacket.crc = crc8_table[sPacket.crc ^ sPacket.payload[i]];
-	}
-	rs232_putchar(sPacket.crc);
+	#endif
 }
 
 //@Author George Giannakaras
@@ -709,13 +731,14 @@ void initializations(struct pcState *pcState){
 #ifdef BLE_ENABLE
 #include "gattlib.h"
 void ble_notification_cb(const uuid_t* uuid, const uint8_t* data, size_t data_length, void* user_data) {
+	// printf("received ble data %hu \n", data_length);
 	int i;
 	for(i = 0; i < data_length; i++) {
 		enqueuepc(&pcReQueue, data[i]);
 	}
 }
 
-void ble_write() {
+void ble_send() {
 	if (ble_tx_queue.count > 0) {
 		int dataLength = ble_tx_queue.count > 20 ? 20: ble_tx_queue.count;
 		uint8_t data[dataLength];
@@ -738,7 +761,13 @@ void ble_connect() {
 	uuid_t nus_characteristic_rx_uuid;
 	int i, ret;
 
-	m_connection = gattlib_connect(NULL, "Quatrippel", BDADDR_LE_RANDOM, BT_SEC_LOW, 0, 0);
+	ret = gattlib_adapter_open(NULL, &ble_adapter);
+	if (ret) {
+		fprintf(stderr, "ERROR: Failed to open adapter.\n");
+		return;
+	}
+
+	m_connection = gattlib_connect(NULL, "D6:AD:A9:01:8D:D8", BDADDR_LE_RANDOM, BT_SEC_LOW, 0, 0);
 	if (m_connection == NULL) {
 		fprintf(stderr, "Fail to connect to the bluetooth device.\n");
 		return;
@@ -819,6 +848,10 @@ int main(int argc, char **argv)
 	pthread_create(&guithread, NULL, guiThread, NULL);
 	#endif
 
+	#ifdef BLE_ENABLE
+	ble_connect();
+	#endif
+
 	//send & receive
 	while(1) {
 		if ((c = term_getchar_nb()) != -1)	// Read from keyboard and store in fd_RS232
@@ -840,9 +873,10 @@ int main(int argc, char **argv)
 			if(bufferCleared) {
 				enqueuepc(&pcReQueue, (uint8_t) c);
 			}
-			if(pcReQueue.count >= PACKET_LENGTH) {
-				receivePacket(rPacket);
-			}
+		}
+
+		if(pcReQueue.count >= PACKET_LENGTH) {
+			receivePacket(rPacket);
 		}
 
 		if ((getMicrotime() - timeLastPacket) >= COMMUNICATION_MIN_DELAY_US){

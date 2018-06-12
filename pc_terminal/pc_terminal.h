@@ -25,6 +25,12 @@ gatt_connection_t* m_connection;
 uint16_t ble_tx_handle;
 uint16_t ble_rx_handle;
 
+void ble_send();
+void ble_connect();
+void ble_disconnect();
+
+void* ble_adapter;
+
 #endif
 
 
