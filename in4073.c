@@ -46,6 +46,15 @@ void checkSafety() {
 	// } else {
 		state.nextMode = 1;
 	}
+	/*
+		This is raw battery value.
+		real value = (bat_volt * 7) / 100;
+		143 = 10.01 V
+		This is the value where it goes into panic mode
+
+		128 = 8.96 V 
+		This is to check we have a connected battery
+	*/
 	if (bat_volt < 143 && bat_volt > 128){
 		state.nextMode = 1;
 	}
@@ -93,6 +102,10 @@ void applicationComponentLoop() {
 				if (state.currentMode == 7) {
 					state.heightSet = false;
 				}
+				if (state.nextMode == 7 && state.currentMode != 5) {
+					state.nextMode = state.currentMode;
+					break;
+				}
 				switch(state.nextMode) {
 					case 1:
 						state.panicFinished = appClock + PANIC_STEPS;
@@ -113,6 +126,9 @@ void applicationComponentLoop() {
 						state.calibrateSpOffset = 0;
 						state.calibrateSqOffset = 0;
 						state.calibrateSrOffset = 0;
+						state.calibrateSaxOffset = 0;
+						state.calibrateSayOffset = 0;
+						state.calibrateSazOffset = 0;
 						// dmp_enable_gyro_cal(1);
 						break;
 					case 2:
@@ -310,6 +326,8 @@ int main(void)
 					state.calibrateSpOffset = (state.calibrateSpOffset * 7  + sp) >> 3;
 					state.calibrateSqOffset = (state.calibrateSqOffset * 7 + sq) >> 3;
 					state.calibrateSrOffset = (state.calibrateSrOffset * 7 + sr) >> 3;
+					state.calibrateSaxOffset = (state.calibrateSaxOffset * 7 + sax) >> 3;
+					state.calibrateSayOffset = (state.calibrateSayOffset * 7 + say) >> 3;
 					state.calibrateSazOffset = (state.calibrateSazOffset * 7 + saz) >> 3;
 				}
 				break;

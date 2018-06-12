@@ -226,6 +226,8 @@ typedef struct {
 	int32_t calibrateSpOffset;
 	int32_t calibrateSqOffset;
 	int32_t calibrateSrOffset;
+	int32_t calibrateSaxOffset;
+	int32_t calibrateSayOffset;
 	int32_t calibrateSazOffset;
 	
 	bool heightSet;
