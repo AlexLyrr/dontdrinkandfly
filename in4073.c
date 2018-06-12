@@ -113,6 +113,7 @@ void applicationComponentLoop() {
 						state.calibrateSpOffset = 0;
 						state.calibrateSqOffset = 0;
 						state.calibrateSrOffset = 0;
+						state.calibrateSazOffset = 0;
 						// dmp_enable_gyro_cal(1);
 						break;
 					case 2:
@@ -166,8 +167,8 @@ void applicationComponentLoop() {
 				// dmp_enable_gyro_cal(0);
 				writeOffsetValues();
 				writeMotorStatus();
-				init_height();
-				state.heightSet = true;
+				//init_height();
+				//state.heightSet = true;
 				state.calibrated = true;
 				state.nextMode = 0;
 				state.currentMode = 0;
