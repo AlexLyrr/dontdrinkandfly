@@ -182,8 +182,8 @@ void applicationComponentLoop() {
 				// dmp_enable_gyro_cal(0);
 				writeOffsetValues();
 				writeMotorStatus();
-				init_height();
-				state.heightSet = true;
+				//init_height();
+				//state.heightSet = true;
 				state.calibrated = true;
 				state.nextMode = 0;
 				state.currentMode = 0;
