@@ -199,6 +199,7 @@ void receivePacket(SRPacket rPacket){
 					case 16:
 					case 17:
 					case 18:
+					case 19:
 						logReceivePacket(rPacket);
 						break;
 					case 11:
@@ -353,7 +354,14 @@ void logReceivePacket(SRPacket rPacket){
 			);
 			fflush(CsvFile);
 			break;
-	}
+		case 19:
+			printf("[RAW]sax=%hd, say=%hd, saz= %hd\n",
+				(((int16_t) rPacket.payload[1]) << 8) | ((int16_t) rPacket.payload[2]),
+				(((int16_t) rPacket.payload[3]) << 8) | ((int16_t) rPacket.payload[4]),
+				(((int16_t) rPacket.payload[5]) << 8) | ((int16_t) rPacket.payload[6])
+			);
+			break;
+	}	
 }
 
 

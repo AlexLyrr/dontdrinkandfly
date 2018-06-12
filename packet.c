@@ -217,6 +217,12 @@ void writeSensorValues() {
 			((sr - state.calibrateSrOffset) >> 8) & 0xFF, (sr - state.calibrateSrOffset) & 0xFF,
 			0, 0, 0
 		);
+		writePacket(19,
+			((sax - state.calibrateSaxOffset) >> 8) & 0xFF, (sax - state.calibrateSaxOffset) & 0xFF,
+			((say - state.calibrateSayOffset) >> 8) & 0xFF, (say - state.calibrateSayOffset) & 0xFF,
+			((saz - state.calibrateSazOffset) >> 8) & 0xFF, (saz - state.calibrateSazOffset) & 0xFF,
+			0, 0, 0
+		);
 	} else {
 		writePacket(15,
 			(phi >> 8) & 0xFF, phi & 0xFF,
@@ -228,6 +234,12 @@ void writeSensorValues() {
 			(sp >> 8) & 0xFF, sp & 0xFF,
 			(sq >> 8) & 0xFF, sq & 0xFF,
 			(sr >> 8) & 0xFF, sr & 0xFF,
+			0, 0, 0
+		);
+		writePacket(19,
+			(sax >> 8) & 0xFF, sax & 0xFF,
+			(say >> 8) & 0xFF, say & 0xFF,
+			(saz >> 8) & 0xFF, saz & 0xFF,
 			0, 0, 0
 		);
 	}
