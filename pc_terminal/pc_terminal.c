@@ -199,6 +199,7 @@ void receivePacket(SRPacket rPacket){
 					case 16:
 					case 17:
 					case 18:
+					case 19:
 						logReceivePacket(rPacket);
 						break;
 					case 11:
