@@ -30,6 +30,10 @@ void ble_connect();
 void ble_disconnect();
 
 void* ble_adapter;
+char* ble_addr;
+
+#define BLE_DEVICE_NAME "Quatrippel"
+#define BLE_SCAN_TIMEOUT   4
 
 #endif
 
