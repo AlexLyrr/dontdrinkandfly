@@ -118,11 +118,8 @@ void setPacket(struct pcState *pcState, SRPacket *sPacket){
 			sPacket->payload[6] = (pcState->PValue & 0xFF);
 			sPacket->payload[7] = (pcState->PheightValue >> 8);
 			sPacket->payload[8] = (pcState->PheightValue & 0xFF);
-			
-			printf("[P]p1=%u, p2= %u, pYaw = %u, pHeight = %u", pcState->P1Value, pcState->P2Value, pcState->PValue, pcState->PheightValue);
-			for (int i = 9; i < PACKET_BODY_LENGTH; i++){
-				sPacket->payload[i] = 0; // null bytes
-			}
+			sPacket->payload[9] = (pcState->PheightValue2);
+			printf("[P]p1=%u, p2= %u, pYaw = %u, pHeight = %u, pHeight2 = %u \n", pcState->P1Value, pcState->P2Value, pcState->PValue, pcState->PheightValue, pcState->PheightValue2);
 	}
 	// // Set crc
 	// sPacket->crc = 0x00;
@@ -664,6 +661,8 @@ void printControllersGUI(SRPacket *sPacket){
 	gtk_label_set_label(widg.l[22], guiText);
 	sprintf(guiText, "%hhu", sPacketGUI.payload[8]);
 	gtk_label_set_label(widg.l[24], guiText);
+	sprintf(guiText, "%hhu", sPacketGUI.payload[9]);
+	gtk_label_set_label(widg.l[25], guiText);
 }
 
 

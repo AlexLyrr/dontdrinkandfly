@@ -149,6 +149,22 @@ G_MODULE_EXPORT void on_button_down_ph_clicked(GtkButton *button, Widgets *widg)
 	}
 }
 
+G_MODULE_EXPORT void on_button_up_psaz_clicked(GtkButton *button, Widgets *widg)
+{
+	if (pcState->PheightValue2 < 256 && (pcState->mode == 5 || pcState->mode == 7)){
+		pcState->tPressed = true;
+		pcState->PheightValue2 += 1;
+	}
+}
+
+G_MODULE_EXPORT void on_button_down_psaz_clicked(GtkButton *button, Widgets *widg)
+{	
+	if (pcState->PheightValue2 > 0 && (pcState->mode == 5 || pcState->mode == 7)){
+		pcState->gPressed = true;
+		pcState->PheightValue2 -= 1;
+	}
+}
+
 G_MODULE_EXPORT void on_button_left_roll_clicked(GtkButton *button, Widgets *widg)
 {	
 	if (pcState->rollValue < 180 && (pcState->mode == 2 || pcState->mode == 5 || pcState->mode == 6 || pcState->mode == 9)){
@@ -253,6 +269,7 @@ void *guiThread(void *vargp){
     widg.l[22] = GTK_LABEL( gtk_builder_get_object( builder, "label_p1" ) );
     widg.l[23] = GTK_LABEL( gtk_builder_get_object( builder, "label_p2" ) );
     widg.l[24] = GTK_LABEL( gtk_builder_get_object( builder, "label_ph" ) );
+    widg.l[25] = GTK_LABEL( gtk_builder_get_object( builder, "label_psaz" ) );
     widg.lb[0] = GTK_LEVEL_BAR( gtk_builder_get_object( builder, "levelbar_motor1" ) );
     widg.lb[1] = GTK_LEVEL_BAR( gtk_builder_get_object( builder, "levelbar_motor2" ) );
     widg.lb[2] = GTK_LEVEL_BAR( gtk_builder_get_object( builder, "levelbar_motor3" ) );
@@ -284,7 +301,8 @@ void *guiThread(void *vargp){
 	gtk_label_set_label(widg.l[23], guiText);
 	sprintf(guiText, "%hhu", pcStateGui->PheightValue);
 	gtk_label_set_label(widg.l[24], guiText);
-
+	sprintf(guiText, "%hhu", pcStateGui->PheightValue2);
+	gtk_label_set_label(widg.l[25], guiText);
     gtk_main();
 
     return NULL;

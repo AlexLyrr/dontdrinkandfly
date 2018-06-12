@@ -255,6 +255,7 @@ int main(void)
 	state.p2 = 25;
 	state.pYaw = 80;
 	state.pLift = 0;
+	state.psaz = 0;
 
 	state.calibrated = false;
 	state.heightSet = false;
@@ -375,28 +376,15 @@ int main(void)
 						init_height();
 						state.heightSet = true;
 					}
-					yawControl();
-					rollControl();
-					pitchControl();
 					heightControl2();
+					//yawControl();
+					//rollControl();
+					//pitchControl();
+					//run_filters_and_control();
 					full_control_motor();
-				}
-				if (state.controlChanged) { // We don't need to do anything extra yet when this happens
-					state.controlChanged = false;
-				}
-				if (state.pChanged) { // We don't need to do anything extra yet when this happens
-					state.pChanged = false;
-				}
-				break;
-			case 8:
-				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
-					if (check_sensor_int_flag()) {
-						get_dmp_data();
-					}
-					yawControl();
-					rollControl();
-					pitchControl();
-					full_control_motor();
+					#ifdef DEBUGGING
+					state.sendMotorStatus = true;
+					#endif
 				}
 				if (state.controlChanged) { // We don't need to do anything extra yet when this happens
 					state.controlChanged = false;
