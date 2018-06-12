@@ -84,16 +84,15 @@ void applicationComponentLoop() {
 				state.calibrated = false; // reset flag
 				state.currentMode = state.nextMode;
 				break;
-			case 7:
-				state.heightSet = false;
-				state.currentMode = state.nextMode;
-				break;
 			case 0:
 				if (state.nextMode == 1) {
 					systemDone = true;
 					break;
 				}
 			default:
+				if (state.currentMode == 7) {
+					state.heightSet = false;
+				}
 				switch(state.nextMode) {
 					case 1:
 						state.panicFinished = appClock + PANIC_STEPS;
