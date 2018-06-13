@@ -156,21 +156,24 @@ void pitchFilter(){
 
     qAfterKalman = notFixedPoint(qAfterKalman);
     thetaAfterKalman = notFixedPoint(thetaAfterKalman);
-
-
 }
-
-
 
 void controlComponentLoop() {
 	// TODO: implement
 }
 
 int32_t maPressureFilter(){
-	static int32_t x0 = 0, x1 = 0, x2 = 0, x3 = 0;
+	/* Savitzky 
+	static int64_t x0 = 0, x1 = 0, x2 = 0, x3 = 0, x4 = 0;
 	int32_t y0;
-	x3 = x2; x2 = x1; x1 = x0; x0 = pressure;
+	y0 = ((- 3 * x0 + 12* x1 + 17 * x2 + 12 * x3 - 3 * x4) / 35);
+	x4 = x3; x3 = x2; x2 = x1; x1 = x0; x0 = pressure;
+	return y0;
+	*/
+	static int64_t x0 = 0, x1 = 0, x2 = 0, x3 = 0;
+	int32_t y0;
 	y0 = (x0 + x1 + x2 + x3) >> 2;
+	x3 = x2; x2 = x1; x1 = x0; x0 = pressure;
 	return y0;
 }
 
