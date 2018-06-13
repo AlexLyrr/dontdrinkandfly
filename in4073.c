@@ -42,6 +42,7 @@ bool hasNonZeroControl() {
  *	@author Roy Blokker
  */
 #define MIN_PACKET_INTERVAL_US (2 * 1000 * 1000)
+#define MIN_PACKET_INTERVAL_US_BLE (10 * 1000 * 1000)
 void checkSafety() {
 	if (state.currentMode != state.nextMode) {
 		if (state.currentMode == 0 && state.nextMode != 1 && hasNonZeroControl()) {
@@ -50,9 +51,16 @@ void checkSafety() {
 	}
 
 	uint32_t currentTime = get_time_us();
-	if (state.currentMode != 0 && (currentTime - state.lastPacketReceived) > MIN_PACKET_INTERVAL_US) {
-		state.nextMode = 1;
+	if (state.currentMode == 8) {
+		if ((currentTime - state.lastPacketReceived) > MIN_PACKET_INTERVAL_US_BLE) {
+			state.nextMode = 1;
+		}
+	} else {
+		if (state.currentMode != 0 && (currentTime - state.lastPacketReceived) > MIN_PACKET_INTERVAL_US) {
+			state.nextMode = 1;
+		}
 	}
+
 	/*
 		This is raw battery value.
 		real value = (bat_volt * 7) / 100;

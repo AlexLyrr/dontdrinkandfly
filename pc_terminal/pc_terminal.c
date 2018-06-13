@@ -756,15 +756,16 @@ void ble_disconnect() {
 	gattlib_disconnect(m_connection);
 }
 
-static void ble_discovered_device(const char* addr, const char* name) {
-	if (name) {
-		printf("Discovered %s - '%s'\n", addr, name);
-		if (strcmp(name, BLE_DEVICE_NAME) == 0) {
-			ble_addr = strdup(addr);
-		}
-	}
+// static void ble_discovered_device(const char* addr, const char* name) {
+// 	if (name) {
+// 		printf("Discovered %s - '%s'\n", addr, name);
+// 		if (strcmp(name, BLE_DEVICE_NAME) == 0) {
+// 			ble_addr = strdup(addr);
+// 		}
+// 	}
+// 		printf("Discovered %s - '%s'\n", addr, name);
 
-}
+// }
 
 void ble_connect() {
 	uuid_t nus_characteristic_tx_uuid;
@@ -777,14 +778,14 @@ void ble_connect() {
 		return;
 	}
 
-	ret = gattlib_adapter_scan_enable(ble_adapter, ble_discovered_device, BLE_SCAN_TIMEOUT);
-	if (ret) {
-		fprintf(stderr, "ERROR: Failed to scan.\n");
-		return;
-	}
-	gattlib_adapter_scan_disable(ble_adapter);
+	// ret = gattlib_adapter_scan_enable(ble_adapter, ble_discovered_device, BLE_SCAN_TIMEOUT);
+	// if (ret) {
+	// 	fprintf(stderr, "ERROR: Failed to scan.\n");
+	// 	return;
+	// }
+	// gattlib_adapter_scan_disable(ble_adapter);
 
-	m_connection = gattlib_connect(NULL, ble_addr, BDADDR_LE_RANDOM, BT_SEC_LOW, 0, 0);
+	m_connection = gattlib_connect(NULL, BLE_DEVICE_ID, BDADDR_LE_RANDOM, BT_SEC_LOW, 0, 0);
 	if (m_connection == NULL) {
 		fprintf(stderr, "Fail to connect to the bluetooth device.\n");
 		return;
