@@ -437,8 +437,21 @@ int main(void)
 					state.pChanged = false;
 				}
 				break;
-			case 8:
-				// TODO: do full control ?
+			case 8: // Wireless
+				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
+					#ifdef APPLICATION_TIMINGS
+					workDone = true;
+					#endif
+					if (check_sensor_int_flag()) {
+						get_dmp_data();
+					}
+					yawControl();
+					rollControl();
+					pitchControl();
+					full_control_motor();
+					state.controlChanged = false;
+					state.pChanged = false;
+				}
 				break;
 			case 9:
 				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
