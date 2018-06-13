@@ -170,9 +170,8 @@ int32_t maPressureFilter(){
 	x4 = x3; x3 = x2; x2 = x1; x1 = x0; x0 = pressure;
 	return y0;
 	*/
-	static int64_t x0 = 0, x1 = 0, x2 = 0, x3 = 0;
-	int32_t y0;
-	y0 = (x0 + x1 + x2 + x3) >> 2;
+	static int32_t x0 = 0, x1 = 0, x2 = 0, x3 = 0, y0 = 0;
+	y0 = (y0 * 3 + ((x0 + x1 + x2 + x3) >> 2)) >> 2;
 	x3 = x2; x2 = x1; x1 = x0; x0 = pressure;
 	return y0;
 }
