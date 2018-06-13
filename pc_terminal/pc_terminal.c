@@ -81,7 +81,7 @@ void setPacket(struct pcState *pcState, SRPacket *sPacket){
 		sPacket->payload[0] = 9;
 
 	//check if we changed lift values when we are in height mode and go back to full control
-	if(DroneStatusMode == 7 && (pcState->aPressed || pcState->zPressed || pcState->jThrottleUp || pcState->jThrottleDown)){
+	if(DroneStatusMode == 7 && (pcState->aPressed || pcState->zPressed || pcState->jThrottleUp || pcState->jThrottleDown || pcState->n7Pressed)){
 		sPacket->payload[0] = 5;
 		pcState->mode = 5;
 	}
