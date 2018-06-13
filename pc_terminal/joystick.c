@@ -61,15 +61,12 @@ void checkJoystick(struct pcState *pcState) {
 						} else {
 							// jTemp = (sqrt((double)(60800 - jTemp)) * 4) / 2;
 							// jTemp = (sqrt((double)(60800 - jTemp)) * 6) / 3;
-							// jTemp = (sqrt((double)(60800 - jTemp)*12)/2);
-							if (jTemp > 32000) {
-							  jTemp = (60800-jTemp)/160;
-							} else{
-							  jTemp = (32000-jTemp)/120 + 200;
-							}
-							if (jTemp+200 - pcState->jThrottleValue) > 10 || (jTemp+200 - pcState->jThrottleValue) < -10 {
-								pcState->jLift = true;
-							}
+							jTemp = (sqrt((double)(60800 - jTemp)*12)/2);
+							// if (jTemp > 32000) {
+							//   jTemp = (60800-jTemp)/160;
+							// } else{
+							//   jTemp = (32000-x)/120 + 200;
+							// }
 							pcState->jThrottleValue = jTemp + 200;
 						}
 						break;

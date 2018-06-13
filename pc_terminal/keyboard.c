@@ -45,7 +45,6 @@ void resetPcState(struct pcState *pcState){
 
 
 	//JOYSTIC
-	pcState->jLift = false;
 	pcState->jChanged = false;
 	pcState->jThrottleUp = false;
 	pcState->jThrottleDown = false;
@@ -70,8 +69,8 @@ void initPcState(struct pcState *pcState){
   pcState->P2Value = 25; //
   pcState->PheightValue = 0;
   pcState->PheightValue2 = 0;
-
-
+  
+  
   //JOYSTIC
   pcState->jThrottleValue = 0;
   pcState->jRollValue = 90;
@@ -258,7 +257,7 @@ void checkInput(char c, struct pcState *pcState)
 				pcState->PheightValue2 -= 1;
 			}
 			break;
-
+			
 	}
 }
 
