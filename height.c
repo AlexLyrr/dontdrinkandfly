@@ -4,6 +4,7 @@ void init_height(){
   state.initPressure = maPressureFilter() - state.calibratePressureOffset;
 }
 
+//@Author Roy Blokker
 void heightControl(){
   // TODO: Built in P controller. To stay at level with set pressure (initPressure). Maybe taking into account saz.
   int32_t error = 0;
