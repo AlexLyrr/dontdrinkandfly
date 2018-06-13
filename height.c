@@ -37,6 +37,9 @@ void heightControl2(){
   }else if (liftValue < -100){
     liftValue = -100;
   }
-
+  if (state.controlLiftUser < 200) {
+    state.controlLift = 0;
+    return;
+  }
   state.controlLift = state.controlLiftUser + liftValue;
 }

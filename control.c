@@ -163,7 +163,7 @@ void controlComponentLoop() {
 }
 
 int32_t maPressureFilter(){
-	/* Savitzky 
+	/* Savitzky
 	static int64_t x0 = 0, x1 = 0, x2 = 0, x3 = 0, x4 = 0;
 	int32_t y0;
 	y0 = ((- 3 * x0 + 12* x1 + 17 * x2 + 12 * x3 - 3 * x4) / 35);
@@ -241,6 +241,9 @@ void update_motors(void)
 	for (int i = 0; i<4 ; i++){
 		if (ae[i] > 700){
 			ae[i] = 700;
+		}
+		if (ae[i] < 0) {
+			ae[i] = 0;
 		}
 	}
 	motor[0] = ae[0];
