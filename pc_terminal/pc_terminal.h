@@ -52,7 +52,7 @@ struct pcState{
 	bool escPressed; //abort / exit
 
 	uint8_t mode;
-	
+
 	bool n0Pressed;
 	bool n1Pressed;
 	bool n2Pressed;
@@ -96,13 +96,14 @@ struct pcState{
 	uint16_t PheightValue;
 
 	bool tPressed;	//height control Pheight up
-	bool gPressed;	//height control Pheight down	
+	bool gPressed;	//height control Pheight down
 	uint8_t PheightValue2;
 
 	//JOYSTICK
 	bool jChanged;
-	bool jThrottleUp;	//lift up
-	bool jThrottleDown;	//lift down
+	bool jLift;	//lift change
+	bool jThrottleUp;
+	bool jThrottleDown;
 	bool jLeft;		//roll up
 	bool jRight;	//roll down
 	bool jForward;	//pitch down

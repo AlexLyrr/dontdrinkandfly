@@ -81,7 +81,7 @@ void setPacket(struct pcState *pcState, SRPacket *sPacket){
 		sPacket->payload[0] = 9;
 
 	//check if we changed lift values when we are in height mode and go back to full control
-	if(DroneStatusMode == 7 && (pcState->aPressed || pcState->zPressed || pcState->jThrottleUp || pcState->jThrottleDown || pcState->n7Pressed)){
+	if(DroneStatusMode == 7 && (pcState->aPressed || pcState->zPressed || pcState->n7Pressed)){
 		sPacket->payload[0] = 5;
 		pcState->mode = 5;
 	}
@@ -285,7 +285,7 @@ void logReceivePacket(SRPacket rPacket){
 				rPacket.payload[4], rPacket.payload[5]);
 			#ifdef GUIACTIVATED
 				calculateBatteryStatus();
-				g_idle_add ((GSourceFunc) printBatteryStatusGUI, NULL);				
+				g_idle_add ((GSourceFunc) printBatteryStatusGUI, NULL);
 				g_idle_add ((GSourceFunc) printDroneStatusGUI, &rPacket);
 				//printDroneStatusGUI(&rPacket);
 				caluclateDroneMode(&rPacket);
@@ -316,14 +316,14 @@ void logReceivePacket(SRPacket rPacket){
 			writePing();
 			break;
 		case 13:
-			val3 = ((uint64_t)rPacket.payload[1] << 56) | 
-				((uint64_t)rPacket.payload[2] << 48) | 
-				((uint64_t)rPacket.payload[3] << 40) | 
-				((uint64_t)rPacket.payload[4] << 32) | 
-				((uint64_t)rPacket.payload[5] << 24) | 
-				((uint64_t)rPacket.payload[6] << 16) | 
-				((uint64_t)rPacket.payload[7] << 8) | 
-				((uint64_t)rPacket.payload[8]); 
+			val3 = ((uint64_t)rPacket.payload[1] << 56) |
+				((uint64_t)rPacket.payload[2] << 48) |
+				((uint64_t)rPacket.payload[3] << 40) |
+				((uint64_t)rPacket.payload[4] << 32) |
+				((uint64_t)rPacket.payload[5] << 24) |
+				((uint64_t)rPacket.payload[6] << 16) |
+				((uint64_t)rPacket.payload[7] << 8) |
+				((uint64_t)rPacket.payload[8]);
 			printf("Receive pong %lu\n", getMicrotime() - val3);
 			break;
 		case 14:
@@ -383,7 +383,7 @@ void logReceivePacket(SRPacket rPacket){
 				(((int16_t) rPacket.payload[5]) << 8) | ((int16_t) rPacket.payload[6])
 			);
 			break;
-	}	
+	}
 }
 
 
@@ -540,7 +540,7 @@ void writePing() {
 	rPacket.payload[8] = (time) & 0xFF;
 
 	printf("%hhu", rPacket.payload[1]);
-	
+
 	sendPacket(rPacket);
 }
 
@@ -566,7 +566,7 @@ void calculateBatteryStatus()
 			battery.fractionGUI = 1;
 		}
 		battery.batteryPercentageGUI = battery_final;
-		
+
 }
 
 //@Author Georgios Giannakaras
@@ -845,8 +845,8 @@ void ble_connect() {
  * main -- execute terminal
  *----------------------------------------------------------------
  */
-#define COMMUNICATION_MIN_DELAY_US (1 * 1500) 
-#define COMMUNICATION_PING_INTERVAL_US (1000 * 1000) 
+#define COMMUNICATION_MIN_DELAY_US (1 * 1500)
+#define COMMUNICATION_PING_INTERVAL_US (1000 * 1000)
 int main(int argc, char **argv)
 {
 	pcState = (struct pcState*) calloc(1, sizeof(struct pcState));
@@ -854,13 +854,13 @@ int main(int argc, char **argv)
 	SRPacket rPacket;
 	bool bufferCleared = false;
 	int c;
-	
+
 	long timeLastPacket = 0;
 	long timeLastPing = getMicrotime();
-	
+
 	initializations(pcState);
 	pcStateGui = pcState;
-	
+
 	#ifdef GUIACTIVATED
 	pthread_t guithread;
 	pthread_create(&guithread, NULL, guiThread, NULL);
