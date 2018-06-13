@@ -32,8 +32,9 @@ void ble_disconnect();
 void* ble_adapter;
 char* ble_addr;
 
+#define BLE_DEVICE_ID "E6:62:D0:51:F7:CA"
 //#define BLE_DEVICE_ID "D6:17:B4:FA:71:9A" // Joseph board
-#define BLE_DEVICE_ID "D6:AD:A9:01:8D:D8" // George board
+//#define BLE_DEVICE_ID "D6:AD:A9:01:8D:D8" // George board
 #define BLE_DEVICE_NAME "Quatrippel"
 #define BLE_SCAN_TIMEOUT   4
 
