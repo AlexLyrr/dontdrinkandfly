@@ -32,6 +32,8 @@
 #include <asm/types.h>
 #include <linux/input.h>
 
+#include "pc_terminal.h"
+
 /*
  * Version
  */

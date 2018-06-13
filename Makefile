@@ -252,6 +252,9 @@ computer-ble-compile:
 joystick-compile:
 	cd pc_terminal; make joystick
 
+joystick-compile-ble:
+	cd pc_terminal; make ble-joystick
+
 computer: computer-compile default upload pc-run
 
 computer-ble: computer-ble-compile default upload pc-run
@@ -263,6 +266,8 @@ runFilter: pc doupload
 	cd pc_terminal/; make run
 
 joystick: joystick-compile default upload pc-run
+
+joystick-ble: joystick-compile-ble default upload pc-run
 
 filter:
 	make -f Makefile_filter default
