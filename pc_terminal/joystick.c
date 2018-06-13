@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+
+//@Author Roy Blokker
 //void getJoystick(struct pcState *pcState)
 void openJoystick() {
 	/* Initializations moves to pc_terminal.c
