@@ -253,6 +253,7 @@ void applicationComponentLoop() {
 /*------------------------------------------------------------------
  * main -- everything you need is here :)
  *------------------------------------------------------------------
+ * @author Joseph Verburg
  */
 int main(void)
 {
@@ -433,7 +434,7 @@ int main(void)
 							}
 						}
 					}
-					heightControl2();
+					heightControl();
 					yawControl();
 					rollControl();
 					pitchControl();

@@ -3,6 +3,9 @@
 
 
 
+/**
+ * @author Joseph Verburg
+ */
 void packetComponentLoop() {
 	if (state.hasPacket) {
 		state.hasPacket = false;
@@ -89,6 +92,9 @@ void parsePacketSetP() {
 	state.pChanged = true;
 }
 
+/**
+ * @author Joseph Verburg
+ */
 void parsePacketPing() {
 	writePacket(13, state.currentPacket[5], state.currentPacket[6], state.currentPacket[7], state.currentPacket[8],
 	state.currentPacket[9], state.currentPacket[10], state.currentPacket[11], state.currentPacket[12],
@@ -142,6 +148,9 @@ void writeError(uint8_t errorCode) {
 	);
 }
 
+/**
+ * @author Joseph Verburg
+ */
 void writeMotorStatus() {
 	writePacket(
 		0x0a,
@@ -162,6 +171,9 @@ void writeMotorStatus() {
 	);
 }
 
+/**
+ * @author Joseph Verburg
+ */
 void writeAck(uint16_t packetNumber) {
 	writePacket(
 		0x0b,
@@ -179,6 +191,9 @@ void writeAck(uint16_t packetNumber) {
 	);
 }
 
+/**
+ * @author Joseph Verburg
+ */
 void writeTimings() {
 	#ifdef APPLICATION_TIMINGS
 	uint32_t avg = 0;
@@ -195,14 +210,23 @@ void writeTimings() {
 	#endif
 }
 
+/**
+ * @author Joseph Verburg
+ */
 void writePing(uint32_t clock) {
 	writePacket(12, 0,0,0,0, (clock >> 24) & 0xFF, (clock >> 16) & 0xFF, (clock >> 8) & 0xFF, clock & 0xFF, 0);
 }
 
+/**
+ * @author Joseph Verburg
+ */
 void writePong(uint32_t clock) {
 	writePacket(13, 0,0,0,0, (clock >> 24) & 0xFF, (clock >> 16) & 0xFF, (clock >> 8) & 0xFF, clock & 0xFF, 0);
 }
 
+/**
+ * @author Joseph Verburg
+ */
 void writeSensorValues() {
 	if (state.calibrated) {
 		writePacket(15,
@@ -245,6 +269,9 @@ void writeSensorValues() {
 	}
 }
 
+/**
+ * @author Joseph Verburg
+ */
 void writeOffsetValues() {
 	writePacket(15,
 		(state.calibratePhiOffset >> 8) & 0xFF, state.calibratePhiOffset & 0xFF,
@@ -260,6 +287,9 @@ void writeOffsetValues() {
 	);
 }
 
+/**
+ * @author Joseph Verburg
+ */
 void writeRawValues(uint16_t sp, uint16_t sq, uint16_t sr, uint16_t sax, uint16_t say, uint16_t saz) {
 	writePacket(17,
 		(sp >> 8) & 0xFF, sp & 0xFF,

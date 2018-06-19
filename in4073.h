@@ -32,8 +32,6 @@
 #define PREAMPLE_B2 0x37
 #define DEBUGGING
 
-
-
 // Control
 #define MIN_RECORD_TIME 5000
 #define P2PHI 10
@@ -166,10 +164,10 @@ void ble_send(void);
 #define PACKET_BODY_LENGTH 10
 #define PACKET_LENGTH (PACKET_BODY_LENGTH + 5)
 #define APPLICATION_TIMINGS
+#ifdef APPLICATION_TIMINGS
+#define APPLICATION_TIMINGS_EXTENDED
+#endif
 #define BLE_ENABLED
-
-typedef int32_t Q13_20;
-typedef int32_t Q17_14;
 
 typedef struct {
 	uint8_t nextMode;
@@ -234,14 +232,6 @@ typedef struct {
 	bool heightSet;
 	int32_t initPressure;
 
-	Q13_20 rawSp;
-	Q13_20 rawSq;
-	Q13_20 rawSr;
-
-	Q13_20 rawSax;
-	Q13_20 rawSay;
-	Q13_20 rawSaz;
-
 	uint32_t timeLoopTotal;
 	uint32_t timeLoopCount;
 	uint32_t timeLoopMax;
@@ -256,7 +246,6 @@ void onAbort();
     Application & Components
 	@author Joseph Verburg
 *******/
-void controlComponentLoop();
 void communicationComponentLoop();
 void packetComponentLoop();
 void applicationComponentLoop();
@@ -269,7 +258,6 @@ bool hasNonZeroControl();
 
 void init_height();
 void heightControl();
-void heightControl2();
 
 /*******
 	Protocol
@@ -292,9 +280,6 @@ void writePing();
 void writeSensorValues();
 void writeOffsetValues();
 void writeRawValues(uint16_t sp, uint16_t sq, uint16_t sr, uint16_t sax, uint16_t say, uint16_t saz);
-
-Q13_20 toFixedPoint(uint16_t value);
-
 
 int root(int a, int n);
 int iPow(int a, int e);

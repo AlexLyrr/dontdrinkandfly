@@ -158,10 +158,6 @@ void pitchFilter(){
     thetaAfterKalman = notFixedPoint(thetaAfterKalman);
 }
 
-void controlComponentLoop() {
-	// TODO: implement
-}
-
 int32_t maPressureFilter(){
 	/* Savitzky
 	static int64_t x0 = 0, x1 = 0, x2 = 0, x3 = 0, x4 = 0;
@@ -236,6 +232,9 @@ void yawFilter(){
     srFiltered = (int16_t) (y0Butter >> PRECISION);
 }
 
+/**
+ * @author Roy Blokker
+ */
 void update_motors(void)
 {
 	for (int i = 0; i<4 ; i++){
@@ -252,13 +251,11 @@ void update_motors(void)
 	motor[3] = ae[3];
 }
 
-//@Author Roy Blokker
+/**
+ * @author Roy Blokker
+ */
 void run_filters_and_control()
 {
-	// fancy stuff here
-	// control loops and/or filters
-
-	// ae[0] = xxx, ae[1] = yyy etc etc
 	//controlLift: 0-1000
 	//controlPitch, controlRoll, controlYaw: 0-180
 	uint32_t controlPitch = state.controlPitch;
@@ -300,31 +297,9 @@ void run_filters_and_control()
 	update_motors();
 }
 
-void manualControlBackup()
-{
-	uint8_t setMotors = 0;
-	int32_t adjust1 = 640, adjust2 = 1700, adjust3 = 3500, b = 1, d = 1;
-	int32_t aeSQ[4];
-	int32_t Z = state.controlLift;
-	int32_t L = state.controlPitch - 90;
-	int32_t M = state.controlRoll - 90;
-	int32_t N = state.controlYaw - 90;
-
-	Z *= adjust1; L *= adjust2; M *= adjust2; N *= adjust3;
-	aeSQ[0] = Z/(4*b) + L/(2*b) - N/(4*d);
-	aeSQ[1] = Z/(4*b) - M/(2*b) + N/(4*d);
-	aeSQ[2] = Z/(4*b) - L/(2*b) - N/(4*d);
-	aeSQ[3] = Z/(4*b) + M/(2*b) + N/(4*d);
-	for (int i = 0; i < 4; i++){
-		if (aeSQ[i] < 0)
-			setMotors = 1;
-		ae[i] = root(aeSQ[i], 2) + 120;
-	}
-	if (setMotors == 0)
-		update_motors();
-}
-
-//@Author Roy Blokker
+/**
+ * @author Roy Blokker
+ */
 void full_control_motor()
 {
 	uint32_t controlPitch = state.controlPitch;

@@ -42,7 +42,6 @@ $(abspath ../components/drivers_nrf/delay/nrf_delay.c) \
 $(abspath ./testfiltering/filter.c) \
 $(abspath ./sensors.c) \
 $(abspath ./control.c) \
-$(abspath ./maths.c) \
 $(abspath ./packet.c) \
 $(abspath ./comm.c) \
 $(abspath ./drivers/gpio.c) \

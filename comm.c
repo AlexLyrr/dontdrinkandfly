@@ -1,6 +1,5 @@
 #include "in4073.h"
 
-
 static uint8_t const crc8_table[] = {
     0xea, 0xd4, 0x96, 0xa8, 0x12, 0x2c, 0x6e, 0x50, 0x7f, 0x41, 0x03, 0x3d,
     0x87, 0xb9, 0xfb, 0xc5, 0xa5, 0x9b, 0xd9, 0xe7, 0x5d, 0x63, 0x21, 0x1f,
@@ -25,20 +24,11 @@ static uint8_t const crc8_table[] = {
     0xd0, 0xee, 0xac, 0x92, 0x28, 0x16, 0x54, 0x6a, 0x45, 0x7b, 0x39, 0x07,
     0xbd, 0x83, 0xc1, 0xff};
 
-
-// uint8_t crc8(uint8_t crc)
-// {
-//     if (data == NULL)
-//         return 0;
-//     crc &= 0xff;
-//     unsigned char const *end = data + len;
-//     while (data < end)
-//         crc = crc8_table[crc ^ *data++];
-//     return crc;
-// }
 #define MAX_PACKET_SCAN 20
 
-
+/**
+ * @author Joseph Verburg
+ */
 void writeByte(uint8_t b) {
 	#ifdef BLE_ENABLED
 	if (state.currentMode == 8) {
@@ -49,8 +39,8 @@ void writeByte(uint8_t b) {
 	uart_put(b);
 }
 
-/*
- *
+
+/**
  * @author Joseph Verburg
  */
 void communicationComponentLoop() {
@@ -113,7 +103,9 @@ void communicationComponentLoop() {
 }
 
 
-
+/**
+ * @author Joseph Verburg
+ */
 void writePacket(uint8_t b0, uint8_t b1, uint8_t b2, uint8_t b3, uint8_t b4, uint8_t b5, uint8_t b6, uint8_t b7, uint8_t b8, uint8_t b9) {
 
 	uint8_t crc = 0x00;
