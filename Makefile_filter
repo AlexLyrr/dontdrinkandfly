@@ -40,7 +40,6 @@ C_SOURCE_FILES += \
 $(abspath ../components/toolchain/system_nrf51.c) \
 $(abspath ../components/drivers_nrf/delay/nrf_delay.c) \
 $(abspath ./testfiltering/filter.c) \
-$(abspath ./sensors.c) \
 $(abspath ./control.c) \
 $(abspath ./packet.c) \
 $(abspath ./comm.c) \

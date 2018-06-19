@@ -33,14 +33,13 @@
 #define DEBUGGING
 
 // Control
-#define MIN_RECORD_TIME 5000
 #define P2PHI 10
 #define C1 8	// 6
 #define C2 20	//14
 #define PRECISION 14
 
 int16_t motor[4], ae[4];
-void run_filters_and_control();
+void manual_control_motor();
 void yawControl();
 void pitchControl();
 void rollControl();
@@ -235,6 +234,12 @@ typedef struct {
 	uint32_t timeLoopTotal;
 	uint32_t timeLoopCount;
 	uint32_t timeLoopMax;
+	#ifdef APPLICATION_TIMINGS_EXTENDED
+	uint32_t timeLoopControlTotal;
+	uint32_t timeLoopControlCount;
+	uint32_t timeLoopControlMax;
+
+	#endif
 } State;
 State state;
 bool systemDone;

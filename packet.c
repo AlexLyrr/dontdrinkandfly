@@ -204,6 +204,19 @@ void writeTimings() {
 		(state.timeLoopMax >> 24) & 0xFF, (state.timeLoopMax >> 16) & 0xFF, (state.timeLoopMax >> 8) & 0xFF, state.timeLoopMax & 0xFF,
 		(avg >> 24) & 0xFF, (avg >> 16) & 0xFF, (avg >> 8) & 0xFF, avg & 0xFF);
 
+	#ifdef APPLICATION_TIMINGS_EXTENDED
+	uint32_t avgControl = 0;
+	if (state.timeLoopControlCount > 0) { // No div0
+		avgControl = state.timeLoopControlTotal / state.timeLoopControlCount;
+	}
+	writePacket(14, 2,
+		(state.timeLoopControlMax >> 24) & 0xFF, (state.timeLoopControlMax >> 16) & 0xFF, (state.timeLoopControlMax >> 8) & 0xFF, state.timeLoopControlMax & 0xFF,
+		(avgControl >> 24) & 0xFF, (avgControl >> 16) & 0xFF, (avgControl >> 8) & 0xFF, avgControl & 0xFF);
+	state.timeLoopControlTotal = 0;
+	state.timeLoopControlCount = 0;
+	state.timeLoopControlMax = 0;
+	#endif
+
 	state.timeLoopTotal = 0;
 	state.timeLoopCount = 0;
 	state.timeLoopMax = 0;

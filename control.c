@@ -254,7 +254,7 @@ void update_motors(void)
 /**
  * @author Roy Blokker
  */
-void run_filters_and_control()
+void manual_control_motor()
 {
 	//controlLift: 0-1000
 	//controlPitch, controlRoll, controlYaw: 0-180

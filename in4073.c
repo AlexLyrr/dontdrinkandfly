@@ -305,6 +305,9 @@ int main(void)
 	#ifdef APPLICATION_TIMINGS
 	int32_t loopStart = 0, loopLength = 0;
 	bool workDone = false;
+	#ifdef APPLICATION_TIMINGS_EXTENDED
+	int32_t controlStart = 0, controlLength = 0;
+	#endif
 	#endif
 
 	while (!systemDone) {
@@ -316,6 +319,9 @@ int main(void)
 		communicationComponentLoop();
 		packetComponentLoop();
 
+		#ifdef APPLICATION_TIMINGS_EXTENDED
+			controlStart = get_time_us();
+		#endif
 		switch(state.currentMode) {
 			case 0:
 				motor[0] = 0;
@@ -341,10 +347,9 @@ int main(void)
 					#ifdef APPLICATION_TIMINGS
 					workDone = true;
 					#endif
-					run_filters_and_control(); // TODO: rename function
+					manual_control_motor();
 					state.controlChanged = false;
 					state.sendMotorStatus = true;
-					// writeMotorStatus(); // TODO: move to the end of the control loop
 				}
 				break;
 			case 3: // Calibration
@@ -375,7 +380,7 @@ int main(void)
 						get_dmp_data();
 					}
 					yawControl();
-					run_filters_and_control();
+					manual_control_motor();
 					state.controlChanged = false;
 					state.pChanged = false;
 				}
@@ -402,7 +407,6 @@ int main(void)
 					workDone = true;
 					#endif
 					get_raw_sensor_data();
-					// if ((get_time_us() - recording_last) > MIN_RECORD_TIME){
 					yawFilter();
 					rollFilter();
 					pitchFilter();
@@ -410,8 +414,6 @@ int main(void)
 					rollControlRaw();
 					pitchControlRaw();
 					full_control_motor();
-						// recording_last = get_time_us();
-					// }
 					
 					state.controlChanged = false;
 					state.pChanged = false;
@@ -472,7 +474,7 @@ int main(void)
 					#endif
 					//rollControl();
 					pitchControl();
-					run_filters_and_control();
+					manual_control_motor();
 					#ifdef DEBUGGING
 					state.sendMotorStatus = true;
 					#endif
@@ -481,12 +483,25 @@ int main(void)
 				}
 				break;
 		}
+		#ifdef APPLICATION_TIMINGS_EXTENDED
+			controlLength = get_time_us() - controlStart;
+			if (controlLength > 0 && workDone) {
+				if (state.timeLoopControlMax < controlLength) {
+					state.timeLoopControlMax = controlLength;
+				}
+				state.timeLoopControlTotal += controlLength;
+				state.timeLoopControlCount++;
+			}
+		#endif
 
 		if (check_timer_flag()) {
 			#ifdef APPLICATION_TIMINGS
 			workDone = true;
 			#endif
 			applicationComponentLoop();
+			#ifdef APPLICATION_TIMINGS_EXTENDED
+			writeTimings();
+			#endif
 		}
 		#ifdef APPLICATION_TIMINGS
 		loopLength = get_time_us() - loopStart;
