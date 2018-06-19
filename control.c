@@ -15,7 +15,9 @@ uint32_t prevTime = 0;
 int16_t prevDisp = 0;
 int16_t displacement;
 
-//@Author Alex Lyrakis
+/**
+ *	@author Alex Lyrakis 
+ */
 void yawControl() {
 	int32_t eps = (((int32_t) state.controlYawUser - 90) << 2) + (((int32_t) sr - state.calibrateSrOffset) >> 2);
 	int32_t yawValue = ((state.pYaw * eps) >> 8) + 180;
@@ -26,7 +28,9 @@ void yawControl() {
 	state.controlYaw = (uint16_t) yawValue;
 }
 
-//@Author Alex Lyrakis
+/**
+ *	@author Alex Lyrakis 
+ */
 void pitchControl(){
 	int32_t eps = (((int32_t) state.controlPitchUser - 90) << 4) - ((theta - state.calibrateThetaOffset) >> 2);
 	int32_t pitchValue = (state.p1 * eps);
@@ -39,7 +43,9 @@ void pitchControl(){
 	state.controlPitch = (uint16_t) pitchValue;
 }
 
-//@Author Alex Lyrakis
+/**
+ *	@author Alex Lyrakis 
+ */
 void rollControl(){
 	int32_t eps = (((int32_t) state.controlRollUser - 90) << 4) + ((phi - state.calibratePhiOffset) >> 2);
 	int32_t rollValue = (state.p1 * eps);
@@ -52,8 +58,9 @@ void rollControl(){
 	state.controlRoll = (uint16_t) rollValue;
 }
 
-
-//@Author Alex Lyrakis
+/**
+ *	@author Alex Lyrakis 
+ */
 void yawControlRaw() {
 	int32_t eps = (((int32_t) state.controlYawUser - 90) << 2) + (srFiltered);
 	int32_t yawValue = ((state.pYaw * eps) >> 8) + 180;
@@ -64,7 +71,9 @@ void yawControlRaw() {
 	state.controlYaw = (uint16_t) yawValue;
 }
 
-//@Author Alex Lyrakis
+/**
+ *	@author Alex Lyrakis 
+ */
 void pitchControlRaw(){
 	int32_t eps = (((int32_t) state.controlPitchUser - 90) << 2) - (thetaAfterKalman >> 4);
 	int32_t pitchValue = (state.p1 * eps);
@@ -75,10 +84,11 @@ void pitchControlRaw(){
 	if (pitchValue < 0)
 		pitchValue = 0;
 	state.controlPitch = (uint16_t) pitchValue;
-	//state.controlPitch = 90;
 }
 
-//@Author Alex Lyrakis
+/**
+ *	@author Alex Lyrakis 
+ */
 void rollControlRaw(){
 	int32_t eps = (((int32_t) state.controlRollUser - 90) << 2) + (phiAfterKalman >> 4);
 	int32_t rollValue = (state.p1 * eps);
@@ -89,12 +99,11 @@ void rollControlRaw(){
 	if (rollValue < 0)
 		rollValue = 0;
 	state.controlRoll = (uint16_t) rollValue;
-	//state.controlRoll = 90;
-	//state.controlLift = 300;
 }
 
-
-//@Author Alex Lyrakis
+/**
+ *	@author Alex Lyrakis 
+ */
 void kalmanRoll(){
   static int32_t pKalman = 0, pBias = 0, pBiasPrev = 0, phiKalman = 0, phiKalmanPrev = 0, phiError = 0;
 
@@ -110,7 +119,9 @@ void kalmanRoll(){
   phiAfterKalman = phiKalman;
 }
 
-//@Author Alex Lyrakis
+/**
+ *	@author Alex Lyrakis 
+ */
 void kalmanPitch(){
   static int32_t qKalman = 0, qBias = 0, qBiasPrev = 0, thetaKalman = 0, thetaKalmanPrev = 0, thetaError = 0;
 
@@ -126,31 +137,28 @@ void kalmanPitch(){
   thetaAfterKalman = thetaKalman;
 }
 
-//@Author Alex Lyrakis
+/**
+ *	@author Alex Lyrakis 
+ */
 void rollFilter(){
 	phi = say;
-	sp_fp = fixedPoint(sp);
-    phi_fp = fixedPoint(phi);
-
-    phiFiltered = phi_fp; //- lowpassFilterRoll(phi_fp);
-    spFiltered = sp_fp;
+    phiFiltered = fixedPoint(phi); //- lowpassFilterRoll(phi_fp);
+    spFiltered = fixedPoint(sp);
 
     kalmanRoll();
-
 
     pAfterKalman = notFixedPoint(pAfterKalman);
     phiAfterKalman = notFixedPoint(phiAfterKalman);
 
 }
 
-//@Author Alex Lyrakis
+/**
+ *	@author Alex Lyrakis 
+ */
 void pitchFilter(){
 	theta = sax;
-	sq_fp = fixedPoint(sq);
-    theta_fp = fixedPoint(theta);
-
-    thetaFiltered = theta_fp; //- lowpassFilterPitch(theta_fp);
-    sqFiltered = sq_fp;
+    thetaFiltered = fixedPoint(theta); //- lowpassFilterPitch(theta_fp);
+    sqFiltered = fixedPoint(sq);
 
     kalmanPitch();
 
@@ -158,14 +166,11 @@ void pitchFilter(){
     thetaAfterKalman = notFixedPoint(thetaAfterKalman);
 }
 
+
+/**
+ *	@author Joseph Verburg
+ */
 int32_t maPressureFilter(){
-	/* Savitzky
-	static int64_t x0 = 0, x1 = 0, x2 = 0, x3 = 0, x4 = 0;
-	int32_t y0;
-	y0 = ((- 3 * x0 + 12* x1 + 17 * x2 + 12 * x3 - 3 * x4) / 35);
-	x4 = x3; x3 = x2; x2 = x1; x1 = x0; x0 = pressure;
-	return y0;
-	*/
 	static int32_t x0 = 0, x1 = 0, x2 = 0, x3 = 0, y0 = 0;
 	y0 = (y0 * 3 + ((x0 + x1 + x2 + x3) >> 2)) >> 2;
 	x3 = x2; x2 = x1; x1 = x0; x0 = pressure;
@@ -174,7 +179,9 @@ int32_t maPressureFilter(){
 
 
 
-//@Author Georgios Giannakaras
+/**
+ *	@author Georgios Giannakaras
+ */
 //fc = 1HZ fs = 1000
 int32_t lowpassFilterYaw(int32_t x0){
     static int32_t x1 = 0, x2 = 0, y0, y1 = 0, y2 = 0;
@@ -196,7 +203,9 @@ int32_t lowpassFilterYaw(int32_t x0){
 
 
 
-//@Author Georgios Giannakaras
+/**
+ *	@author Georgios Giannakaras
+ */
 //fc = 20HZ fs = 1000
 int32_t butterWorth2nd(int32_t x0){
     static int32_t x1 = 0, x2 = 0, y0, y1 = 0, y2 = 0;
@@ -215,7 +224,9 @@ int32_t butterWorth2nd(int32_t x0){
     return y0;
 }
 
-//@Author Alex Lyrakis
+/**
+ *	@author Alex Lyrakis
+ */
 int32_t fixedPoint(int32_t x0){
   return (x0 << PRECISION);
 }
@@ -223,7 +234,9 @@ int32_t notFixedPoint(int32_t x0){
   return x0 >> PRECISION;
 }
 
-//@Author Georgios Giannakaras
+/**
+ *	@author Georgios Giannakaras
+ */
 void yawFilter(){
 	int32_t x0, y0calibrated, y0Butter;
 	x0 = fixedPoint(sr);

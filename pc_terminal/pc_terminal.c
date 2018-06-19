@@ -29,8 +29,7 @@
 #include "joystick.h"
 #include "keyboard.h"
 #include "rs232.h"
-//#include "commLog.h"
-//#include <sys/time.h>
+
 
 /*------------------------------------------------------------
  * console I/O
@@ -66,8 +65,9 @@ int serial_device = 0;
 
 #include <sys/time.h>
 
-
-// @Author Alex Lyrakis
+/**
+ *	@author Alex Lyrakis 
+ */
 void setPacket(struct pcState *pcState, SRPacket *sPacket){
 	// Set packet type
 	static uint16_t sPacketCounter = 0;
@@ -121,21 +121,15 @@ void setPacket(struct pcState *pcState, SRPacket *sPacket){
 			sPacket->payload[9] = (pcState->PheightValue2);
 			printf("[P]p1=%u, p2= %u, pYaw = %u, pHeight = %u, pHeight2 = %u \n", pcState->P1Value, pcState->P2Value, pcState->PValue, pcState->PheightValue, pcState->PheightValue2);
 	}
-	// // Set crc
-	// sPacket->crc = 0x00;
-	// sPacket->crc = crc8_table[sPacket->crc ^ ((uint8_t) (sPacket->fcs >> 8))];
-	// sPacket->crc = crc8_table[sPacket->crc ^ ((uint8_t) (sPacket->fcs & 0xFF))];
-	// for (int i=0; i<10; i++) {
-	// 	sPacket->crc = crc8_table[sPacket->crc ^ sPacket->payload[i]];
-	// }
-	// Increase packet counter
 	if (sPacketCounter == 0xFFFF)
 		sPacketCounter = 0;
 	else
 		sPacketCounter++;
 }
 
-//@Author Alex Lyrakis
+/**
+ *	@author Alex Lyrakis 
+ */
 void sendPacket(SRPacket sPacket){
 	#ifdef BLE_ENABLE
 	if (DroneStatusMode == 8) {
@@ -156,6 +150,7 @@ void sendPacket(SRPacket sPacket){
 		ble_send();
 	} else {
 	#endif
+		// Set preamble, fcs and payload
 		rs232_putchar(0x13);
 		rs232_putchar(0x37);
 		rs232_putchar(sPacket.fcs >> 8);
@@ -163,6 +158,7 @@ void sendPacket(SRPacket sPacket){
 		for (int i=0; i<10; i++){
 			rs232_putchar(sPacket.payload[i]);
 		}
+		// Compute and set crc value
 		sPacket.crc = 0x00;
 		sPacket.crc = crc8_table[sPacket.crc ^ ((uint8_t) (sPacket.fcs >> 8))];
 		sPacket.crc = crc8_table[sPacket.crc ^ ((uint8_t) (sPacket.fcs & 0xFF))];
@@ -241,14 +237,14 @@ void receivePacket(SRPacket rPacket){
 }
 
 
-//@Author Alex Lyrakis
+/**
+ *	@author Alex Lyrakis 
+ */
 void initLogFiles(){
 	Rfile = fopen("logReceivePacket.txt", "w+");
 	Sfile = fopen("logSendPackets.txt", "w+");
 	CsvFile = fopen("data.csv", "w+");
 
-	// system("cat /dev/null > logSendPackets.txt");
-	// system("cat /dev/null > logReceivePacket.txt");
 	if (Rfile == NULL)
 	{
 	    printf("Error opening logReceivePacket.txt file!\n");
@@ -267,7 +263,9 @@ void initLogFiles(){
 	fprintf(CsvFile, "sp,sq,sr,sax,say,saz\n");
 }
 
-//@Author George Giannakaras
+/**
+ *	@author George Giannakaras 
+ */
 void logReceivePacket(SRPacket rPacket){
 	uint32_t val, val2;
 	uint64_t val3;
@@ -387,7 +385,9 @@ void logReceivePacket(SRPacket rPacket){
 }
 
 
-//@Author Alex Lyrakis
+/**
+ *	@author Alex Lyrakis 
+ */
 void logSendPacket(SRPacket sPacket){
 	switch(sPacket.payload[0]){
 		case 3:
@@ -415,7 +415,9 @@ void logSendPacket(SRPacket sPacket){
 	}
 }
 
-//@Author Alex Lyrakis
+/**
+ *	@author Alex Lyrakis 
+ */
 void updatePcState(struct pcState *pcState){
 
 	pcState->tLiftValue = pcState->liftValue + pcState->jThrottleValue;
@@ -544,7 +546,9 @@ void writePing() {
 	sendPacket(rPacket);
 }
 
-//@Author Georgios Giannakaras
+/**
+ *	@author Georgios Giannakaras 
+ */
 void calculateBatteryStatus()
 {
 		float temp_battery;
@@ -569,7 +573,9 @@ void calculateBatteryStatus()
 		
 }
 
-//@Author Georgios Giannakaras
+/**
+ *	@author Georgios Giannakaras 
+ */
 void printBatteryStatusGUI(){
 	char guiText[30];
 
@@ -581,7 +587,9 @@ void printBatteryStatusGUI(){
 	gtk_label_set_label(widg.l[5], guiText);
 }
 
-//@Author Georgios Giannakaras
+/**
+ *	@author Georgios Giannakaras 
+ */
 void printMotorStatusGUI(SRPacket *rPacket){
 	char guiText[30];
 
@@ -593,7 +601,9 @@ void printMotorStatusGUI(SRPacket *rPacket){
 	}
 }
 
-//@Author Georgios Giannakaras
+/**
+ *	@author Georgios Giannakaras 
+ */
 void caluclateDroneMode(SRPacket *rPacket){
 	switch(rPacket->payload[1]){
 		case 0:
@@ -626,13 +636,17 @@ void caluclateDroneMode(SRPacket *rPacket){
 	}
 }
 
-//@Author Georgios Giannakaras
+/**
+ *	@author Georgios Giannakaras 
+ */
 void printModeGUI(SRPacket *rPacket){
 
 	gtk_label_set_label(widg.l[4], droneModeGUI);
 }
 
-//@Author Georgios Giannakaras
+/**
+ *	@author Georgios Giannakaras 
+ */
 void printDroneStatusGUI(SRPacket *rPacket){
 	char guiText[30];
 
@@ -643,7 +657,9 @@ void printDroneStatusGUI(SRPacket *rPacket){
 	}
 }
 
-//@Author Georgios Giannakaras
+/**
+ *	@author Georgios Giannakaras 
+ */
 void printPcStatusGUI(SRPacket *sPacket){
 	char guiText[20];
 	uint16_t lift;
@@ -679,7 +695,9 @@ void printPcStatusGUI(SRPacket *sPacket){
 	gtk_label_set_label(widg.l[20], guiText);
 }
 
-//@Author Georgios Giannakaras
+/**
+ *	@author Georgios Giannakaras 
+ */
 void printControllersGUI(SRPacket *sPacket){
 	char guiText[30];
 
@@ -696,7 +714,9 @@ void printControllersGUI(SRPacket *sPacket){
 }
 
 
-//@Author Georgios Giannakaras
+/**
+ *	@author Georgios Giannakaras 
+ */
 void initializations(struct pcState *pcState){
 	char c;
 
@@ -872,17 +892,17 @@ int main(int argc, char **argv)
 
 	//send & receive
 	while(1) {
-		if ((c = term_getchar_nb()) != -1)	// Read from keyboard and store in fd_RS232
+		if ((c = term_getchar_nb()) != -1)	// Read from keyboard
 		{
 			checkInput(c, pcState);
 		}
 
-		// Read from joystic and update pcState
+		// Read from joystick and update pcState
 		#ifdef JOYSTICK_ENABLE
 		checkJoystick(pcState);
 		#endif
 
-		// Read from fd_RS232
+		// Read from fd_RS232 and put it in a queue
 		if ((c = rs232_getchar_nb()) != -1){
 			if(c == 0x13){
 				bufferCleared = true;
@@ -892,10 +912,17 @@ int main(int argc, char **argv)
 			}
 		}
 
+		// If queue has at least 1 packet then receive it
 		if(pcReQueue.count >= PACKET_LENGTH) {
 			receivePacket(rPacket);
 		}
 
+		/*
+		 * If time passed >= COMMUNICATION_MIN_DELAY then combine keyboard and
+		 * joystick values. Subsequently set the packet and send it to drone. 
+		 * Log the sent packet and reset the boolean values of PcState that 
+		 * indicate if a new event comes in.
+		 */
 		if ((getMicrotime() - timeLastPacket) >= COMMUNICATION_MIN_DELAY_US){
 			if ((getMicrotime() - timeLastPing) >= COMMUNICATION_PING_INTERVAL_US) {
 				timeLastPing = getMicrotime();

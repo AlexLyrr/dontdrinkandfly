@@ -8,7 +8,9 @@
 
 #include "pc_terminal.h"
 
-// @Author: Alex Lyrakis
+/**
+ *	@author Alex Lyrakis 
+ */
 void resetPcState(struct pcState *pcState){
 	pcState->escPressed = false;
 	pcState->n0Pressed = false;
@@ -86,7 +88,9 @@ void initPcState(struct pcState *pcState){
   pcState->tYawValue = 90;
 }
 
-// @Author: Alex Lyrakis
+/**
+ *	@author Alex Lyrakis 
+ */
 void checkInput(char c, struct pcState *pcState)
 {
 	switch (c)
@@ -261,7 +265,9 @@ void checkInput(char c, struct pcState *pcState)
 	}
 }
 
-// @Author Alex Lyrakis
+/**
+ *	@author Alex Lyrakis 
+ */
 bool setModeAttempt(struct pcState *pcState){
 	return (pcState->n0Pressed || pcState->n1Pressed || pcState->n2Pressed || pcState->n3Pressed || pcState->n4Pressed || pcState->n5Pressed
 		|| pcState->n6Pressed || pcState->n7Pressed || pcState->n8Pressed || pcState->n9Pressed);

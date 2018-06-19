@@ -140,7 +140,10 @@ GtkWidget  *window, *dialog;
 Widgets widg;
 int response;
 
-// @Author: Georgios Giannakaras
+
+/**
+ *	@author Georgios Giannakaras 
+ */ 
 typedef struct{
 	float batteryVolt;
 	float fractionGUI;
@@ -148,7 +151,10 @@ typedef struct{
 } Battery;
 
 Battery battery;
-// @Author: Alex Lyrakis
+
+/**
+ *	@author Alex Lyrakis 
+ */
 typedef struct{
 	uint16_t fcs;
 	uint8_t payload[10];
@@ -177,21 +183,6 @@ void initLogFiles();
 void logSendPacket(SRPacket sPacket);
 void updatePcState(struct pcState *pcState);
 void initReceivedACK();
-//void logReceivePacket(SRPacket rPacket);
-//void logSendPacket(SRPacket sPacket);
-//void initReceivedACK();
-//void initLogFiles();
-//void receivePacket(SRPacket rPacket);
-//void sendPacket(SRPacket sPacket);
-//void setPacket(struct pcState *pcState, SRPacket *sPacket);
-//bool sthPressed(struct pcState *pcState);
-//bool setPAttempt(struct pcState *pcState);
-//bool setControlAttempt(struct pcState *pcState);
-//bool setModeAttempt(struct pcState *pcState);
-//void checkInput(char c, struct pcState *pcState);
-//void initPcState(struct pcState *pcState);
-//void resetPcState(struct pcState *pcState);
-//void updatePcState(struct pcState *pcState);
 void calculateBatteryStatus();
 void caluclateDroneMode(SRPacket *rPacket);
 void *guiThread(void *vargp);
