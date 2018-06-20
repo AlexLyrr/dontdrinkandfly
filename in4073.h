@@ -34,8 +34,8 @@
 
 // Control
 #define P2PHI 10
-#define C1 8	// 6
-#define C2 20	//14
+#define C1 6
+#define C2 18
 #define PRECISION 14
 
 int16_t motor[4], ae[4];
@@ -227,7 +227,7 @@ typedef struct {
 	int32_t calibrateSayOffset;
 	int32_t calibrateSazOffset;
 	int32_t calibratePressureOffset;
-	
+
 	bool heightSet;
 	int32_t initPressure;
 

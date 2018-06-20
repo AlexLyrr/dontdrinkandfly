@@ -16,7 +16,7 @@
 #include "in4073.h"
 
 /**
- *	@author Joseph Verburg 
+ *	@author Joseph Verburg
  */
 void onAbort() {
 	switch(state.currentMode) {
@@ -34,7 +34,7 @@ void onAbort() {
 }
 
 /**
- *	@author Joseph Verburg 
+ *	@author Joseph Verburg
  */
 bool hasNonZeroControl() {
 	return state.controlLiftUser != 0;
@@ -69,7 +69,7 @@ void checkSafety() {
 		143 = 10.01 V
 		This is the value where it goes into panic mode
 
-		128 = 8.96 V 
+		128 = 8.96 V
 		This is to check we have a connected battery
 	*/
 	if (bat_volt < 143 && bat_volt > 128){
@@ -78,7 +78,7 @@ void checkSafety() {
 }
 
 /**
- *	@author Joseph Verburg 
+ *	@author Joseph Verburg
  */
 void applicationComponentLoop() {
 	checkSafety();
@@ -149,7 +149,7 @@ void applicationComponentLoop() {
 						state.calibrateSayOffset = 0;
 						state.calibrateSazOffset = 0;
 						state.calibratePressureOffset = 0;
-						
+
 						// dmp_enable_gyro_cal(1);
 						break;
 					case 2:
@@ -266,7 +266,7 @@ int main(void)
 	twi_init();
 	baro_init();
 	spi_flash_init();
-	
+
 	#ifdef BLE_ENABLED
 	ble_init();
 	#endif
@@ -416,7 +416,7 @@ int main(void)
 					rollControlRaw();
 					pitchControlRaw();
 					full_control_motor();
-					
+
 					state.controlChanged = false;
 					state.pChanged = false;
 				}

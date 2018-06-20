@@ -32,7 +32,7 @@ void ble_disconnect();
 void* ble_adapter;
 char* ble_addr;
 
-#define BLE_DEVICE_ID "D6:AD:A9:01:8D:D8"
+#define BLE_DEVICE_ID "E9:CB:02:21:5B:B7"
 //#define BLE_DEVICE_ID "D6:17:B4:FA:71:9A" // Joseph board
 //#define BLE_DEVICE_ID "D6:AD:A9:01:8D:D8" // George board
 #define BLE_DEVICE_NAME "Quatrippel"
@@ -48,7 +48,7 @@ int fd_RS232;
 int fd_joystick;
 
 /**
- *	@author Georgios Giannakaras 
+ *	@author Georgios Giannakaras
  */
 struct pcState{
 	//KEYBOARD
@@ -131,7 +131,7 @@ struct pcState *pcStateGui;
 struct pcState *pcState;
 
 /**
- *	@author Georgios Giannakaras 
+ *	@author Georgios Giannakaras
  */
 typedef struct _Widgets Widgets;
 struct _Widgets
@@ -148,8 +148,8 @@ int response;
 
 
 /**
- *	@author Georgios Giannakaras 
- */ 
+ *	@author Georgios Giannakaras
+ */
 typedef struct{
 	float batteryVolt;
 	float fractionGUI;
@@ -159,7 +159,7 @@ typedef struct{
 Battery battery;
 
 /**
- *	@author Alex Lyrakis 
+ *	@author Alex Lyrakis
  */
 typedef struct{
 	uint16_t fcs;
