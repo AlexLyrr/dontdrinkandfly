@@ -250,9 +250,13 @@ void yawFilter(){
  */
 void update_motors(void)
 {
+	bool hasActive = (ae[0] > 200) || (ae[1] > 200) || (ae[2] > 200) || (ae[3] > 200);
 	for (int i = 0; i<4 ; i++){
 		if (ae[i] > 700){
 			ae[i] = 700;
+		}
+		if (hasActive && ae[i] < 200) {
+			ae[i] = 200;
 		}
 		if (ae[i] < 0) {
 			ae[i] = 0;
