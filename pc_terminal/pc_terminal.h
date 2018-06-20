@@ -32,7 +32,7 @@ void ble_disconnect();
 void* ble_adapter;
 char* ble_addr;
 
-#define BLE_DEVICE_ID "E6:62:D0:51:F7:CA"
+#define BLE_DEVICE_ID "D6:AD:A9:01:8D:D8"
 //#define BLE_DEVICE_ID "D6:17:B4:FA:71:9A" // Joseph board
 //#define BLE_DEVICE_ID "D6:AD:A9:01:8D:D8" // George board
 #define BLE_DEVICE_NAME "Quatrippel"
@@ -46,7 +46,10 @@ extern const uint8_t crc8_table[];
 extern int serial_device;
 int fd_RS232;
 int fd_joystick;
-// @Author: George Giannakaras
+
+/**
+ *	@author Georgios Giannakaras 
+ */
 struct pcState{
 	//KEYBOARD
 	bool escPressed; //abort / exit
@@ -126,7 +129,9 @@ uint8_t DroneStatusMode;
 struct pcState *pcStateGui;
 struct pcState *pcState;
 
-//@Author Georgios Giannakaras
+/**
+ *	@author Georgios Giannakaras 
+ */
 typedef struct _Widgets Widgets;
 struct _Widgets
 {

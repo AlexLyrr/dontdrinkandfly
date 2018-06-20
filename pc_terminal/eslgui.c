@@ -7,8 +7,10 @@
 #include <gtk/gtk.h>
 #include "pc_terminal.h"
 
-//For all the below G_MODULE_EXPORT functions @Author Georgios Giannakaras
-//
+/**
+ *  For all the below G_MODULE_EXPORT functions
+ *	@author Georgios Giannakaras 
+ */ 
 G_MODULE_EXPORT void on_button_safe_clicked(GtkButton *button, Widgets *widg)
 {
 	pcStateGui->n0Pressed = true;
@@ -230,7 +232,9 @@ G_MODULE_EXPORT void help_about(GtkWidget *widget, gpointer data){
     g_object_unref(G_OBJECT(builder2));
 }
 
-//@Author Georgios Giannakaras
+/**
+ *	@author Georgios Giannakaras 
+ */ 
 void *guiThread(void *vargp){
 	char guiText[20];
 

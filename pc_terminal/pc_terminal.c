@@ -85,6 +85,7 @@ void setPacket(struct pcState *pcState, SRPacket *sPacket){
 		sPacket->payload[0] = 5;
 		pcState->mode = 5;
 	}
+
 	// Set payload
 	switch (sPacket->payload[0]) {
 		case 5:
@@ -171,7 +172,9 @@ void sendPacket(SRPacket sPacket){
 	#endif
 }
 
-//@Author George Giannakaras
+/**
+ *	@author Georgios Giannakaras 
+ */
 void receivePacket(SRPacket rPacket){
 	uint8_t crc = 0x00, crcTemp;
 	bool foundPacket = false;
@@ -264,7 +267,7 @@ void initLogFiles(){
 }
 
 /**
- *	@author George Giannakaras 
+ *	@author Georgios Giannakaras 
  */
 void logReceivePacket(SRPacket rPacket){
 	uint32_t val, val2;
@@ -285,10 +288,8 @@ void logReceivePacket(SRPacket rPacket){
 				calculateBatteryStatus();
 				g_idle_add ((GSourceFunc) printBatteryStatusGUI, NULL);				
 				g_idle_add ((GSourceFunc) printDroneStatusGUI, &rPacket);
-				//printDroneStatusGUI(&rPacket);
 				caluclateDroneMode(&rPacket);
 				g_idle_add ((GSourceFunc) printModeGUI, &rPacket);
-				//printModeGUI(&rPacket);
 			#endif
 			break;
 		case 7:
@@ -302,7 +303,6 @@ void logReceivePacket(SRPacket rPacket){
 			motor[3] = (uint16_t)rPacket.payload[7] << 8 | (uint16_t)rPacket.payload[8];
 			#ifdef GUIACTIVATED
 				g_idle_add ((GSourceFunc) printMotorStatusGUI, &rPacket);
-				//printMotorStatusGUI(&rPacket);
 			#endif
 			// printf("Packet number: %hu | Type: %hhu | Motor1: %hu | Motor2: %hu | Motor3: %hu | Motor4: %hu\n",
 				// rPacket.fcs, rPacket.payload[0], motor[0], motor[1], motor[2], motor[3]);
@@ -397,7 +397,6 @@ void logSendPacket(SRPacket sPacket){
 			#ifdef GUIACTIVATED
 				g_idle_add ((GSourceFunc) printPcStatusGUI, &sPacket);
 			#endif
-				//printPcStatusGUI(&sPacket);
 			break;
 		case 5:
 			// fprintf(Sfile, "Packet number: %hu | Type: %hhu | Mode: %hhu",
@@ -445,11 +444,6 @@ void updatePcState(struct pcState *pcState){
 	if (pcState->tLiftValue > 1000){
 		pcState->tLiftValue = 1000;
 	}
-	/*
-	if( (pcState->tLiftValue < 200) && (pcState->liftValue >= 10) ){	// Motors start moving after 200 rpm
-		pcState->tLiftValue += 190;
-	}
-	*/
 }
 
 void initReceivedACK(){
@@ -457,8 +451,6 @@ void initReceivedACK(){
 		receivedACK[i] = false;
 	}
 }
-
-
 
 
 /**
@@ -776,17 +768,6 @@ void ble_disconnect() {
 	gattlib_disconnect(m_connection);
 }
 
-// static void ble_discovered_device(const char* addr, const char* name) {
-// 	if (name) {
-// 		printf("Discovered %s - '%s'\n", addr, name);
-// 		if (strcmp(name, BLE_DEVICE_NAME) == 0) {
-// 			ble_addr = strdup(addr);
-// 		}
-// 	}
-// 		printf("Discovered %s - '%s'\n", addr, name);
-
-// }
-
 void ble_connect() {
 	uuid_t nus_characteristic_tx_uuid;
 	uuid_t nus_characteristic_rx_uuid;
@@ -797,13 +778,6 @@ void ble_connect() {
 		fprintf(stderr, "ERROR: Failed to open adapter.\n");
 		return;
 	}
-
-	// ret = gattlib_adapter_scan_enable(ble_adapter, ble_discovered_device, BLE_SCAN_TIMEOUT);
-	// if (ret) {
-	// 	fprintf(stderr, "ERROR: Failed to scan.\n");
-	// 	return;
-	// }
-	// gattlib_adapter_scan_disable(ble_adapter);
 
 	m_connection = gattlib_connect(NULL, BLE_DEVICE_ID, BDADDR_LE_RANDOM, BT_SEC_LOW, 0, 0);
 	if (m_connection == NULL) {

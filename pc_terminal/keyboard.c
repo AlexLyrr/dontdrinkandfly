@@ -60,7 +60,9 @@ void resetPcState(struct pcState *pcState){
 }
 
 
-// @Author: George Giannakaras
+/**
+ *	@author Georgios Giannakaras 
+ */
 void initPcState(struct pcState *pcState){
   pcState->liftValue = 0;
   pcState->rollValue = 90;

@@ -26,7 +26,7 @@ int main(void)
 	timers_init();
 	adc_init();
 	twi_init();
-	imu_init(false, 1000);
+	imu_init(false, 500);
 	baro_init();
 	spi_flash_init();
 
@@ -58,7 +58,6 @@ int main(void)
 
 	#define RECORD_DURATION (10 * 1000 * 1000)
 	#define MIN_PACKET_DELAY (2 * 1500)
-	#define MIN_RECORD_TIME 1000
 
 	bool recording = false;
 	bool sending = false;
