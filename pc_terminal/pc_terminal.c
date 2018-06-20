@@ -510,15 +510,9 @@ int	term_getchar()
         return c;
 }
 
-/*------------------------------------------------------------
- * Serial I/O
- * 8 bits, 1 stopbit, no parity,
- * 115,200 baud
- *------------------------------------------------------------
+/**
+ *	@author Joseph Verburg 
  */
-
-
-
 void writePing() {
 	SRPacket rPacket;
 	rPacket.fcs = 0;
@@ -742,6 +736,10 @@ void initializations(struct pcState *pcState){
 
 #ifdef BLE_ENABLE
 #include "gattlib.h"
+
+/**
+ *	@author Joseph Verburg 
+ */
 void ble_notification_cb(const uuid_t* uuid, const uint8_t* data, size_t data_length, void* user_data) {
 	// printf("received ble data %hu \n", data_length);
 	int i;
@@ -750,6 +748,9 @@ void ble_notification_cb(const uuid_t* uuid, const uint8_t* data, size_t data_le
 	}
 }
 
+/**
+ *	@author Joseph Verburg 
+ */
 void ble_send() {
 	if (ble_tx_queue.count > 0) {
 		int dataLength = ble_tx_queue.count > 20 ? 20: ble_tx_queue.count;
@@ -764,10 +765,16 @@ void ble_send() {
 	}
 }
 
+/**
+ *	@author Joseph Verburg 
+ */
 void ble_disconnect() {
 	gattlib_disconnect(m_connection);
 }
 
+/**
+ *	@author Joseph Verburg 
+ */
 void ble_connect() {
 	uuid_t nus_characteristic_tx_uuid;
 	uuid_t nus_characteristic_rx_uuid;

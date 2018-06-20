@@ -18,7 +18,9 @@
 #include "pc_terminal.h"
 
 
-
+/**
+ *	@author Joseph Verburg 
+ */
 void rs232_open(void)
 {
   	char *name;

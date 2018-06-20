@@ -15,9 +15,8 @@
 
 #include "in4073.h"
 
-/*
- *
- * @author Joseph Verburg
+/**
+ *	@author Joseph Verburg 
  */
 void onAbort() {
 	switch(state.currentMode) {
@@ -34,6 +33,9 @@ void onAbort() {
 	state.sendStatus = true;
 }
 
+/**
+ *	@author Joseph Verburg 
+ */
 bool hasNonZeroControl() {
 	return state.controlLiftUser != 0;
 }

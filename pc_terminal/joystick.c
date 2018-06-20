@@ -8,8 +8,9 @@
 #include <unistd.h>
 
 
-//@Author Roy Blokker
-//void getJoystick(struct pcState *pcState)
+/**
+ *	@author Roy Blokker 
+ */
 void openJoystick() {
 	/* Initializations moves to pc_terminal.c
 	int fd;
@@ -23,6 +24,9 @@ void openJoystick() {
 	fcntl(fd_joystick, F_SETFL, O_NONBLOCK);
 }
 
+/**
+ *	@author Roy Blokker 
+ */
 void checkJoystick(struct pcState *pcState) {
 	struct js_event js;
 	uint16_t jValue;
