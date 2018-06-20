@@ -67,6 +67,9 @@ void checkJoystick(struct pcState *pcState) {
 							} else{
 							  jTemp = (32000-jTemp)/120 + 200;
 							}
+							if (abs((jTemp+200) - pcState->jThrottleValue) > 20) {
+                pcState->jLift = true; 
+              }
 							pcState->jThrottleValue = jTemp + 200;
 						}
 						break;
