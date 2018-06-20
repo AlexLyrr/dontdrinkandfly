@@ -11,23 +11,22 @@
 #ifndef IN4073_H__
 #define IN4073_H__
 
-#include <inttypes.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include "nrf_gpio.h"
-#include "nrf_delay.h"
+#include "app_util_platform.h"
 #include "inv_mpu.h"
 #include "inv_mpu_dmp_motion_driver.h"
 #include "ml.h"
-#include "app_util_platform.h"
+#include "nrf_delay.h"
+#include "nrf_gpio.h"
+#include <inttypes.h>
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-
-#define RED		22
-#define YELLOW		24
-#define GREEN		28
-#define BLUE		30
-#define INT_PIN		5
+#define RED 22
+#define YELLOW 24
+#define GREEN 28
+#define BLUE 30
+#define INT_PIN 5
 #define PREAMPLE_B1 0x13
 #define PREAMPLE_B2 0x37
 #define DEBUGGING
@@ -74,7 +73,7 @@ int32_t saxFiltered, sayFiltered, sazFiltered;
 int32_t pAfterKalman, phiAfterKalman, qAfterKalman, thetaAfterKalman;
 
 // Timers
-#define TIMER_PERIOD	10 //50ms=20Hz (MAX 23bit, 4.6h)
+#define TIMER_PERIOD 10 //50ms=20Hz (MAX 23bit, 4.6h)
 void timers_init(void);
 uint32_t get_time_us(void);
 bool check_timer_flag(void);
@@ -90,14 +89,14 @@ typedef struct {
 	uint16_t first, last;
 	uint16_t count;
 } queue;
-void init_queue(queue *q);
-void enqueue(queue *q, uint8_t x);
-uint8_t dequeue(queue *q);
-uint8_t queuePeek(queue *q, uint16_t offset);
+void init_queue(queue* q);
+void enqueue(queue* q, uint8_t x);
+uint8_t dequeue(queue* q);
+uint8_t queuePeek(queue* q, uint16_t offset);
 
 // UART
-#define RX_PIN_NUMBER  16
-#define TX_PIN_NUMBER  14
+#define RX_PIN_NUMBER 16
+#define TX_PIN_NUMBER 14
 queue rx_queue;
 queue tx_queue;
 uint32_t last_correct_checksum_time;
@@ -105,11 +104,11 @@ void uart_init(void);
 void uart_put(uint8_t);
 
 // TWI
-#define TWI_SCL	4
-#define TWI_SDA	2
+#define TWI_SCL 4
+#define TWI_SDA 2
 void twi_init(void);
-bool i2c_write(uint8_t slave_addr, uint8_t reg_addr, uint8_t length, uint8_t const *data);
-bool i2c_read(uint8_t slave_addr, uint8_t reg_addr, uint8_t length, uint8_t *data);
+bool i2c_write(uint8_t slave_addr, uint8_t reg_addr, uint8_t length, uint8_t const* data);
+bool i2c_read(uint8_t slave_addr, uint8_t reg_addr, uint8_t length, uint8_t* data);
 
 // MPU wrapper
 int16_t phi, theta, psi;
@@ -141,9 +140,9 @@ void adc_request_sample(void);
 bool spi_flash_init(void);
 bool flash_chip_erase(void);
 bool flash_write_byte(uint32_t address, uint8_t data);
-bool flash_write_bytes(uint32_t address, uint8_t *data, uint32_t count);
-bool flash_read_byte(uint32_t address, uint8_t *buffer);
-bool flash_read_bytes(uint32_t address, uint8_t *buffer, uint32_t count);
+bool flash_write_bytes(uint32_t address, uint8_t* data, uint32_t count);
+bool flash_read_byte(uint32_t address, uint8_t* buffer);
+bool flash_read_bytes(uint32_t address, uint8_t* buffer, uint32_t count);
 
 // BLE
 queue ble_rx_queue;
@@ -151,7 +150,6 @@ queue ble_tx_queue;
 volatile bool radio_active;
 void ble_init(void);
 void ble_send(void);
-
 
 /*******
 	State
@@ -185,11 +183,9 @@ typedef struct {
 	uint16_t packetNumber;
 	uint8_t currentPacket[PACKET_LENGTH];
 
-
 	// Panic mode
 	uint16_t panicFinished; // In appClock;
 	uint32_t panicMotor[4];
-
 
 	uint8_t motor1Offset;
 	uint8_t motor2Offset;
@@ -234,12 +230,12 @@ typedef struct {
 	uint32_t timeLoopTotal;
 	uint32_t timeLoopCount;
 	uint32_t timeLoopMax;
-	#ifdef APPLICATION_TIMINGS_EXTENDED
+#ifdef APPLICATION_TIMINGS_EXTENDED
 	uint32_t timeLoopControlTotal;
 	uint32_t timeLoopControlCount;
 	uint32_t timeLoopControlMax;
 
-	#endif
+#endif
 } State;
 State state;
 bool systemDone;

@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-
 /**
  *	@author Roy Blokker 
  */
@@ -27,7 +26,7 @@ void openJoystick() {
 /**
  *	@author Roy Blokker 
  */
-void checkJoystick(struct pcState *pcState) {
+void checkJoystick(struct pcState* pcState) {
 	struct js_event js;
 	uint16_t jValue;
 	int32_t jTemp;
@@ -67,13 +66,13 @@ void checkJoystick(struct pcState *pcState) {
 							// jTemp = (sqrt((double)(60800 - jTemp)) * 6) / 3;
 							// jTemp = (sqrt((double)(60800 - jTemp)*12)/2);
 							if (jTemp > 32000) {
-							  jTemp = (60800-jTemp)/160;
-							} else{
-							  jTemp = (32000-jTemp)/120 + 200;
+								jTemp = (60800 - jTemp) / 160;
+							} else {
+								jTemp = (32000 - jTemp) / 120 + 200;
 							}
-							if (abs((jTemp+200) - pcState->jThrottleValue) > 20) {
-                pcState->jLift = true; 
-              }
+							if (abs((jTemp + 200) - pcState->jThrottleValue) > 20) {
+								pcState->jLift = true;
+							}
 							pcState->jThrottleValue = jTemp + 200;
 						}
 						break;

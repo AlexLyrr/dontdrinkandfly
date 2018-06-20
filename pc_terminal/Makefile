@@ -23,9 +23,3 @@ computer: all
 
 run:
 	$(EXEC)
-
-
-jstest:
-	$(CC) $(CFLAGS) jstest.c -o ./jstest
-	./jstest --normal /dev/input/by-id/usb-Logitech_Logitech_Extreme_3D-joystick
-

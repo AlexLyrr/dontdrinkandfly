@@ -19,7 +19,7 @@
  *	@author Joseph Verburg
  */
 void onAbort() {
-	switch(state.currentMode) {
+	switch (state.currentMode) {
 		case 0:
 			systemDone = true;
 			break;
@@ -72,7 +72,7 @@ void checkSafety() {
 		128 = 8.96 V
 		This is to check we have a connected battery
 	*/
-	if (bat_volt < 143 && bat_volt > 128){
+	if (bat_volt < 143 && bat_volt > 128) {
 		state.nextMode = 1;
 	}
 }
@@ -83,28 +83,28 @@ void checkSafety() {
 void applicationComponentLoop() {
 	checkSafety();
 
-	if (appClock%2 == 0) {
+	if (appClock % 2 == 0) {
 		nrf_gpio_pin_toggle(YELLOW);
 	}
-	if (appClock%100 == 0) { // Every second
+	if (appClock % 100 == 0) { // Every second
 		nrf_gpio_pin_toggle(BLUE);
 	}
-	if (appClock%200 == 0) {
+	if (appClock % 200 == 0) {
 		state.sendStatus = true;
-		#ifndef DEBUGGING
+#ifndef DEBUGGING
 		state.sendMotorStatus = true;
-		#endif
-		#ifdef APPLICATION_TIMINGS
+#endif
+#ifdef APPLICATION_TIMINGS
 		state.sendTimings = true;
-		#endif
+#endif
 	}
-	if (appClock%5 == 0) {
+	if (appClock % 5 == 0) {
 		adc_request_sample();
 		read_baro();
 	}
 
 	if (state.nextMode != state.currentMode) {
-		switch(state.currentMode) {
+		switch (state.currentMode) {
 			case 1:
 				state.nextMode = 1;
 				break;
@@ -125,11 +125,11 @@ void applicationComponentLoop() {
 					state.nextMode = state.currentMode;
 					break;
 				}
-				switch(state.nextMode) {
+				switch (state.nextMode) {
 					case 1:
 						state.panicFinished = appClock + PANIC_STEPS;
-						for(uint8_t i = 0; i < 4; i += 1) {
-								state.panicMotor[i] = motor[i];
+						for (uint8_t i = 0; i < 4; i += 1) {
+							state.panicMotor[i] = motor[i];
 						}
 						break;
 					case 3:
@@ -175,9 +175,9 @@ void applicationComponentLoop() {
 		state.sendStatus = true;
 	}
 
-	switch(state.currentMode) {
+	switch (state.currentMode) {
 		case 0:
-			if (appClock%20 == 0) {
+			if (appClock % 20 == 0) {
 				if (state.dmpEnabled && check_sensor_int_flag()) {
 					get_dmp_data();
 					writeSensorValues();
@@ -185,7 +185,7 @@ void applicationComponentLoop() {
 			}
 			break;
 		case 1:
-			if (appClock%5 == 0) {
+			if (appClock % 5 == 0) {
 				state.sendStatus = true;
 				state.sendMotorStatus = true;
 			}
@@ -197,7 +197,7 @@ void applicationComponentLoop() {
 			break;
 		case 3:
 			// if (appClock%20 == 0) {
-				writeSensorValues();
+			writeSensorValues();
 			// }
 			if (state.calibrationFinished == appClock) {
 				// dmp_enable_gyro_cal(0);
@@ -216,11 +216,11 @@ void applicationComponentLoop() {
 		case 6:
 		case 7:
 		case 8:
-			#ifdef DEBUGGING
+#ifdef DEBUGGING
 			if (appClock % 4 == 0) { // 25 FPS
 				state.sendMotorStatus = true;
 			}
-			#endif
+#endif
 			break;
 	}
 
@@ -242,23 +242,21 @@ void applicationComponentLoop() {
 		writeMotorStatus();
 	} else if (state.sendTimings) {
 		state.sendTimings = false;
-		#ifdef APPLICATION_TIMINGS
+#ifdef APPLICATION_TIMINGS
 		writeTimings();
-		#endif
+#endif
 	} else if (state.sendPing) {
 		state.sendPing = false;
 		writePing(get_time_us());
 	}
 }
 
-
 /*------------------------------------------------------------------
  * main -- everything you need is here :)
  *------------------------------------------------------------------
  * @author Joseph Verburg
  */
-int main(void)
-{
+int main(void) {
 	uart_init();
 	gpio_init();
 	timers_init();
@@ -267,9 +265,9 @@ int main(void)
 	baro_init();
 	spi_flash_init();
 
-	#ifdef BLE_ENABLED
+#ifdef BLE_ENABLED
 	ble_init();
-	#endif
+#endif
 
 	state.currentMode = 0;
 	state.nextMode = 0;
@@ -304,27 +302,27 @@ int main(void)
 	int32_t panicStep = 0;
 	systemDone = false;
 	appClock = 0;
-	#ifdef APPLICATION_TIMINGS
+#ifdef APPLICATION_TIMINGS
 	int32_t loopStart = 0, loopLength = 0;
 	bool workDone = false;
-	#ifdef APPLICATION_TIMINGS_EXTENDED
+#ifdef APPLICATION_TIMINGS_EXTENDED
 	int32_t controlStart = 0, controlLength = 0;
-	#endif
-	#endif
+#endif
+#endif
 
 	while (!systemDone) {
-		#ifdef APPLICATION_TIMINGS
+#ifdef APPLICATION_TIMINGS
 		loopStart = get_time_us();
 		workDone = false;
-		#endif
+#endif
 
 		communicationComponentLoop();
 		packetComponentLoop();
 
-		#ifdef APPLICATION_TIMINGS_EXTENDED
-			controlStart = get_time_us();
-		#endif
-		switch(state.currentMode) {
+#ifdef APPLICATION_TIMINGS_EXTENDED
+		controlStart = get_time_us();
+#endif
+		switch (state.currentMode) {
 			case 0:
 				motor[0] = 0;
 				motor[1] = 0;
@@ -332,12 +330,12 @@ int main(void)
 				motor[3] = 0;
 				break;
 			case 1: // Panic!
-				#ifdef APPLICATION_TIMINGS
+#ifdef APPLICATION_TIMINGS
 				workDone = true;
-				#endif
+#endif
 				panicStep = state.panicFinished - appClock;
 				if (panicStep < 0) {
-						panicStep = 0;
+					panicStep = 0;
 				}
 				motor[0] = (uint16_t)(state.panicMotor[0] * panicStep / PANIC_STEPS);
 				motor[1] = (uint16_t)(state.panicMotor[1] * panicStep / PANIC_STEPS);
@@ -346,9 +344,9 @@ int main(void)
 				break;
 			case 2: // Manual
 				if (state.controlChanged) {
-					#ifdef APPLICATION_TIMINGS
+#ifdef APPLICATION_TIMINGS
 					workDone = true;
-					#endif
+#endif
 					manual_control_motor();
 					state.controlChanged = false;
 					state.sendMotorStatus = true;
@@ -356,15 +354,15 @@ int main(void)
 				break;
 			case 3: // Calibration
 				if (check_sensor_int_flag()) {
-					#ifdef APPLICATION_TIMINGS
+#ifdef APPLICATION_TIMINGS
 					workDone = true;
-					#endif
+#endif
 					get_dmp_data();
 					// Low pass filtering
 					state.calibratePhiOffset = (state.calibratePhiOffset * 7 + phi) >> 3;
 					state.calibrateThetaOffset = (state.calibrateThetaOffset * 7 + theta) >> 3;
 					state.calibratePsiOffset = (state.calibratePsiOffset * 7 + psi) >> 3;
-					state.calibrateSpOffset = (state.calibrateSpOffset * 7  + sp) >> 3;
+					state.calibrateSpOffset = (state.calibrateSpOffset * 7 + sp) >> 3;
 					state.calibrateSqOffset = (state.calibrateSqOffset * 7 + sq) >> 3;
 					state.calibrateSrOffset = (state.calibrateSrOffset * 7 + sr) >> 3;
 					state.calibrateSaxOffset = (state.calibrateSaxOffset * 7 + sax) >> 3;
@@ -375,9 +373,9 @@ int main(void)
 				break;
 			case 4: // Manual Yaw
 				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
-					#ifdef APPLICATION_TIMINGS
+#ifdef APPLICATION_TIMINGS
 					workDone = true;
-					#endif
+#endif
 					if (check_sensor_int_flag()) {
 						get_dmp_data();
 					}
@@ -389,9 +387,9 @@ int main(void)
 				break;
 			case 5: // Full-Control
 				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
-					#ifdef APPLICATION_TIMINGS
+#ifdef APPLICATION_TIMINGS
 					workDone = true;
-					#endif
+#endif
 					if (check_sensor_int_flag()) {
 						get_dmp_data();
 					}
@@ -405,9 +403,9 @@ int main(void)
 				break;
 			case 6: // Raw-control
 				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
-					#ifdef APPLICATION_TIMINGS
+#ifdef APPLICATION_TIMINGS
 					workDone = true;
-					#endif
+#endif
 					get_raw_sensor_data();
 					yawFilter();
 					rollFilter();
@@ -423,14 +421,14 @@ int main(void)
 				break;
 			case 7: //Height control
 				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
-					#ifdef APPLICATION_TIMINGS
+#ifdef APPLICATION_TIMINGS
 					workDone = true;
-					#endif
+#endif
 					if (check_sensor_int_flag()) {
 						get_dmp_data();
 					}
-					if (state.heightSet == false){
-						for (int i = 0; i < 4; i++){
+					if (state.heightSet == false) {
+						for (int i = 0; i < 4; i++) {
 							init_height();
 							state.heightSet = true;
 							if (check_sensor_int_flag()) {
@@ -443,18 +441,18 @@ int main(void)
 					rollControl();
 					pitchControl();
 					full_control_motor();
-					#ifdef DEBUGGING
+#ifdef DEBUGGING
 					state.sendMotorStatus = true;
-					#endif
+#endif
 					state.controlChanged = false;
 					state.pChanged = false;
 				}
 				break;
 			case 8: // Wireless
 				if (state.controlChanged || state.pChanged || check_sensor_int_flag()) {
-					#ifdef APPLICATION_TIMINGS
+#ifdef APPLICATION_TIMINGS
 					workDone = true;
-					#endif
+#endif
 					if (check_sensor_int_flag()) {
 						get_dmp_data();
 					}
@@ -471,41 +469,41 @@ int main(void)
 					if (check_sensor_int_flag()) {
 						get_dmp_data();
 					}
-					#ifdef APPLICATION_TIMINGS
+#ifdef APPLICATION_TIMINGS
 					workDone = true;
-					#endif
+#endif
 					//rollControl();
 					pitchControl();
 					manual_control_motor();
-					#ifdef DEBUGGING
+#ifdef DEBUGGING
 					state.sendMotorStatus = true;
-					#endif
+#endif
 					state.controlChanged = false;
 					state.pChanged = false;
 				}
 				break;
 		}
-		#ifdef APPLICATION_TIMINGS_EXTENDED
-			controlLength = get_time_us() - controlStart;
-			if (controlLength > 0 && workDone) {
-				if (state.timeLoopControlMax < controlLength) {
-					state.timeLoopControlMax = controlLength;
-				}
-				state.timeLoopControlTotal += controlLength;
-				state.timeLoopControlCount++;
+#ifdef APPLICATION_TIMINGS_EXTENDED
+		controlLength = get_time_us() - controlStart;
+		if (controlLength > 0 && workDone) {
+			if (state.timeLoopControlMax < controlLength) {
+				state.timeLoopControlMax = controlLength;
 			}
-		#endif
+			state.timeLoopControlTotal += controlLength;
+			state.timeLoopControlCount++;
+		}
+#endif
 
 		if (check_timer_flag()) {
-			#ifdef APPLICATION_TIMINGS
+#ifdef APPLICATION_TIMINGS
 			workDone = true;
-			#endif
+#endif
 			applicationComponentLoop();
-			#ifdef APPLICATION_TIMINGS_EXTENDED
+#ifdef APPLICATION_TIMINGS_EXTENDED
 			writeTimings();
-			#endif
+#endif
 		}
-		#ifdef APPLICATION_TIMINGS
+#ifdef APPLICATION_TIMINGS
 		loopLength = get_time_us() - loopStart;
 		if (loopLength > 0 && workDone) {
 			if (state.timeLoopMax < loopLength) {
@@ -514,7 +512,7 @@ int main(void)
 			state.timeLoopTotal += loopLength;
 			state.timeLoopCount++;
 		}
-		#endif
+#endif
 	}
 
 	printf("\n\t Goodbye \n\n");
