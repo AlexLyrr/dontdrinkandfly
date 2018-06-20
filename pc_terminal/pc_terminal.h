@@ -173,6 +173,10 @@ FILE *Rfile;
 FILE *Sfile;
 
 FILE *CsvFile;
+// #define EXTENDED_LOGGING
+#ifdef EXTENDED_LOGGING
+FILE *CsvFile2;
+#endif
 
 SRPacket sPacketBuffer[65535];
 bool receivedACK[65535];

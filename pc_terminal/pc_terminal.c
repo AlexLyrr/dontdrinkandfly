@@ -248,6 +248,10 @@ void initLogFiles(){
 	Sfile = fopen("logSendPackets.txt", "w+");
 	CsvFile = fopen("data.csv", "w+");
 
+	#ifdef EXTENDED_LOGGING
+	CsvFile2 = fopen("data2.csv", "w+");
+	#endif
+	
 	if (Rfile == NULL)
 	{
 	    printf("Error opening logReceivePacket.txt file!\n");
@@ -260,9 +264,17 @@ void initLogFiles(){
 	}
 	if (CsvFile == NULL)
 	{
-	    printf("Error opening logSendPackets.txt file!\n");
+	    printf("Error opening data.csv file!\n");
 	    exit(1);
 	}
+	#ifdef EXTENDED_LOGGING
+	if (CsvFile2 == NULL)
+	{
+	    printf("Error opening data2.csv file!\n");
+	    exit(1);
+	}
+	fprintf(CsvFile2, "type,max,avg\n");
+	#endif
 	fprintf(CsvFile, "sp,sq,sr,sax,say,saz\n");
 }
 
@@ -344,6 +356,14 @@ void logReceivePacket(SRPacket rPacket){
 					printf("Sensor Loop time=%u, avg=%u\n", val, val2);
 					break;
 			}
+			#ifdef EXTENDED_LOGGING
+			fprintf(CsvFile2, "%hhu, %u, %u\n",
+				rPacket.payload[1],
+				val,
+				val2
+			);
+			fflush(CsvFile2);
+			#endif
 			break;
 		case 15:
 			printf("[RAW]phi=%hd, theta=%hd, psi= %hd\n",

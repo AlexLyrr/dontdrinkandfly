@@ -209,7 +209,7 @@ void writeTimings() {
 	if (state.timeLoopControlCount > 0) { // No div0
 		avgControl = state.timeLoopControlTotal / state.timeLoopControlCount;
 	}
-	writePacket(14, 2,
+	writePacket(14, 3,
 		(state.timeLoopControlMax >> 24) & 0xFF, (state.timeLoopControlMax >> 16) & 0xFF, (state.timeLoopControlMax >> 8) & 0xFF, state.timeLoopControlMax & 0xFF,
 		(avgControl >> 24) & 0xFF, (avgControl >> 16) & 0xFF, (avgControl >> 8) & 0xFF, avgControl & 0xFF);
 	state.timeLoopControlTotal = 0;
