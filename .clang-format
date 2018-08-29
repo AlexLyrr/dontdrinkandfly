@@ -1,0 +1,9 @@
+BasedOnStyle: Webkit
+UseTab: Always
+TabWidth: 4
+IndentCaseLabels: true
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterEnum: false
+  AfterStruct: false
+  SplitEmptyFunction: false

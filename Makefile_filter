@@ -39,11 +39,10 @@ remduplicates = $(strip $(if $1,$(firstword $1) $(call remduplicates,$(filter-ou
 C_SOURCE_FILES += \
 $(abspath ../components/toolchain/system_nrf51.c) \
 $(abspath ../components/drivers_nrf/delay/nrf_delay.c) \
-$(abspath ./in4073.c) \
+$(abspath ./testfiltering/filter.c) \
 $(abspath ./control.c) \
 $(abspath ./packet.c) \
 $(abspath ./comm.c) \
-$(abspath ./height.c) \
 $(abspath ./drivers/gpio.c) \
 $(abspath ./drivers/timers.c) \
 $(abspath ./drivers/uart.c) \
@@ -164,7 +163,7 @@ OBJECTS = $(C_OBJECTS) $(ASM_OBJECTS)
 in4073: OUTPUT_FILENAME := in4073
 in4073: LINKER_SCRIPT=in4073.ld
 in4073: $(BUILD_DIRECTORIES) $(OBJECTS)
-	@echo Linking target: $(OUTPUT_FILENAME).out
+	@echo Linking filter target: $(OUTPUT_FILENAME).out
 	$(NO_ECHO)$(CC) $(LDFLAGS) $(OBJECTS) $(LIBS) -o $(OUTPUT_BINARY_DIRECTORY)/$(OUTPUT_FILENAME).out
 	$(NO_ECHO)$(MAKE) -f $(MAKEFILE_NAME) -C $(MAKEFILE_DIR) -e finalize
 
@@ -175,7 +174,7 @@ $(BUILD_DIRECTORIES):
 
 # Create objects from C SRC files
 $(OBJECT_DIRECTORY)/%.o: %.c
-	@echo Compiling file: $(notdir $<)
+	@echo Compiling file: $<
 	$(NO_ECHO)$(CC) $(CFLAGS) $(INC_PATHS) -c -o $@ $<
 
 # Assemble files
@@ -244,28 +243,11 @@ upload-run: default pc doupload
 computer-compile:
 	cd pc_terminal; make computer
 
-computer-ble-compile:
-	cd pc_terminal; make ble
-
 joystick-compile:
 	cd pc_terminal; make joystick
 
-joystick-compile-ble:
-	cd pc_terminal; make ble-joystick
-
 computer: computer-compile default upload pc-run
-
-computer-ble: computer-ble-compile default upload pc-run
-
 
 gui: computer-compile pc-run
 
-runFilter: pc doupload 
-	cd pc_terminal/; make run
-
 joystick: joystick-compile default upload pc-run
-
-joystick-ble: joystick-compile-ble default upload pc-run
-
-filter:
-	make -f Makefile_filter default

@@ -79,8 +79,8 @@ static void gap_params_init(void)
                                           strlen(DEVICE_NAME));
 */
 
-    char quad_name[12];
-    sprintf(quad_name, "%s %x", DEVICE_NAME, (uint8_t)(NRF_UICR->CUSTOMER[20]));
+    char quad_name[] = "Quatrippel\0";
+    // sprintf(quad_name, "%s %x", DEVICE_NAME, (uint8_t)(NRF_UICR->CUSTOMER[20]));
 
     err_code = sd_ble_gap_device_name_set(&sec_mode,
                                           (const uint8_t *) quad_name,
